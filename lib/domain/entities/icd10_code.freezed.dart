@@ -20,30 +20,37 @@ Icd10Code _$Icd10CodeFromJson(Map<String, dynamic> json) {
 
 /// @nodoc
 mixin _$Icd10Code {
-  /// Full ICD-10 code, e.g. "E11.9"
+  /// Full ICD-10 code, e.g. "A00.0", "E11.9".
   String get code => throw _privateConstructorUsedError;
 
   /// Turkish description – primary display language for TR locale.
+  /// Seeded from [descriptionEn] until a Turkish dataset is available.
   String get descriptionTr => throw _privateConstructorUsedError;
 
-  /// English description – fallback and reference.
+  /// English description from the WHO ICD-10 CSV (column: definition).
   String get descriptionEn => throw _privateConstructorUsedError;
 
-  /// Top-level chapter title, e.g.
-  /// "Endocrine, nutritional and metabolic diseases"
+  /// Chapter title, e.g. "Certain infectious and parasitic diseases".
+  /// Parsed from CSV column `chapter` (second line of the multi-line field).
   String get chapter => throw _privateConstructorUsedError;
 
-  /// Chapter range code, e.g. "E00-E89"
+  /// Chapter code range, e.g. "A00-B99".
+  /// Parsed from CSV column `chapter` (third line, parentheses stripped).
   String get chapterCode => throw _privateConstructorUsedError;
 
-  /// Narrower block title, e.g. "Diabetes mellitus" (nullable – not all
-  /// codes belong to a named block)
+  /// Block/domain title, e.g. "Intestinal infectious diseases".
+  /// Parsed from CSV column `domain` (first line).
   String? get blockDescription => throw _privateConstructorUsedError;
 
-  /// Block code range, e.g. "E10-E14"
+  /// Block code range, e.g. "A00-A09".
+  /// Parsed from CSV column `domain` (second line, parentheses stripped).
   String? get blockCode => throw _privateConstructorUsedError;
 
-  /// Whether this code is current in the active ICD-10 revision.
+  /// Direct URL to the WHO ICD-10 browser entry.
+  /// Useful for "open in browser" deep-links inside the app.
+  String? get url => throw _privateConstructorUsedError;
+
+  /// Whether this code is active in the current ICD-10 revision.
   bool get isActive => throw _privateConstructorUsedError;
 
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
@@ -65,6 +72,7 @@ abstract class $Icd10CodeCopyWith<$Res> {
       String chapterCode,
       String? blockDescription,
       String? blockCode,
+      String? url,
       bool isActive});
 }
 
@@ -88,6 +96,7 @@ class _$Icd10CodeCopyWithImpl<$Res, $Val extends Icd10Code>
     Object? chapterCode = null,
     Object? blockDescription = freezed,
     Object? blockCode = freezed,
+    Object? url = freezed,
     Object? isActive = null,
   }) {
     return _then(_value.copyWith(
@@ -119,6 +128,10 @@ class _$Icd10CodeCopyWithImpl<$Res, $Val extends Icd10Code>
           ? _value.blockCode
           : blockCode // ignore: cast_nullable_to_non_nullable
               as String?,
+      url: freezed == url
+          ? _value.url
+          : url // ignore: cast_nullable_to_non_nullable
+              as String?,
       isActive: null == isActive
           ? _value.isActive
           : isActive // ignore: cast_nullable_to_non_nullable
@@ -143,6 +156,7 @@ abstract class _$$Icd10CodeImplCopyWith<$Res>
       String chapterCode,
       String? blockDescription,
       String? blockCode,
+      String? url,
       bool isActive});
 }
 
@@ -164,6 +178,7 @@ class __$$Icd10CodeImplCopyWithImpl<$Res>
     Object? chapterCode = null,
     Object? blockDescription = freezed,
     Object? blockCode = freezed,
+    Object? url = freezed,
     Object? isActive = null,
   }) {
     return _then(_$Icd10CodeImpl(
@@ -195,6 +210,10 @@ class __$$Icd10CodeImplCopyWithImpl<$Res>
           ? _value.blockCode
           : blockCode // ignore: cast_nullable_to_non_nullable
               as String?,
+      url: freezed == url
+          ? _value.url
+          : url // ignore: cast_nullable_to_non_nullable
+              as String?,
       isActive: null == isActive
           ? _value.isActive
           : isActive // ignore: cast_nullable_to_non_nullable
@@ -214,49 +233,58 @@ class _$Icd10CodeImpl implements _Icd10Code {
       required this.chapterCode,
       this.blockDescription,
       this.blockCode,
+      this.url,
       this.isActive = true});
 
   factory _$Icd10CodeImpl.fromJson(Map<String, dynamic> json) =>
       _$$Icd10CodeImplFromJson(json);
 
-  /// Full ICD-10 code, e.g. "E11.9"
+  /// Full ICD-10 code, e.g. "A00.0", "E11.9".
   @override
   final String code;
 
   /// Turkish description – primary display language for TR locale.
+  /// Seeded from [descriptionEn] until a Turkish dataset is available.
   @override
   final String descriptionTr;
 
-  /// English description – fallback and reference.
+  /// English description from the WHO ICD-10 CSV (column: definition).
   @override
   final String descriptionEn;
 
-  /// Top-level chapter title, e.g.
-  /// "Endocrine, nutritional and metabolic diseases"
+  /// Chapter title, e.g. "Certain infectious and parasitic diseases".
+  /// Parsed from CSV column `chapter` (second line of the multi-line field).
   @override
   final String chapter;
 
-  /// Chapter range code, e.g. "E00-E89"
+  /// Chapter code range, e.g. "A00-B99".
+  /// Parsed from CSV column `chapter` (third line, parentheses stripped).
   @override
   final String chapterCode;
 
-  /// Narrower block title, e.g. "Diabetes mellitus" (nullable – not all
-  /// codes belong to a named block)
+  /// Block/domain title, e.g. "Intestinal infectious diseases".
+  /// Parsed from CSV column `domain` (first line).
   @override
   final String? blockDescription;
 
-  /// Block code range, e.g. "E10-E14"
+  /// Block code range, e.g. "A00-A09".
+  /// Parsed from CSV column `domain` (second line, parentheses stripped).
   @override
   final String? blockCode;
 
-  /// Whether this code is current in the active ICD-10 revision.
+  /// Direct URL to the WHO ICD-10 browser entry.
+  /// Useful for "open in browser" deep-links inside the app.
+  @override
+  final String? url;
+
+  /// Whether this code is active in the current ICD-10 revision.
   @override
   @JsonKey()
   final bool isActive;
 
   @override
   String toString() {
-    return 'Icd10Code(code: $code, descriptionTr: $descriptionTr, descriptionEn: $descriptionEn, chapter: $chapter, chapterCode: $chapterCode, blockDescription: $blockDescription, blockCode: $blockCode, isActive: $isActive)';
+    return 'Icd10Code(code: $code, descriptionTr: $descriptionTr, descriptionEn: $descriptionEn, chapter: $chapter, chapterCode: $chapterCode, blockDescription: $blockDescription, blockCode: $blockCode, url: $url, isActive: $isActive)';
   }
 
   @override
@@ -276,6 +304,7 @@ class _$Icd10CodeImpl implements _Icd10Code {
                 other.blockDescription == blockDescription) &&
             (identical(other.blockCode, blockCode) ||
                 other.blockCode == blockCode) &&
+            (identical(other.url, url) || other.url == url) &&
             (identical(other.isActive, isActive) ||
                 other.isActive == isActive));
   }
@@ -291,6 +320,7 @@ class _$Icd10CodeImpl implements _Icd10Code {
       chapterCode,
       blockDescription,
       blockCode,
+      url,
       isActive);
 
   @JsonKey(ignore: true)
@@ -316,6 +346,7 @@ abstract class _Icd10Code implements Icd10Code {
       required final String chapterCode,
       final String? blockDescription,
       final String? blockCode,
+      final String? url,
       final bool isActive}) = _$Icd10CodeImpl;
 
   factory _Icd10Code.fromJson(Map<String, dynamic> json) =
@@ -323,37 +354,45 @@ abstract class _Icd10Code implements Icd10Code {
 
   @override
 
-  /// Full ICD-10 code, e.g. "E11.9"
+  /// Full ICD-10 code, e.g. "A00.0", "E11.9".
   String get code;
   @override
 
   /// Turkish description – primary display language for TR locale.
+  /// Seeded from [descriptionEn] until a Turkish dataset is available.
   String get descriptionTr;
   @override
 
-  /// English description – fallback and reference.
+  /// English description from the WHO ICD-10 CSV (column: definition).
   String get descriptionEn;
   @override
 
-  /// Top-level chapter title, e.g.
-  /// "Endocrine, nutritional and metabolic diseases"
+  /// Chapter title, e.g. "Certain infectious and parasitic diseases".
+  /// Parsed from CSV column `chapter` (second line of the multi-line field).
   String get chapter;
   @override
 
-  /// Chapter range code, e.g. "E00-E89"
+  /// Chapter code range, e.g. "A00-B99".
+  /// Parsed from CSV column `chapter` (third line, parentheses stripped).
   String get chapterCode;
   @override
 
-  /// Narrower block title, e.g. "Diabetes mellitus" (nullable – not all
-  /// codes belong to a named block)
+  /// Block/domain title, e.g. "Intestinal infectious diseases".
+  /// Parsed from CSV column `domain` (first line).
   String? get blockDescription;
   @override
 
-  /// Block code range, e.g. "E10-E14"
+  /// Block code range, e.g. "A00-A09".
+  /// Parsed from CSV column `domain` (second line, parentheses stripped).
   String? get blockCode;
   @override
 
-  /// Whether this code is current in the active ICD-10 revision.
+  /// Direct URL to the WHO ICD-10 browser entry.
+  /// Useful for "open in browser" deep-links inside the app.
+  String? get url;
+  @override
+
+  /// Whether this code is active in the current ICD-10 revision.
   bool get isActive;
   @override
   @JsonKey(ignore: true)

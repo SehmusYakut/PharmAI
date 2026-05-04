@@ -56,6 +56,11 @@ const Icd10CodeModelSchema = CollectionSchema(
       id: 7,
       name: r'isActive',
       type: IsarType.bool,
+    ),
+    r'url': PropertySchema(
+      id: 8,
+      name: r'url',
+      type: IsarType.string,
     )
   },
   estimateSize: _icd10CodeModelEstimateSize,
@@ -77,6 +82,19 @@ const Icd10CodeModelSchema = CollectionSchema(
         )
       ],
     ),
+    r'descriptionEn': IndexSchema(
+      id: 2985529149843430803,
+      name: r'descriptionEn',
+      unique: false,
+      replace: false,
+      properties: [
+        IndexPropertySchema(
+          name: r'descriptionEn',
+          type: IndexType.value,
+          caseSensitive: false,
+        )
+      ],
+    ),
     r'descriptionTr': IndexSchema(
       id: 4977730737974374443,
       name: r'descriptionTr',
@@ -90,15 +108,28 @@ const Icd10CodeModelSchema = CollectionSchema(
         )
       ],
     ),
-    r'descriptionEn': IndexSchema(
-      id: 2985529149843430803,
-      name: r'descriptionEn',
+    r'chapterCode': IndexSchema(
+      id: -6731229965406187674,
+      name: r'chapterCode',
       unique: false,
       replace: false,
       properties: [
         IndexPropertySchema(
-          name: r'descriptionEn',
-          type: IndexType.value,
+          name: r'chapterCode',
+          type: IndexType.hash,
+          caseSensitive: false,
+        )
+      ],
+    ),
+    r'blockCode': IndexSchema(
+      id: -8995861301483755440,
+      name: r'blockCode',
+      unique: false,
+      replace: false,
+      properties: [
+        IndexPropertySchema(
+          name: r'blockCode',
+          type: IndexType.hash,
           caseSensitive: false,
         )
       ],
@@ -148,6 +179,12 @@ int _icd10CodeModelEstimateSize(
   bytesCount += 3 + object.code.length * 3;
   bytesCount += 3 + object.descriptionEn.length * 3;
   bytesCount += 3 + object.descriptionTr.length * 3;
+  {
+    final value = object.url;
+    if (value != null) {
+      bytesCount += 3 + value.length * 3;
+    }
+  }
   return bytesCount;
 }
 
@@ -165,6 +202,7 @@ void _icd10CodeModelSerialize(
   writer.writeString(offsets[5], object.descriptionEn);
   writer.writeString(offsets[6], object.descriptionTr);
   writer.writeBool(offsets[7], object.isActive);
+  writer.writeString(offsets[8], object.url);
 }
 
 Icd10CodeModel _icd10CodeModelDeserialize(
@@ -183,6 +221,7 @@ Icd10CodeModel _icd10CodeModelDeserialize(
   object.descriptionTr = reader.readString(offsets[6]);
   object.id = id;
   object.isActive = reader.readBool(offsets[7]);
+  object.url = reader.readStringOrNull(offsets[8]);
   return object;
 }
 
@@ -209,6 +248,8 @@ P _icd10CodeModelDeserializeProp<P>(
       return (reader.readString(offset)) as P;
     case 7:
       return (reader.readBool(offset)) as P;
+    case 8:
+      return (reader.readStringOrNull(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
   }
@@ -243,18 +284,18 @@ extension Icd10CodeModelQueryWhereSort
     });
   }
 
-  QueryBuilder<Icd10CodeModel, Icd10CodeModel, QAfterWhere> anyDescriptionTr() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addWhereClause(
-        const IndexWhereClause.any(indexName: r'descriptionTr'),
-      );
-    });
-  }
-
   QueryBuilder<Icd10CodeModel, Icd10CodeModel, QAfterWhere> anyDescriptionEn() {
     return QueryBuilder.apply(this, (query) {
       return query.addWhereClause(
         const IndexWhereClause.any(indexName: r'descriptionEn'),
+      );
+    });
+  }
+
+  QueryBuilder<Icd10CodeModel, Icd10CodeModel, QAfterWhere> anyDescriptionTr() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(
+        const IndexWhereClause.any(indexName: r'descriptionTr'),
       );
     });
   }
@@ -479,6 +520,147 @@ extension Icd10CodeModelQueryWhere
   }
 
   QueryBuilder<Icd10CodeModel, Icd10CodeModel, QAfterWhereClause>
+      descriptionEnEqualTo(String descriptionEn) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(IndexWhereClause.equalTo(
+        indexName: r'descriptionEn',
+        value: [descriptionEn],
+      ));
+    });
+  }
+
+  QueryBuilder<Icd10CodeModel, Icd10CodeModel, QAfterWhereClause>
+      descriptionEnNotEqualTo(String descriptionEn) {
+    return QueryBuilder.apply(this, (query) {
+      if (query.whereSort == Sort.asc) {
+        return query
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r'descriptionEn',
+              lower: [],
+              upper: [descriptionEn],
+              includeUpper: false,
+            ))
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r'descriptionEn',
+              lower: [descriptionEn],
+              includeLower: false,
+              upper: [],
+            ));
+      } else {
+        return query
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r'descriptionEn',
+              lower: [descriptionEn],
+              includeLower: false,
+              upper: [],
+            ))
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r'descriptionEn',
+              lower: [],
+              upper: [descriptionEn],
+              includeUpper: false,
+            ));
+      }
+    });
+  }
+
+  QueryBuilder<Icd10CodeModel, Icd10CodeModel, QAfterWhereClause>
+      descriptionEnGreaterThan(
+    String descriptionEn, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(IndexWhereClause.between(
+        indexName: r'descriptionEn',
+        lower: [descriptionEn],
+        includeLower: include,
+        upper: [],
+      ));
+    });
+  }
+
+  QueryBuilder<Icd10CodeModel, Icd10CodeModel, QAfterWhereClause>
+      descriptionEnLessThan(
+    String descriptionEn, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(IndexWhereClause.between(
+        indexName: r'descriptionEn',
+        lower: [],
+        upper: [descriptionEn],
+        includeUpper: include,
+      ));
+    });
+  }
+
+  QueryBuilder<Icd10CodeModel, Icd10CodeModel, QAfterWhereClause>
+      descriptionEnBetween(
+    String lowerDescriptionEn,
+    String upperDescriptionEn, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(IndexWhereClause.between(
+        indexName: r'descriptionEn',
+        lower: [lowerDescriptionEn],
+        includeLower: includeLower,
+        upper: [upperDescriptionEn],
+        includeUpper: includeUpper,
+      ));
+    });
+  }
+
+  QueryBuilder<Icd10CodeModel, Icd10CodeModel, QAfterWhereClause>
+      descriptionEnStartsWith(String DescriptionEnPrefix) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(IndexWhereClause.between(
+        indexName: r'descriptionEn',
+        lower: [DescriptionEnPrefix],
+        upper: ['$DescriptionEnPrefix\u{FFFFF}'],
+      ));
+    });
+  }
+
+  QueryBuilder<Icd10CodeModel, Icd10CodeModel, QAfterWhereClause>
+      descriptionEnIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(IndexWhereClause.equalTo(
+        indexName: r'descriptionEn',
+        value: [''],
+      ));
+    });
+  }
+
+  QueryBuilder<Icd10CodeModel, Icd10CodeModel, QAfterWhereClause>
+      descriptionEnIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      if (query.whereSort == Sort.asc) {
+        return query
+            .addWhereClause(IndexWhereClause.lessThan(
+              indexName: r'descriptionEn',
+              upper: [''],
+            ))
+            .addWhereClause(IndexWhereClause.greaterThan(
+              indexName: r'descriptionEn',
+              lower: [''],
+            ));
+      } else {
+        return query
+            .addWhereClause(IndexWhereClause.greaterThan(
+              indexName: r'descriptionEn',
+              lower: [''],
+            ))
+            .addWhereClause(IndexWhereClause.lessThan(
+              indexName: r'descriptionEn',
+              upper: [''],
+            ));
+      }
+    });
+  }
+
+  QueryBuilder<Icd10CodeModel, Icd10CodeModel, QAfterWhereClause>
       descriptionTrEqualTo(String descriptionTr) {
     return QueryBuilder.apply(this, (query) {
       return query.addWhereClause(IndexWhereClause.equalTo(
@@ -620,44 +802,44 @@ extension Icd10CodeModelQueryWhere
   }
 
   QueryBuilder<Icd10CodeModel, Icd10CodeModel, QAfterWhereClause>
-      descriptionEnEqualTo(String descriptionEn) {
+      chapterCodeEqualTo(String chapterCode) {
     return QueryBuilder.apply(this, (query) {
       return query.addWhereClause(IndexWhereClause.equalTo(
-        indexName: r'descriptionEn',
-        value: [descriptionEn],
+        indexName: r'chapterCode',
+        value: [chapterCode],
       ));
     });
   }
 
   QueryBuilder<Icd10CodeModel, Icd10CodeModel, QAfterWhereClause>
-      descriptionEnNotEqualTo(String descriptionEn) {
+      chapterCodeNotEqualTo(String chapterCode) {
     return QueryBuilder.apply(this, (query) {
       if (query.whereSort == Sort.asc) {
         return query
             .addWhereClause(IndexWhereClause.between(
-              indexName: r'descriptionEn',
+              indexName: r'chapterCode',
               lower: [],
-              upper: [descriptionEn],
+              upper: [chapterCode],
               includeUpper: false,
             ))
             .addWhereClause(IndexWhereClause.between(
-              indexName: r'descriptionEn',
-              lower: [descriptionEn],
+              indexName: r'chapterCode',
+              lower: [chapterCode],
               includeLower: false,
               upper: [],
             ));
       } else {
         return query
             .addWhereClause(IndexWhereClause.between(
-              indexName: r'descriptionEn',
-              lower: [descriptionEn],
+              indexName: r'chapterCode',
+              lower: [chapterCode],
               includeLower: false,
               upper: [],
             ))
             .addWhereClause(IndexWhereClause.between(
-              indexName: r'descriptionEn',
+              indexName: r'chapterCode',
               lower: [],
-              upper: [descriptionEn],
+              upper: [chapterCode],
               includeUpper: false,
             ));
       }
@@ -665,96 +847,67 @@ extension Icd10CodeModelQueryWhere
   }
 
   QueryBuilder<Icd10CodeModel, Icd10CodeModel, QAfterWhereClause>
-      descriptionEnGreaterThan(
-    String descriptionEn, {
-    bool include = false,
-  }) {
+      blockCodeIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(IndexWhereClause.equalTo(
+        indexName: r'blockCode',
+        value: [null],
+      ));
+    });
+  }
+
+  QueryBuilder<Icd10CodeModel, Icd10CodeModel, QAfterWhereClause>
+      blockCodeIsNotNull() {
     return QueryBuilder.apply(this, (query) {
       return query.addWhereClause(IndexWhereClause.between(
-        indexName: r'descriptionEn',
-        lower: [descriptionEn],
-        includeLower: include,
+        indexName: r'blockCode',
+        lower: [null],
+        includeLower: false,
         upper: [],
       ));
     });
   }
 
   QueryBuilder<Icd10CodeModel, Icd10CodeModel, QAfterWhereClause>
-      descriptionEnLessThan(
-    String descriptionEn, {
-    bool include = false,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addWhereClause(IndexWhereClause.between(
-        indexName: r'descriptionEn',
-        lower: [],
-        upper: [descriptionEn],
-        includeUpper: include,
-      ));
-    });
-  }
-
-  QueryBuilder<Icd10CodeModel, Icd10CodeModel, QAfterWhereClause>
-      descriptionEnBetween(
-    String lowerDescriptionEn,
-    String upperDescriptionEn, {
-    bool includeLower = true,
-    bool includeUpper = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addWhereClause(IndexWhereClause.between(
-        indexName: r'descriptionEn',
-        lower: [lowerDescriptionEn],
-        includeLower: includeLower,
-        upper: [upperDescriptionEn],
-        includeUpper: includeUpper,
-      ));
-    });
-  }
-
-  QueryBuilder<Icd10CodeModel, Icd10CodeModel, QAfterWhereClause>
-      descriptionEnStartsWith(String DescriptionEnPrefix) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addWhereClause(IndexWhereClause.between(
-        indexName: r'descriptionEn',
-        lower: [DescriptionEnPrefix],
-        upper: ['$DescriptionEnPrefix\u{FFFFF}'],
-      ));
-    });
-  }
-
-  QueryBuilder<Icd10CodeModel, Icd10CodeModel, QAfterWhereClause>
-      descriptionEnIsEmpty() {
+      blockCodeEqualTo(String? blockCode) {
     return QueryBuilder.apply(this, (query) {
       return query.addWhereClause(IndexWhereClause.equalTo(
-        indexName: r'descriptionEn',
-        value: [''],
+        indexName: r'blockCode',
+        value: [blockCode],
       ));
     });
   }
 
   QueryBuilder<Icd10CodeModel, Icd10CodeModel, QAfterWhereClause>
-      descriptionEnIsNotEmpty() {
+      blockCodeNotEqualTo(String? blockCode) {
     return QueryBuilder.apply(this, (query) {
       if (query.whereSort == Sort.asc) {
         return query
-            .addWhereClause(IndexWhereClause.lessThan(
-              indexName: r'descriptionEn',
-              upper: [''],
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r'blockCode',
+              lower: [],
+              upper: [blockCode],
+              includeUpper: false,
             ))
-            .addWhereClause(IndexWhereClause.greaterThan(
-              indexName: r'descriptionEn',
-              lower: [''],
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r'blockCode',
+              lower: [blockCode],
+              includeLower: false,
+              upper: [],
             ));
       } else {
         return query
-            .addWhereClause(IndexWhereClause.greaterThan(
-              indexName: r'descriptionEn',
-              lower: [''],
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r'blockCode',
+              lower: [blockCode],
+              includeLower: false,
+              upper: [],
             ))
-            .addWhereClause(IndexWhereClause.lessThan(
-              indexName: r'descriptionEn',
-              upper: [''],
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r'blockCode',
+              lower: [],
+              upper: [blockCode],
+              includeUpper: false,
             ));
       }
     });
@@ -1860,6 +2013,160 @@ extension Icd10CodeModelQueryFilter
       ));
     });
   }
+
+  QueryBuilder<Icd10CodeModel, Icd10CodeModel, QAfterFilterCondition>
+      urlIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'url',
+      ));
+    });
+  }
+
+  QueryBuilder<Icd10CodeModel, Icd10CodeModel, QAfterFilterCondition>
+      urlIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'url',
+      ));
+    });
+  }
+
+  QueryBuilder<Icd10CodeModel, Icd10CodeModel, QAfterFilterCondition>
+      urlEqualTo(
+    String? value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'url',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Icd10CodeModel, Icd10CodeModel, QAfterFilterCondition>
+      urlGreaterThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'url',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Icd10CodeModel, Icd10CodeModel, QAfterFilterCondition>
+      urlLessThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'url',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Icd10CodeModel, Icd10CodeModel, QAfterFilterCondition>
+      urlBetween(
+    String? lower,
+    String? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'url',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Icd10CodeModel, Icd10CodeModel, QAfterFilterCondition>
+      urlStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.startsWith(
+        property: r'url',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Icd10CodeModel, Icd10CodeModel, QAfterFilterCondition>
+      urlEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.endsWith(
+        property: r'url',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Icd10CodeModel, Icd10CodeModel, QAfterFilterCondition>
+      urlContains(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.contains(
+        property: r'url',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Icd10CodeModel, Icd10CodeModel, QAfterFilterCondition>
+      urlMatches(String pattern, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.matches(
+        property: r'url',
+        wildcard: pattern,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Icd10CodeModel, Icd10CodeModel, QAfterFilterCondition>
+      urlIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'url',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<Icd10CodeModel, Icd10CodeModel, QAfterFilterCondition>
+      urlIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        property: r'url',
+        value: '',
+      ));
+    });
+  }
 }
 
 extension Icd10CodeModelQueryObject
@@ -1974,6 +2281,18 @@ extension Icd10CodeModelQuerySortBy
       sortByIsActiveDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'isActive', Sort.desc);
+    });
+  }
+
+  QueryBuilder<Icd10CodeModel, Icd10CodeModel, QAfterSortBy> sortByUrl() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'url', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Icd10CodeModel, Icd10CodeModel, QAfterSortBy> sortByUrlDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'url', Sort.desc);
     });
   }
 }
@@ -2098,6 +2417,18 @@ extension Icd10CodeModelQuerySortThenBy
       return query.addSortBy(r'isActive', Sort.desc);
     });
   }
+
+  QueryBuilder<Icd10CodeModel, Icd10CodeModel, QAfterSortBy> thenByUrl() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'url', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Icd10CodeModel, Icd10CodeModel, QAfterSortBy> thenByUrlDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'url', Sort.desc);
+    });
+  }
 }
 
 extension Icd10CodeModelQueryWhereDistinct
@@ -2159,6 +2490,13 @@ extension Icd10CodeModelQueryWhereDistinct
       return query.addDistinctBy(r'isActive');
     });
   }
+
+  QueryBuilder<Icd10CodeModel, Icd10CodeModel, QDistinct> distinctByUrl(
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'url', caseSensitive: caseSensitive);
+    });
+  }
 }
 
 extension Icd10CodeModelQueryProperty
@@ -2217,6 +2555,12 @@ extension Icd10CodeModelQueryProperty
   QueryBuilder<Icd10CodeModel, bool, QQueryOperations> isActiveProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'isActive');
+    });
+  }
+
+  QueryBuilder<Icd10CodeModel, String?, QQueryOperations> urlProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'url');
     });
   }
 }

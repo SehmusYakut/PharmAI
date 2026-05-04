@@ -15,6 +15,7 @@ _$Icd10CodeImpl _$$Icd10CodeImplFromJson(Map<String, dynamic> json) =>
       chapterCode: json['chapterCode'] as String,
       blockDescription: json['blockDescription'] as String?,
       blockCode: json['blockCode'] as String?,
+      url: json['url'] as String?,
       isActive: json['isActive'] as bool? ?? true,
     );
 
@@ -27,5 +28,6 @@ Map<String, dynamic> _$$Icd10CodeImplToJson(_$Icd10CodeImpl instance) =>
       'chapterCode': instance.chapterCode,
       'blockDescription': instance.blockDescription,
       'blockCode': instance.blockCode,
+      'url': instance.url,
       'isActive': instance.isActive,
     };

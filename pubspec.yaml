@@ -39,6 +39,9 @@ dependencies:
   # File System (needed for Isar directory on device)
   path_provider: ^2.1.1
 
+  # RFC 4180-compliant CSV parsing (handles embedded newlines in quoted fields)
+  csv: ^6.0.0
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -53,3 +56,6 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+
+  assets:
+    - assets/data/icd10_codes.csv
