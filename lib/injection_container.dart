@@ -5,6 +5,7 @@ import 'package:pharmai/domain/repositories/icd10_repository.dart';
 import 'package:pharmai/domain/usecases/search_icd10.dart';
 import 'package:pharmai/presentation/bloc/calculator/calculator_cubit.dart';
 import 'package:pharmai/presentation/bloc/icd10_search/icd10_search_cubit.dart';
+import 'package:pharmai/presentation/bloc/theme/theme_cubit.dart';
 
 final GetIt sl = GetIt.instance;
 
@@ -35,4 +36,5 @@ Future<void> initDependencies() async {
   // across navigation events.
   sl.registerFactory(() => Icd10SearchCubit(sl()));
   sl.registerFactory(() => CalculatorCubit());
+  sl.registerLazySingleton(() => ThemeCubit());
 }

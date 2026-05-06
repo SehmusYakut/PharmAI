@@ -2,11 +2,11 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:pharmai/domain/entities/icd10_code.dart';
+import 'package:pharmai/core/l10n/app_localizations.dart';
 import 'package:pharmai/presentation/bloc/icd10_search/icd10_search_cubit.dart';
 import 'package:pharmai/presentation/bloc/icd10_search/icd10_search_state.dart';
 import 'package:pharmai/presentation/widgets/adaptive_search_field.dart';
-import 'package:pharmai/presentation/widgets/icd10_code_tile.dart';
+import 'package:pharmai/presentation/widgets/icd10_result_card.dart';
 
 /// ICD-10 Search page.
 ///
@@ -14,10 +14,11 @@ import 'package:pharmai/presentation/widgets/icd10_code_tile.dart';
 ///   • iOS   – [CupertinoNavigationBar] + [BouncingScrollPhysics]
 ///   • Other – [AppBar] (Material 3) + [ClampingScrollPhysics]
 ///
-/// Lazy loading:
-///   [ListView.builder] only builds widgets for visible items.
-///   A [ScrollController] fires [Icd10SearchCubit.loadMore] when the user
-///   reaches 90 % of the scroll extent.
+/// Focus strategy:
+///   A [FocusNode] is created in [State] and [requestFocus] is called via
+///   [WidgetsBinding.addPostFrameCallback] so focus is set after the route
+///   transition completes.  This eliminates the dropped-first-keystroke bug
+///   caused by [autofocus] racing with the IME initialisation on Android.
 class Icd10SearchPage extends StatefulWidget {
   const Icd10SearchPage({super.key});
 
@@ -28,17 +29,24 @@ class Icd10SearchPage extends StatefulWidget {
 class _Icd10SearchPageState extends State<Icd10SearchPage> {
   final _queryController = TextEditingController();
   final _scrollController = ScrollController();
+  final _focusNode = FocusNode();
 
   @override
   void initState() {
     super.initState();
     _scrollController.addListener(_onScroll);
+    // Delay focus request until after the first frame so the route animation
+    // has settled and the OS IME is ready — prevents dropped first keystroke.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) _focusNode.requestFocus();
+    });
   }
 
   @override
   void dispose() {
     _queryController.dispose();
     _scrollController.dispose();
+    _focusNode.dispose();
     super.dispose();
   }
 
@@ -62,18 +70,19 @@ class _Icd10SearchPageState extends State<Icd10SearchPage> {
   // ── iOS scaffold ────────────────────────────────────────────────────────────
 
   Widget _buildCupertinoScaffold() {
+    final l10n = AppLocalizations.of(context);
     return CupertinoPageScaffold(
       navigationBar: CupertinoNavigationBar(
-        middle: const Text('ICD-10 Search'),
+        middle: Text(l10n.icd10SearchTitle),
         leading: CupertinoButton(
           padding: EdgeInsets.zero,
           onPressed: () => context.go('/'),
-          child: const Text('Back'),
+          child: Text(l10n.searchBack),
         ),
         trailing: CupertinoButton(
           padding: EdgeInsets.zero,
           onPressed: _onClear,
-          child: const Text('Clear'),
+          child: Text(l10n.searchClear),
         ),
       ),
       child: SafeArea(
@@ -83,8 +92,9 @@ class _Icd10SearchPageState extends State<Icd10SearchPage> {
               padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
               child: AdaptiveSearchField(
                 controller: _queryController,
+                focusNode: _focusNode,
                 onChanged: _onQueryChanged,
-                placeholder: 'ICD-10 kodu veya tanım ara…',
+                placeholder: l10n.searchPlaceholder,
               ),
             ),
             Expanded(child: _buildBody(physics: const BouncingScrollPhysics())),
@@ -97,9 +107,10 @@ class _Icd10SearchPageState extends State<Icd10SearchPage> {
   // ── Material scaffold ───────────────────────────────────────────────────────
 
   Widget _buildMaterialScaffold() {
+    final l10n = AppLocalizations.of(context);
     return Scaffold(
       appBar: AppBar(
-        title: const Text('ICD-10 Ara'),
+        title: Text(l10n.icd10SearchTitle),
         centerTitle: false,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
@@ -111,8 +122,9 @@ class _Icd10SearchPageState extends State<Icd10SearchPage> {
             padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
             child: AdaptiveSearchField(
               controller: _queryController,
+              focusNode: _focusNode,
               onChanged: _onQueryChanged,
-              placeholder: 'ICD-10 kodu veya tanım ara…',
+              placeholder: l10n.searchPlaceholder,
             ),
           ),
         ),
@@ -125,7 +137,6 @@ class _Icd10SearchPageState extends State<Icd10SearchPage> {
 
   Widget _buildBody({required ScrollPhysics physics}) {
     return BlocConsumer<Icd10SearchCubit, Icd10SearchState>(
-      // Clear the text field when the cubit is reset externally.
       listener: (context, state) {
         if (state is Icd10SearchInitial && _queryController.text.isNotEmpty) {
           _queryController.clear();
@@ -163,6 +174,7 @@ class _HintView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final colors = Theme.of(context).colorScheme;
     return Center(
       child: Column(
@@ -175,17 +187,19 @@ class _HintView extends StatelessWidget {
           ),
           const SizedBox(height: 16),
           Text(
-            'ICD-10 kodu veya tanımını girin',
-            style: Theme.of(
-              context,
-            ).textTheme.bodyLarge?.copyWith(color: colors.onSurfaceVariant),
+            l10n.searchHint,
+            style: Theme.of(context)
+                .textTheme
+                .bodyLarge
+                ?.copyWith(color: colors.onSurfaceVariant),
           ),
           const SizedBox(height: 4),
           Text(
-            'Örn: "E11", "diabetes", "J00"',
-            style: Theme.of(
-              context,
-            ).textTheme.bodySmall?.copyWith(color: colors.outline),
+            l10n.searchHintExample,
+            style: Theme.of(context)
+                .textTheme
+                .bodySmall
+                ?.copyWith(color: colors.outline),
           ),
         ],
       ),
@@ -208,6 +222,7 @@ class _EmptyView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final colors = Theme.of(context).colorScheme;
     return Center(
       child: Column(
@@ -220,10 +235,11 @@ class _EmptyView extends StatelessWidget {
           ),
           const SizedBox(height: 12),
           Text(
-            '"$query" için sonuç bulunamadı',
-            style: Theme.of(
-              context,
-            ).textTheme.bodyLarge?.copyWith(color: colors.onSurfaceVariant),
+            l10n.searchEmpty(query),
+            style: Theme.of(context)
+                .textTheme
+                .bodyLarge
+                ?.copyWith(color: colors.onSurfaceVariant),
             textAlign: TextAlign.center,
           ),
         ],
@@ -249,9 +265,10 @@ class _ErrorView extends StatelessWidget {
             const SizedBox(height: 12),
             Text(
               message,
-              style: Theme.of(
-                context,
-              ).textTheme.bodyLarge?.copyWith(color: colors.error),
+              style: Theme.of(context)
+                  .textTheme
+                  .bodyLarge
+                  ?.copyWith(color: colors.error),
               textAlign: TextAlign.center,
             ),
           ],
@@ -277,39 +294,24 @@ class _ResultsList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final results = state.results;
-    // Extra slot at the end for the load-more indicator.
     final itemCount = results.length + (state.canLoadMore ? 1 : 0);
 
-    return ListView.separated(
+    return ListView.builder(
       controller: scrollController,
       physics: physics,
-      // cacheExtent ensures widgets are pre-built before they scroll into view,
-      // giving smoother lazy-loading performance.
       cacheExtent: 480,
+      padding: const EdgeInsets.symmetric(vertical: 8),
       itemCount: itemCount,
-      separatorBuilder: (_, _) => const Divider(height: 1, indent: 84),
       itemBuilder: (context, index) {
         if (index >= results.length) {
           return const _LoadMoreIndicator();
         }
-        return Icd10CodeTile(
+        return Icd10ResultCard(
           key: ValueKey(results[index].code),
           code: results[index],
           highlight: state.query,
-          onTap: () => _onTap(context, results[index]),
         );
       },
-    );
-  }
-
-  void _onTap(BuildContext context, Icd10Code code) {
-    // Detail page navigation will be added in a future sprint.
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('${code.code} – ${code.descriptionTr}'),
-        duration: const Duration(seconds: 2),
-        behavior: SnackBarBehavior.floating,
-      ),
     );
   }
 }

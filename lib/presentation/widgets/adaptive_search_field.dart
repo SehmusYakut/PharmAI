@@ -11,12 +11,20 @@ class AdaptiveSearchField extends StatelessWidget {
     super.key,
     required this.controller,
     required this.onChanged,
+    this.focusNode,
     this.placeholder = 'Search ICD-10…',
-    this.autofocus = true,
+    this.autofocus = false,
   });
 
   final TextEditingController controller;
   final ValueChanged<String> onChanged;
+
+  /// Optional external [FocusNode]. When provided, the caller controls focus
+  /// timing (e.g. [FocusNode.requestFocus] in [initState] via
+  /// [WidgetsBinding.addPostFrameCallback]) which avoids the dropped
+  /// first-keystroke bug on Android.
+  final FocusNode? focusNode;
+
   final String placeholder;
   final bool autofocus;
 
@@ -25,12 +33,14 @@ class AdaptiveSearchField extends StatelessWidget {
     return Theme.of(context).platform == TargetPlatform.iOS
         ? _CupertinoField(
             controller: controller,
+            focusNode: focusNode,
             onChanged: onChanged,
             placeholder: placeholder,
             autofocus: autofocus,
           )
         : _MaterialField(
             controller: controller,
+            focusNode: focusNode,
             onChanged: onChanged,
             placeholder: placeholder,
             autofocus: autofocus,
@@ -46,17 +56,20 @@ class _CupertinoField extends StatelessWidget {
     required this.onChanged,
     required this.placeholder,
     required this.autofocus,
+    this.focusNode,
   });
 
   final TextEditingController controller;
   final ValueChanged<String> onChanged;
   final String placeholder;
   final bool autofocus;
+  final FocusNode? focusNode;
 
   @override
   Widget build(BuildContext context) {
     return CupertinoSearchTextField(
       controller: controller,
+      focusNode: focusNode,
       autofocus: autofocus,
       placeholder: placeholder,
       onChanged: onChanged,
@@ -78,24 +91,26 @@ class _MaterialField extends StatelessWidget {
     required this.onChanged,
     required this.placeholder,
     required this.autofocus,
+    this.focusNode,
   });
 
   final TextEditingController controller;
   final ValueChanged<String> onChanged;
   final String placeholder;
   final bool autofocus;
+  final FocusNode? focusNode;
 
   @override
   Widget build(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
     return TextField(
       controller: controller,
+      focusNode: focusNode,
       autofocus: autofocus,
       textInputAction: TextInputAction.search,
       decoration: InputDecoration(
         hintText: placeholder,
         prefixIcon: const Icon(Icons.search_rounded),
-        // Show clear button only when field has text.
         suffixIcon: ValueListenableBuilder<TextEditingValue>(
           valueListenable: controller,
           builder: (_, value, _) {

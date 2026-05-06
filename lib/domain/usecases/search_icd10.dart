@@ -20,14 +20,26 @@ class SearchIcd10 {
 
   static final _codePattern = RegExp(r'^[A-Za-z]\d', caseSensitive: false);
 
+  // Inserts a space at letter→digit and digit→letter boundaries so that
+  // "type2" matches "Type 2", "e11" still routes to code search, etc.
+  static final _letterDigit = RegExp(r'([A-Za-zÀ-ÿ])(\d)');
+  static final _digitLetter = RegExp(r'(\d)([A-Za-zÀ-ÿ])');
+  static final _multiSpace = RegExp(r'\s+');
+
+  static String _normalise(String raw) => raw
+      .trim()
+      .replaceAll(_multiSpace, ' ')
+      .replaceAllMapped(_letterDigit, (m) => '${m[1]} ${m[2]}')
+      .replaceAllMapped(_digitLetter, (m) => '${m[1]} ${m[2]}');
+
   Future<Either<Failure, List<Icd10Code>>> call(
     String query, {
     int offset = 0,
   }) {
-    final trimmed = query.trim();
-    if (_codePattern.hasMatch(trimmed)) {
-      return _repository.searchByCode(trimmed, offset: offset);
+    final normalised = _normalise(query);
+    if (_codePattern.hasMatch(normalised)) {
+      return _repository.searchByCode(normalised, offset: offset);
     }
-    return _repository.searchByDescription(trimmed, offset: offset);
+    return _repository.searchByDescription(normalised, offset: offset);
   }
 }
