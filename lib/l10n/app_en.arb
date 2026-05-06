@@ -1,0 +1,29 @@
+{
+  "@@locale": "en",
+  "appName": "PharmAI",
+  "appTagline": "Clinical Decision Support Platform",
+  "appVersion": "v1.0.0",
+  "features": "Features",
+  "navIcd10": "ICD-10 Search",
+  "navDrugInfo": "Drug Info",
+  "navCalculators": "Calculators",
+  "icd10Subtitle": "Fast code and definition lookup",
+  "drugInfoSubtitle": "Current drug reference",
+  "calculatorsSubtitle": "BMI, GFR and clinical scores",
+  "badgeActive": "ACTIVE",
+  "badgeSoon": "SOON",
+  "themeLightTooltip": "Switch to light mode",
+  "themeDarkTooltip": "Switch to dark mode",
+  "icd10SearchTitle": "ICD-10 Search",
+  "searchPlaceholder": "Search ICD-10 code or description…",
+  "searchHint": "Enter an ICD-10 code or description",
+  "searchHintExample": "e.g. \"E11\", \"diabetes\", \"J00\"",
+  "searchEmpty": "No results for \"{query}\"",
+  "@searchEmpty": {
+    "placeholders": {
+      "query": { "type": "String" }
+    }
+  },
+  "searchBack": "Back",
+  "searchClear": "Clear"
+}

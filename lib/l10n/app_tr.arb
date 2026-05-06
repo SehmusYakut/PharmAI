@@ -1,0 +1,29 @@
+{
+  "@@locale": "tr",
+  "appName": "PharmAI",
+  "appTagline": "Klinik Karar Destek Platformu",
+  "appVersion": "v1.0.0",
+  "features": "Özellikler",
+  "navIcd10": "ICD-10 Arama",
+  "navDrugInfo": "İlaç Bilgisi",
+  "navCalculators": "Hesaplayıcılar",
+  "icd10Subtitle": "Hızlı kod ve tanım araması",
+  "drugInfoSubtitle": "Güncel ilaç rehberi",
+  "calculatorsSubtitle": "BMI, GFH ve klinik skorlar",
+  "badgeActive": "AKTİF",
+  "badgeSoon": "YAKINDA",
+  "themeLightTooltip": "Açık temaya geç",
+  "themeDarkTooltip": "Koyu temaya geç",
+  "icd10SearchTitle": "ICD-10 Ara",
+  "searchPlaceholder": "ICD-10 kodu veya tanım ara…",
+  "searchHint": "ICD-10 kodu veya tanımını girin",
+  "searchHintExample": "Örn: \"E11\", \"diabetes\", \"J00\"",
+  "searchEmpty": "\"{query}\" için sonuç bulunamadı",
+  "@searchEmpty": {
+    "placeholders": {
+      "query": { "type": "String" }
+    }
+  },
+  "searchBack": "Geri",
+  "searchClear": "Temizle"
+}
