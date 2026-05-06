@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:pharmai/domain/entities/icd10_code.dart';
 import 'package:pharmai/presentation/bloc/icd10_search/icd10_search_cubit.dart';
 import 'package:pharmai/presentation/bloc/icd10_search/icd10_search_state.dart';
@@ -64,6 +65,11 @@ class _Icd10SearchPageState extends State<Icd10SearchPage> {
     return CupertinoPageScaffold(
       navigationBar: CupertinoNavigationBar(
         middle: const Text('ICD-10 Search'),
+        leading: CupertinoButton(
+          padding: EdgeInsets.zero,
+          onPressed: () => context.go('/'),
+          child: const Text('Back'),
+        ),
         trailing: CupertinoButton(
           padding: EdgeInsets.zero,
           onPressed: _onClear,
@@ -95,6 +101,10 @@ class _Icd10SearchPageState extends State<Icd10SearchPage> {
       appBar: AppBar(
         title: const Text('ICD-10 Ara'),
         centerTitle: false,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => context.go('/'),
+        ),
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(64),
           child: Padding(
@@ -128,10 +138,10 @@ class _Icd10SearchPageState extends State<Icd10SearchPage> {
           Icd10SearchEmpty(:final query) => _EmptyView(query: query),
           Icd10SearchError(:final message) => _ErrorView(message: message),
           Icd10SearchLoaded() => _ResultsList(
-              state: state,
-              scrollController: _scrollController,
-              physics: physics,
-            ),
+            state: state,
+            scrollController: _scrollController,
+            physics: physics,
+          ),
         };
       },
     );
@@ -158,20 +168,24 @@ class _HintView extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(Icons.manage_search_rounded, size: 72, color: colors.outlineVariant),
+          Icon(
+            Icons.manage_search_rounded,
+            size: 72,
+            color: colors.outlineVariant,
+          ),
           const SizedBox(height: 16),
           Text(
             'ICD-10 kodu veya tanımını girin',
-            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                  color: colors.onSurfaceVariant,
-                ),
+            style: Theme.of(
+              context,
+            ).textTheme.bodyLarge?.copyWith(color: colors.onSurfaceVariant),
           ),
           const SizedBox(height: 4),
           Text(
             'Örn: "E11", "diabetes", "J00"',
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: colors.outline,
-                ),
+            style: Theme.of(
+              context,
+            ).textTheme.bodySmall?.copyWith(color: colors.outline),
           ),
         ],
       ),
@@ -199,14 +213,17 @@ class _EmptyView extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(Icons.search_off_rounded, size: 64, color: colors.outlineVariant),
+          Icon(
+            Icons.search_off_rounded,
+            size: 64,
+            color: colors.outlineVariant,
+          ),
           const SizedBox(height: 12),
           Text(
             '"$query" için sonuç bulunamadı',
-            style: Theme.of(context)
-                .textTheme
-                .bodyLarge
-                ?.copyWith(color: colors.onSurfaceVariant),
+            style: Theme.of(
+              context,
+            ).textTheme.bodyLarge?.copyWith(color: colors.onSurfaceVariant),
             textAlign: TextAlign.center,
           ),
         ],
@@ -232,10 +249,9 @@ class _ErrorView extends StatelessWidget {
             const SizedBox(height: 12),
             Text(
               message,
-              style: Theme.of(context)
-                  .textTheme
-                  .bodyLarge
-                  ?.copyWith(color: colors.error),
+              style: Theme.of(
+                context,
+              ).textTheme.bodyLarge?.copyWith(color: colors.error),
               textAlign: TextAlign.center,
             ),
           ],

@@ -4,6 +4,7 @@ allprojects {
         mavenCentral()
     }
 }
+apply(from = "namespace_fix.gradle")
 
 val newBuildDir: Directory =
     rootProject.layout.buildDirectory

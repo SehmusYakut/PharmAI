@@ -1,0 +1,23 @@
+// Workaround: ensure library modules have a namespace set.
+// This runs for subprojects (including plugins in the pub cache)
+subprojects {
+    afterEvaluate { project ->
+        try {
+            if (project.plugins.hasPlugin('com.android.library') || project.plugins.hasPlugin('com.android.application')) {
+                def androidExt = project.extensions.findByName('android')
+                if (androidExt != null) {
+                    try {
+                        def hasNamespace = androidExt.hasProperty('namespace')
+                        if (!hasNamespace || androidExt.namespace == null || androidExt.namespace.toString().trim() == '') {
+                            androidExt.namespace = 'com.example.pharmai'
+                        }
+                    } catch (e) {
+                        // ignore reflection/compat issues
+                        androidExt.namespace = 'com.example.pharmai'
+                    }
+                }
+            }
+        } catch (ignored) {
+        }
+    }
+}

@@ -3,6 +3,7 @@ import 'package:pharmai/data/datasources/local/local_database_service.dart';
 import 'package:pharmai/data/repositories/icd10_repository_impl.dart';
 import 'package:pharmai/domain/repositories/icd10_repository.dart';
 import 'package:pharmai/domain/usecases/search_icd10.dart';
+import 'package:pharmai/presentation/bloc/calculator/calculator_cubit.dart';
 import 'package:pharmai/presentation/bloc/icd10_search/icd10_search_cubit.dart';
 
 final GetIt sl = GetIt.instance;
@@ -33,4 +34,5 @@ Future<void> initDependencies() async {
   // Factory: a fresh cubit is created per page instance so state doesn't leak
   // across navigation events.
   sl.registerFactory(() => Icd10SearchCubit(sl()));
+  sl.registerFactory(() => CalculatorCubit());
 }
