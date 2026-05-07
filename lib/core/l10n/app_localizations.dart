@@ -61,6 +61,22 @@ class AppLocalizations {
   String get searchBack => _isTr ? 'Geri' : 'Back';
   String get searchClear => _isTr ? 'Temizle' : 'Clear';
 
+  // ── Calculators ────────────────────────────────────────────────────────────
+  String get calcTitle =>
+      _isTr ? 'Klinik Hesaplayıcılar' : 'Clinical Calculators';
+  String get calcCalculate => _isTr ? 'Hesapla' : 'Calculate';
+  String get calcBmiTitle =>
+      _isTr ? 'Vücut Kitle İndeksi (VKİ)' : 'Body Mass Index (BMI)';
+  String get calcGfrTitle =>
+      _isTr ? 'Glomerüler Filtrasyon Hızı (GFH)' : 'Glomerular Filtration Rate (GFR)';
+  String get calcWeight => _isTr ? 'Ağırlık' : 'Weight';
+  String get calcHeight => _isTr ? 'Boy' : 'Height';
+  String get calcAge => _isTr ? 'Yaş' : 'Age';
+  String get calcSerumCreatinine =>
+      _isTr ? 'Serum Kreatinin' : 'Serum Creatinine';
+  String get calcMale => _isTr ? 'Erkek' : 'Male';
+  String get calcFemale => _isTr ? 'Kadın' : 'Female';
+
   // ── Auth & Profile ─────────────────────────────────────────────────────────
   String get signInWithGoogle =>
       _isTr ? 'Google ile Giriş Yap' : 'Sign in with Google';

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:pharmai/core/l10n/app_localizations.dart';
 
 /// Reusable scaffold for one calculator section.
 ///
@@ -68,7 +69,7 @@ class CalculatorFormCard extends StatelessWidget {
               child: FilledButton.icon(
                 onPressed: onCalculate,
                 icon: const Icon(Icons.calculate_outlined, size: 18),
-                label: const Text('Hesapla'),
+                label: Text(AppLocalizations.of(context).calcCalculate),
               ),
             ),
             // ── Result / error slot ──────────────────────────────────────────

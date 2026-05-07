@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:pharmai/core/l10n/app_localizations.dart';
 import 'package:pharmai/core/utils/calculator_models.dart';
 import 'package:pharmai/presentation/bloc/calculator/calculator_cubit.dart';
 import 'package:pharmai/presentation/bloc/calculator/calculator_state.dart';
@@ -12,23 +13,25 @@ class CalculatorsPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Scaffold(
+      resizeToAvoidBottomInset: true,
       appBar: AppBar(
-        title: const Text('Klinik Hesaplayıcılar'),
+        title: Text(l10n.calcTitle),
         centerTitle: false,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () => context.go('/'),
         ),
       ),
-      body: const SingleChildScrollView(
-        padding: EdgeInsets.all(16),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.fromLTRB(16, 16, 16, 32),
+        keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
         child: Column(
           children: [
-            _BmiSection(),
-            SizedBox(height: 16),
-            _GfrSection(),
-            SizedBox(height: 32),
+            _BmiSection(l10n: l10n),
+            const SizedBox(height: 16),
+            _GfrSection(l10n: l10n),
           ],
         ),
       ),
@@ -39,7 +42,8 @@ class CalculatorsPage extends StatelessWidget {
 // ── BMI ────────────────────────────────────────────────────────────────────────
 
 class _BmiSection extends StatefulWidget {
-  const _BmiSection();
+  const _BmiSection({required this.l10n});
+  final AppLocalizations l10n;
 
   @override
   State<_BmiSection> createState() => _BmiSectionState();
@@ -68,9 +72,10 @@ class _BmiSectionState extends State<_BmiSection> {
 
   @override
   Widget build(BuildContext context) {
+    final l = widget.l10n;
     return CalculatorFormCard(
       icon: Icons.monitor_weight_outlined,
-      title: 'Vücut Kitle İndeksi (VKİ)',
+      title: l.calcBmiTitle,
       citation: 'WHO Technical Report Series 854 (1995)',
       onCalculate: _calculate,
       body: Row(
@@ -78,7 +83,7 @@ class _BmiSectionState extends State<_BmiSection> {
           Expanded(
             child: CalculatorInputField(
               controller: _weightCtrl,
-              label: 'Ağırlık',
+              label: l.calcWeight,
               unit: 'kg',
               decimal: true,
               onSubmit: _calculate,
@@ -88,7 +93,7 @@ class _BmiSectionState extends State<_BmiSection> {
           Expanded(
             child: CalculatorInputField(
               controller: _heightCtrl,
-              label: 'Boy',
+              label: l.calcHeight,
               unit: 'cm',
               decimal: true,
               onSubmit: _calculate,
@@ -100,9 +105,7 @@ class _BmiSectionState extends State<_BmiSection> {
         buildWhen: (p, c) =>
             p.bmiResult != c.bmiResult || p.bmiError != c.bmiError,
         builder: (context, state) {
-          if (state.bmiError != null) {
-            return CalculatorErrorText(state.bmiError!);
-          }
+          if (state.bmiError != null) return CalculatorErrorText(state.bmiError!);
           if (state.bmiResult == null) return const SizedBox.shrink();
           return BmiResultCard(result: state.bmiResult!);
         },
@@ -114,7 +117,8 @@ class _BmiSectionState extends State<_BmiSection> {
 // ── GFR ────────────────────────────────────────────────────────────────────────
 
 class _GfrSection extends StatefulWidget {
-  const _GfrSection();
+  const _GfrSection({required this.l10n});
+  final AppLocalizations l10n;
 
   @override
   State<_GfrSection> createState() => _GfrSectionState();
@@ -149,9 +153,10 @@ class _GfrSectionState extends State<_GfrSection> {
 
   @override
   Widget build(BuildContext context) {
+    final l = widget.l10n;
     return CalculatorFormCard(
       icon: Icons.water_drop_outlined,
-      title: 'Glomerüler Filtrasyon Hızı (GFH)',
+      title: l.calcGfrTitle,
       citation:
           'CKD-EPI 2021 · Inker et al., NEJM 385:1737  ·  Cockcroft-Gault, Nephron 1976  ·  KDIGO 2022',
       onCalculate: _calculate,
@@ -162,7 +167,7 @@ class _GfrSectionState extends State<_GfrSection> {
               Expanded(
                 child: CalculatorInputField(
                   controller: _scrCtrl,
-                  label: 'Serum Kreatinin',
+                  label: l.calcSerumCreatinine,
                   unit: 'mg/dL',
                   decimal: true,
                 ),
@@ -171,7 +176,7 @@ class _GfrSectionState extends State<_GfrSection> {
               Expanded(
                 child: CalculatorInputField(
                   controller: _ageCtrl,
-                  label: 'Yaş',
+                  label: l.calcAge,
                   unit: 'yıl',
                   decimal: false,
                 ),
@@ -184,7 +189,7 @@ class _GfrSectionState extends State<_GfrSection> {
               Expanded(
                 child: CalculatorInputField(
                   controller: _weightCtrl,
-                  label: 'Ağırlık',
+                  label: l.calcWeight,
                   unit: 'kg',
                   decimal: true,
                 ),
@@ -192,21 +197,21 @@ class _GfrSectionState extends State<_GfrSection> {
               const SizedBox(width: 12),
               Expanded(
                 child: SegmentedButton<BiologicalSex>(
-                  segments: const [
+                  showSelectedIcon: false,
+                  segments: [
                     ButtonSegment(
                       value: BiologicalSex.male,
-                      label: Text('Erkek'),
-                      icon: Icon(Icons.male),
+                      label: Text(l.calcMale),
+                      icon: const Icon(Icons.male),
                     ),
                     ButtonSegment(
                       value: BiologicalSex.female,
-                      label: Text('Kadın'),
-                      icon: Icon(Icons.female),
+                      label: Text(l.calcFemale),
+                      icon: const Icon(Icons.female),
                     ),
                   ],
                   selected: {_sex},
-                  onSelectionChanged: (s) =>
-                      setState(() => _sex = s.first),
+                  onSelectionChanged: (s) => setState(() => _sex = s.first),
                 ),
               ),
             ],
@@ -217,9 +222,7 @@ class _GfrSectionState extends State<_GfrSection> {
         buildWhen: (p, c) =>
             p.gfrResult != c.gfrResult || p.gfrError != c.gfrError,
         builder: (context, state) {
-          if (state.gfrError != null) {
-            return CalculatorErrorText(state.gfrError!);
-          }
+          if (state.gfrError != null) return CalculatorErrorText(state.gfrError!);
           if (state.gfrResult == null) return const SizedBox.shrink();
           return GfrResultCard(result: state.gfrResult!);
         },

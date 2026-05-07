@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:pharmai/core/constants/app_constants.dart';
 import 'package:pharmai/core/l10n/app_localizations.dart';
+import 'package:pharmai/presentation/bloc/auth/auth_bloc.dart';
 import 'package:pharmai/presentation/bloc/theme/theme_cubit.dart';
 
 class HomePage extends StatelessWidget {
@@ -16,7 +17,7 @@ class HomePage extends StatelessWidget {
       appBar: AppBar(
         title: Text(l10n.appName),
         centerTitle: false,
-        actions: [_ThemeToggleButton()],
+        actions: [_ThemeToggleButton(), _ProfileButton()],
       ),
       body: ListView(
         padding: EdgeInsets.zero,
@@ -292,6 +293,34 @@ class _StatusBadge extends StatelessWidget {
               ),
         ),
       ),
+    );
+  }
+}
+
+// ── Profile button ─────────────────────────────────────────────────────────────
+
+class _ProfileButton extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    return BlocBuilder<AuthBloc, AuthState>(
+      buildWhen: (p, c) =>
+          (p is AuthAuthenticated) != (c is AuthAuthenticated),
+      builder: (context, state) {
+        final photoUrl = state is AuthAuthenticated
+            ? state.profile.photoUrl
+            : null;
+        return IconButton(
+          tooltip: l10n.navProfile,
+          onPressed: () => context.go(AppConstants.routeProfile),
+          icon: photoUrl != null
+              ? CircleAvatar(
+                  radius: 14,
+                  backgroundImage: NetworkImage(photoUrl),
+                )
+              : const Icon(Icons.account_circle_outlined),
+        );
+      },
     );
   }
 }
