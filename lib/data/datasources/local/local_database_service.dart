@@ -2,7 +2,9 @@ import 'package:isar/isar.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:pharmai/core/config/app_config.dart';
 import 'package:pharmai/core/constants/app_constants.dart';
+import 'package:pharmai/data/models/bookmark_model.dart';
 import 'package:pharmai/data/models/icd10_code_model.dart';
+import 'package:pharmai/data/models/local_profile_model.dart';
 
 /// Single owner of the Isar instance for the entire app.
 ///
@@ -24,7 +26,7 @@ class LocalDatabaseService {
   Future<Isar> _open() async {
     final dir = await getApplicationDocumentsDirectory();
     return Isar.open(
-      [Icd10CodeModelSchema],
+      [Icd10CodeModelSchema, LocalProfileModelSchema, BookmarkModelSchema],
       directory: dir.path,
       name: AppConfig.isarDbName,
     );

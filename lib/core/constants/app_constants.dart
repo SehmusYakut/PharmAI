@@ -6,6 +6,8 @@ abstract class AppConstants {
   static const String routeCalculators = '/calculators';
   static const String routePrivacyPolicy = '/privacy';
   static const String routeKvkk = '/kvkk';
+  static const String routeLogin = '/login';
+  static const String routeProfile = '/profile';
 
   // ── Isar collection names ───────────────────────────────────────────────────
   static const String collectionIcd10 = 'icd10_entries';

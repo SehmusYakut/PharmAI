@@ -60,6 +60,17 @@ class AppLocalizations {
       _isTr ? '"$query" için sonuç bulunamadı' : 'No results for "$query"';
   String get searchBack => _isTr ? 'Geri' : 'Back';
   String get searchClear => _isTr ? 'Temizle' : 'Clear';
+
+  // ── Auth & Profile ─────────────────────────────────────────────────────────
+  String get signInWithGoogle =>
+      _isTr ? 'Google ile Giriş Yap' : 'Sign in with Google';
+  String get signOut => _isTr ? 'Çıkış Yap' : 'Sign Out';
+  String get profile => _isTr ? 'Profil' : 'Profile';
+  String get customName => _isTr ? 'Görünen Ad' : 'Display Name';
+  String get darkMode => _isTr ? 'Koyu Tema' : 'Dark Mode';
+  String get languageTurkish => _isTr ? 'Türkçe' : 'Turkish';
+  String get bookmarks => _isTr ? 'Kaydedilenler' : 'Bookmarks';
+  String get navProfile => _isTr ? 'Profil' : 'Profile';
 }
 
 class _AppLocalizationsDelegate

@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "521840446802",
+    "project_id": "pharmai-c7d09",
+    "storage_bucket": "pharmai-c7d09.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:521840446802:android:0c52ba01c0aacb9ca2fe8b",
+        "android_client_info": {
+          "package_name": "com.example.pharmai"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDi6EblmMkHkXCwPQEE2f21M5S_Psy5T94"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
