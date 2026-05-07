@@ -43,8 +43,10 @@ class AppLocalizations {
   String get badgeActive => _isTr ? 'AKTİF' : 'ACTIVE';
   String get badgeSoon => _isTr ? 'YAKINDA' : 'SOON';
 
-  String get themeLightTooltip => _isTr ? 'Açık temaya geç' : 'Switch to light mode';
-  String get themeDarkTooltip => _isTr ? 'Koyu temaya geç' : 'Switch to dark mode';
+  String get themeLightTooltip =>
+      _isTr ? 'Açık temaya geç' : 'Switch to light mode';
+  String get themeDarkTooltip =>
+      _isTr ? 'Koyu temaya geç' : 'Switch to dark mode';
 
   // ── ICD-10 search page ─────────────────────────────────────────────────────
   String get icd10SearchTitle => _isTr ? 'ICD-10 Ara' : 'ICD-10 Search';
@@ -67,8 +69,9 @@ class AppLocalizations {
   String get calcCalculate => _isTr ? 'Hesapla' : 'Calculate';
   String get calcBmiTitle =>
       _isTr ? 'Vücut Kitle İndeksi (VKİ)' : 'Body Mass Index (BMI)';
-  String get calcGfrTitle =>
-      _isTr ? 'Glomerüler Filtrasyon Hızı (GFH)' : 'Glomerular Filtration Rate (GFR)';
+  String get calcGfrTitle => _isTr
+      ? 'Glomerüler Filtrasyon Hızı (GFH)'
+      : 'Glomerular Filtration Rate (GFR)';
   String get calcWeight => _isTr ? 'Ağırlık' : 'Weight';
   String get calcHeight => _isTr ? 'Boy' : 'Height';
   String get calcAge => _isTr ? 'Yaş' : 'Age';
@@ -94,8 +97,7 @@ class _AppLocalizationsDelegate
   const _AppLocalizationsDelegate();
 
   @override
-  bool isSupported(Locale locale) =>
-      ['tr', 'en'].contains(locale.languageCode);
+  bool isSupported(Locale locale) => ['tr', 'en'].contains(locale.languageCode);
 
   @override
   Future<AppLocalizations> load(Locale locale) =>

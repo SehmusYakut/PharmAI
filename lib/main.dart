@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -19,26 +20,35 @@ import 'presentation/bloc/theme/theme_cubit.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-  await GoogleSignIn.instance.initialize();
+  await GoogleSignIn.instance.initialize(
+    serverClientId:
+        '521840446802-9h88fdbbebbv4s1mjme987p4mm4esrlh.apps.googleusercontent.com',
+  );
   await initDependencies();
+  await FirebaseAuth.instance.setLanguageCode(
+    sl<LocaleCubit>().state.languageCode,
+  );
   await _seedIcd10IfEmpty();
   runApp(
     MultiBlocProvider(
       providers: [
         BlocProvider(create: (_) => sl<ThemeCubit>()),
         BlocProvider(create: (_) => sl<LocaleCubit>()),
-        BlocProvider(
-          create: (_) => sl<AuthBloc>()..add(const AuthStarted()),
-        ),
+        BlocProvider(create: (_) => sl<AuthBloc>()..add(const AuthStarted())),
       ],
-      child: BlocListener<AuthBloc, AuthState>(
-        listener: (context, state) {
-          if (state is AuthAuthenticated) {
-            context.read<ThemeCubit>().loadFromProfile(state.profile);
-            context.read<LocaleCubit>().loadFromProfile(state.profile);
-          }
+      child: BlocListener<LocaleCubit, Locale>(
+        listener: (context, locale) {
+          FirebaseAuth.instance.setLanguageCode(locale.languageCode);
         },
-        child: const PharmAIApp(),
+        child: BlocListener<AuthBloc, AuthState>(
+          listener: (context, state) {
+            if (state is AuthAuthenticated) {
+              context.read<ThemeCubit>().loadFromProfile(state.profile);
+              context.read<LocaleCubit>().loadFromProfile(state.profile);
+            }
+          },
+          child: const PharmAIApp(),
+        ),
       ),
     ),
   );

@@ -312,7 +312,7 @@ class _ProfileButton extends StatelessWidget {
             : null;
         return IconButton(
           tooltip: l10n.navProfile,
-          onPressed: () => context.go(AppConstants.routeProfile),
+          onPressed: () => context.push(AppConstants.routeProfile),
           icon: photoUrl != null
               ? CircleAvatar(
                   radius: 14,
