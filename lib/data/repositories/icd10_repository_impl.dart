@@ -16,6 +16,20 @@ class Icd10RepositoryImpl implements Icd10Repository {
   final LocalDatabaseService _db;
 
   @override
+  Future<Either<Failure, List<Icd10Code>>> search(
+    String query, {
+    int offset = 0,
+  }) async {
+    if (query.trim().isEmpty) return right(const []);
+    try {
+      final models = await _db.searchByQuery(query, offset: offset);
+      return right(models.map((m) => m.toDomain()).toList());
+    } catch (_) {
+      return left(const CacheFailure('ICD-10 search failed.'));
+    }
+  }
+
+  @override
   Future<Either<Failure, List<Icd10Code>>> searchByCode(
     String prefix, {
     int offset = 0,

@@ -23,6 +23,13 @@ class LoginPage extends StatelessWidget {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
+                  Image.asset(
+                    'assets/images/app_logo.png',
+                    height: 120,
+                    width: 120,
+                    fit: BoxFit.contain,
+                  ),
+                  const SizedBox(height: 16),
                   Text(
                     l.appName,
                     style: Theme.of(context)

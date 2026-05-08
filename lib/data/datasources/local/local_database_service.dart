@@ -40,6 +40,56 @@ class LocalDatabaseService {
 
   // ── ICD-10 queries ──────────────────────────────────────────────────────────
 
+  /// Unified search: codes whose [Icd10CodeModel.code] starts with [query]
+  /// are returned first (O(log n) index scan), followed by any record whose
+  /// code or description contains [query] (case-insensitive filter scan).
+  ///
+  /// [query] is trimmed automatically — leading/trailing whitespace is ignored.
+  /// [offset] supports cursor-based pagination.
+  Future<List<Icd10CodeModel>> searchByQuery(
+    String query, {
+    int offset = 0,
+  }) async {
+    final q = query.trim();
+    if (q.isEmpty) return [];
+    final isar = await db;
+
+    // Pass 1: startsWith on the code index — O(log n), these get top priority.
+    final prefixHits = await isar.icd10CodeModels
+        .where()
+        .codeStartsWith(q.toUpperCase())
+        .filter()
+        .isActiveEqualTo(true)
+        .findAll();
+
+    final prefixIds = {for (final m in prefixHits) m.id};
+
+    // Pass 2: OR filter across code + both descriptions (case-insensitive).
+    final broadHits = await isar.icd10CodeModels
+        .filter()
+        .isActiveEqualTo(true)
+        .and()
+        .group(
+          (f) => f
+              .codeContains(q, caseSensitive: false)
+              .or()
+              .descriptionEnContains(q, caseSensitive: false)
+              .or()
+              .descriptionTrContains(q, caseSensitive: false),
+        )
+        .limit(AppConstants.maxSearchResults * 2)
+        .findAll();
+
+    // Merge: prefix matches first, then non-overlapping broad matches.
+    final extra = broadHits.where((m) => !prefixIds.contains(m.id)).toList();
+    final merged = [...prefixHits, ...extra];
+
+    if (offset >= merged.length) return [];
+    final end =
+        (offset + AppConstants.maxSearchResults).clamp(0, merged.length);
+    return merged.sublist(offset, end);
+  }
+
   /// Prefix search on the [Icd10CodeModel.code] index.
   /// "e11" → finds E11, E11.0 … E11.9, etc.  O(log n) via index.
   /// [offset] supports pagination – pass the total results already held.
@@ -50,7 +100,7 @@ class LocalDatabaseService {
     final isar = await db;
     return isar.icd10CodeModels
         .where()
-        .codeStartsWith(prefix.toUpperCase())
+        .codeStartsWith(prefix.trim().toUpperCase())
         .filter()
         .isActiveEqualTo(true)
         .offset(offset)
@@ -70,16 +120,15 @@ class LocalDatabaseService {
     int offset = 0,
   }) async {
     final isar = await db;
-    final normalised = query.toLowerCase();
     return isar.icd10CodeModels
         .filter()
         .isActiveEqualTo(true)
         .and()
         .group(
           (q) => q
-              .descriptionTrContains(normalised, caseSensitive: false)
+              .descriptionTrContains(query.trim(), caseSensitive: false)
               .or()
-              .descriptionEnContains(normalised, caseSensitive: false),
+              .descriptionEnContains(query.trim(), caseSensitive: false),
         )
         .offset(offset)
         .limit(AppConstants.maxSearchResults)

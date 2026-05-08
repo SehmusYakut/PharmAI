@@ -1,4 +1,5 @@
 import 'package:csv/csv.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:pharmai/data/models/icd10_code_model.dart';
 
@@ -40,7 +41,10 @@ abstract class Icd10CsvParser {
   /// [LocalDatabaseService.putAllIcd10] for bulk insert.
   static Future<List<Icd10CodeModel>> parseFromAssets() async {
     final raw = await rootBundle.loadString(_assetPath);
+    return compute(_parseCsvData, raw);
+  }
 
+  static List<Icd10CodeModel> _parseCsvData(String raw) {
     // CsvToListConverter handles RFC 4180 quoting, including fields that
     // contain embedded newlines (the `chapter` and `domain` columns).
     final rows = const CsvToListConverter(

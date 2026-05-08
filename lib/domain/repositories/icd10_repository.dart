@@ -11,6 +11,15 @@ import 'package:pharmai/domain/entities/icd10_code.dart';
 /// Implementations live exclusively in data/.  The domain layer never imports
 /// Isar, path_provider, or any I/O package.
 abstract class Icd10Repository {
+  /// Unified search: codes whose [Icd10Code.code] starts with [query] appear
+  /// first (startsWith priority), followed by records where code or either
+  /// description contains [query] (case-insensitive OR logic).
+  /// [query] is trimmed automatically.  [offset] enables pagination.
+  Future<Either<Failure, List<Icd10Code>>> search(
+    String query, {
+    int offset = 0,
+  });
+
   /// Returns codes whose [Icd10Code.code] starts with [prefix] (case-
   /// insensitive).  E.g. "e11" matches "E11", "E11.0", "E11.9", etc.
   /// [offset] enables cursor-based pagination (pass total results already held).

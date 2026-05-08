@@ -127,10 +127,11 @@ class _HeroPanel extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 16),
-          Icon(
-            Icons.local_hospital_rounded,
-            size: 64,
-            color: colors.onPrimaryContainer.withValues(alpha: 0.25),
+          Image.asset(
+            'assets/images/app_logo.png',
+            height: 64,
+            width: 64,
+            fit: BoxFit.contain,
           ),
         ],
       ),
