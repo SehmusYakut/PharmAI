@@ -130,7 +130,6 @@ class _HeroPanel extends StatelessWidget {
           Image.asset(
             'assets/images/app_logo.png',
             height: 64,
-            width: 64,
             fit: BoxFit.contain,
           ),
         ],

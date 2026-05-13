@@ -19,16 +19,23 @@ import 'presentation/bloc/theme/theme_cubit.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-  await GoogleSignIn.instance.initialize(
-    serverClientId:
-        '521840446802-9h88fdbbebbv4s1mjme987p4mm4esrlh.apps.googleusercontent.com',
-  );
+
+  // Firebase and Google Sign-In are independent — initialise in parallel.
+  await Future.wait([
+    Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform),
+    GoogleSignIn.instance.initialize(
+      serverClientId:
+          '521840446802-9h88fdbbebbv4s1mjme987p4mm4esrlh.apps.googleusercontent.com',
+    ),
+  ]);
+
   await initDependencies();
-  await FirebaseAuth.instance.setLanguageCode(
-    sl<LocaleCubit>().state.languageCode,
-  );
-  await _seedIcd10IfEmpty();
+  // Non-blocking: locale code is a best-effort fire-and-forget at startup.
+  FirebaseAuth.instance.setLanguageCode(sl<LocaleCubit>().state.languageCode);
+
+  // Seed ICD-10 after the first frame so it never blocks the UI.
+  WidgetsBinding.instance.addPostFrameCallback((_) => _seedIcd10IfEmpty());
+
   runApp(
     MultiBlocProvider(
       providers: [
