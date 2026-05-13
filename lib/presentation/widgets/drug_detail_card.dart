@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:pharmai/core/utils/drug_text_formatter.dart';
 import 'package:pharmai/domain/entities/drug.dart';
 
 /// Expandable card showing full drug details.
 ///
 /// Layout:
-///   Header  — bold productName + barcode chip
+///   Header  — bold productName + ATC chip
+///   Barcode — icon + barcode number
 ///   Path    — breadcrumb Category 1 › 2 › 3 › 4 › 5
-///   Details — scrollable description in an expandable section
+///   Details — expandable rich-text description
 class DrugDetailCard extends StatefulWidget {
   const DrugDetailCard({super.key, required this.drug});
   final Drug drug;
@@ -17,6 +19,15 @@ class DrugDetailCard extends StatefulWidget {
 
 class _DrugDetailCardState extends State<DrugDetailCard> {
   bool _expanded = false;
+
+  /// Parsed once when the card is first created; never recomputed on rebuild.
+  late final List<DrugTextBlock> _blocks;
+
+  @override
+  void initState() {
+    super.initState();
+    _blocks = DrugTextFormatter.parse(widget.drug.description);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -59,7 +70,6 @@ class _DrugDetailCardState extends State<DrugDetailCard> {
                   ),
                 ),
                 const SizedBox(width: 8),
-                // ATC code chip
                 if (drug.atcCode.isNotEmpty)
                   _Chip(label: drug.atcCode, color: colors.secondaryContainer),
               ],
@@ -72,8 +82,7 @@ class _DrugDetailCardState extends State<DrugDetailCard> {
               padding: const EdgeInsets.fromLTRB(16, 6, 16, 0),
               child: Row(
                 children: [
-                  Icon(Icons.qr_code_2_rounded,
-                      size: 14, color: colors.outline),
+                  Icon(Icons.qr_code_2_rounded, size: 14, color: colors.outline),
                   const SizedBox(width: 4),
                   Text(
                     drug.barcode,
@@ -89,13 +98,12 @@ class _DrugDetailCardState extends State<DrugDetailCard> {
           _CategoryPath(drug: drug),
 
           // ── Description (expandable) ───────────────────────────────────────
-          if (drug.description.isNotEmpty) ...[
+          if (_blocks.isNotEmpty) ...[
             const Divider(height: 1),
             InkWell(
               onTap: () => setState(() => _expanded = !_expanded),
               child: Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                 child: Row(
                   children: [
                     Expanded(
@@ -120,20 +128,93 @@ class _DrugDetailCardState extends State<DrugDetailCard> {
             ),
             if (_expanded)
               Padding(
-                padding: const EdgeInsets.fromLTRB(16, 0, 16, 14),
-                child: Text(
-                  drug.description,
-                  style: text.bodySmall?.copyWith(
-                    color: colors.onSurfaceVariant,
-                    height: 1.5,
-                  ),
-                ),
+                padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                child: _DescriptionBody(blocks: _blocks),
               ),
           ],
 
           const SizedBox(height: 4),
         ],
       ),
+    );
+  }
+}
+
+// ── Rich description renderer ──────────────────────────────────────────────────
+
+class _DescriptionBody extends StatelessWidget {
+  const _DescriptionBody({required this.blocks});
+  final List<DrugTextBlock> blocks;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
+    final text = Theme.of(context).textTheme;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        for (final block in blocks)
+          switch (block) {
+            DrugHeadingBlock(:final blockText) => Padding(
+                padding: const EdgeInsets.only(top: 14, bottom: 3),
+                child: Text(
+                  blockText,
+                  style: text.bodySmall?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: colors.onSurface,
+                    height: 1.5,
+                  ),
+                ),
+              ),
+            DrugSubheadingBlock(:final blockText) => Padding(
+                padding: const EdgeInsets.only(top: 10, bottom: 2),
+                child: Text(
+                  blockText,
+                  style: text.labelSmall?.copyWith(
+                    fontWeight: FontWeight.w700,
+                    color: colors.primary,
+                    letterSpacing: 0.2,
+                    height: 1.5,
+                  ),
+                ),
+              ),
+            DrugBulletBlock(:final blockText) => Padding(
+                padding: const EdgeInsets.only(top: 4),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      '• ',
+                      style: text.bodySmall?.copyWith(
+                        color: colors.primary,
+                        height: 1.5,
+                      ),
+                    ),
+                    Expanded(
+                      child: Text(
+                        blockText,
+                        style: text.bodySmall?.copyWith(
+                          color: colors.onSurfaceVariant,
+                          height: 1.5,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            DrugBodyBlock(:final blockText) => Padding(
+                padding: const EdgeInsets.only(top: 4),
+                child: Text(
+                  blockText,
+                  style: text.bodySmall?.copyWith(
+                    color: colors.onSurfaceVariant,
+                    height: 1.5,
+                  ),
+                ),
+              ),
+          },
+      ],
     );
   }
 }
@@ -167,14 +248,14 @@ class _CategoryPath extends StatelessWidget {
         children: [
           for (int i = 0; i < categories.length; i++) ...[
             if (i > 0)
-              Icon(Icons.chevron_right_rounded,
-                  size: 14, color: colors.outline),
+              Icon(Icons.chevron_right_rounded, size: 14, color: colors.outline),
             _Chip(
               label: categories[i],
               color: i == 0
                   ? colors.primaryContainer
                   : colors.surfaceContainerHighest,
-              textColor: i == 0 ? colors.onPrimaryContainer : colors.outline,
+              textColor:
+                  i == 0 ? colors.onPrimaryContainer : colors.outline,
             ),
           ],
         ],
@@ -211,4 +292,9 @@ class _Chip extends StatelessWidget {
       ),
     );
   }
+}
+
+// Convenience extension so switch expressions can destructure the sealed class.
+extension on DrugTextBlock {
+  String get blockText => text;
 }

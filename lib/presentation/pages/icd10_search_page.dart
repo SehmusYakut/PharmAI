@@ -1,7 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:go_router/go_router.dart';
+import 'package:go_router/go_router.dart'; // context.pop()
 import 'package:pharmai/core/l10n/app_localizations.dart';
 import 'package:pharmai/presentation/bloc/icd10_search/icd10_search_cubit.dart';
 import 'package:pharmai/presentation/bloc/icd10_search/icd10_search_state.dart';
@@ -76,7 +76,7 @@ class _Icd10SearchPageState extends State<Icd10SearchPage> {
         middle: Text(l10n.icd10SearchTitle),
         leading: CupertinoButton(
           padding: EdgeInsets.zero,
-          onPressed: () => context.go('/'),
+          onPressed: () => context.pop(),
           child: Text(l10n.searchBack),
         ),
         trailing: CupertinoButton(
@@ -85,20 +85,24 @@ class _Icd10SearchPageState extends State<Icd10SearchPage> {
           child: Text(l10n.searchClear),
         ),
       ),
-      child: SafeArea(
-        child: Column(
-          children: [
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
-              child: AdaptiveSearchField(
-                controller: _queryController,
-                focusNode: _focusNode,
-                onChanged: _onQueryChanged,
-                placeholder: l10n.searchPlaceholder,
+      child: GestureDetector(
+        onTap: () => _focusNode.unfocus(),
+        behavior: HitTestBehavior.opaque,
+        child: SafeArea(
+          child: Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
+                child: AdaptiveSearchField(
+                  controller: _queryController,
+                  focusNode: _focusNode,
+                  onChanged: _onQueryChanged,
+                  placeholder: l10n.searchPlaceholder,
+                ),
               ),
-            ),
-            Expanded(child: _buildBody(physics: const BouncingScrollPhysics())),
-          ],
+              Expanded(child: _buildBody(physics: const BouncingScrollPhysics())),
+            ],
+          ),
         ),
       ),
     );
@@ -112,10 +116,6 @@ class _Icd10SearchPageState extends State<Icd10SearchPage> {
       appBar: AppBar(
         title: Text(l10n.icd10SearchTitle),
         centerTitle: false,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => context.go('/'),
-        ),
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(64),
           child: Padding(
@@ -129,7 +129,11 @@ class _Icd10SearchPageState extends State<Icd10SearchPage> {
           ),
         ),
       ),
-      body: _buildBody(physics: const ClampingScrollPhysics()),
+      body: GestureDetector(
+        onTap: () => _focusNode.unfocus(),
+        behavior: HitTestBehavior.opaque,
+        child: _buildBody(physics: const ClampingScrollPhysics()),
+      ),
     );
   }
 

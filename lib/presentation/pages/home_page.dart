@@ -204,7 +204,7 @@ class _FeatureCard extends StatelessWidget {
       child: Card(
         clipBehavior: Clip.antiAlias,
         child: InkWell(
-          onTap: feature.available ? () => context.go(feature.route) : null,
+          onTap: feature.available ? () => context.push(feature.route) : null,
           child: Padding(
             padding: const EdgeInsets.all(16),
             child: Row(

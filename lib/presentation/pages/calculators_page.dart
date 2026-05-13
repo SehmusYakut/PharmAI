@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:go_router/go_router.dart';
 import 'package:pharmai/core/l10n/app_localizations.dart';
 import 'package:pharmai/core/utils/calculator_models.dart';
 import 'package:pharmai/presentation/bloc/calculator/calculator_cubit.dart';
@@ -19,20 +18,20 @@ class CalculatorsPage extends StatelessWidget {
       appBar: AppBar(
         title: Text(l10n.calcTitle),
         centerTitle: false,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => context.go('/'),
-        ),
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.fromLTRB(16, 16, 16, 32),
-        keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-        child: Column(
-          children: [
-            _BmiSection(l10n: l10n),
-            const SizedBox(height: 16),
-            _GfrSection(l10n: l10n),
-          ],
+      body: GestureDetector(
+        onTap: () => FocusScope.of(context).unfocus(),
+        behavior: HitTestBehavior.opaque,
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.fromLTRB(16, 16, 16, 32),
+          keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+          child: Column(
+            children: [
+              _BmiSection(l10n: l10n),
+              const SizedBox(height: 16),
+              _GfrSection(l10n: l10n),
+            ],
+          ),
         ),
       ),
     );

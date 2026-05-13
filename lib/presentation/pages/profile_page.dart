@@ -71,59 +71,63 @@ class _ProfilePageState extends State<ProfilePage> {
               );
             }
             final profile = state.profile;
-            return ListView(
-              padding: const EdgeInsets.all(16),
-              children: [
-                _AvatarSection(profile: profile),
-                const SizedBox(height: 24),
-                Row(
-                  children: [
-                    Expanded(
-                      child: TextField(
-                        controller: _nameCtrl,
-                        decoration: InputDecoration(
-                          labelText: l.customName,
-                          border: const OutlineInputBorder(),
+            return GestureDetector(
+              onTap: () => FocusScope.of(context).unfocus(),
+              behavior: HitTestBehavior.opaque,
+              child: ListView(
+                padding: const EdgeInsets.all(16),
+                children: [
+                  _AvatarSection(profile: profile),
+                  const SizedBox(height: 24),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: TextField(
+                          controller: _nameCtrl,
+                          decoration: InputDecoration(
+                            labelText: l.customName,
+                            border: const OutlineInputBorder(),
+                          ),
                         ),
                       ),
+                      const SizedBox(width: 8),
+                      _saving
+                          ? const SizedBox(
+                              width: 24,
+                              height: 24,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            )
+                          : IconButton(
+                              onPressed: () => _saveName(profile),
+                              icon: const Icon(Icons.save_outlined),
+                            ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  SwitchListTile(
+                    title: Text(l.darkMode),
+                    value: context.watch<ThemeCubit>().state == ThemeMode.dark,
+                    onChanged: (_) => context.read<ThemeCubit>().toggle(),
+                  ),
+                  SwitchListTile(
+                    title: Text(l.languageTurkish),
+                    value:
+                        context.watch<LocaleCubit>().state.languageCode == 'tr',
+                    onChanged: (val) => context.read<LocaleCubit>().setLocale(
+                      Locale(val ? 'tr' : 'en'),
                     ),
-                    const SizedBox(width: 8),
-                    _saving
-                        ? const SizedBox(
-                            width: 24,
-                            height: 24,
-                            child: CircularProgressIndicator(strokeWidth: 2),
-                          )
-                        : IconButton(
-                            onPressed: () => _saveName(profile),
-                            icon: const Icon(Icons.save_outlined),
-                          ),
-                  ],
-                ),
-                const SizedBox(height: 8),
-                SwitchListTile(
-                  title: Text(l.darkMode),
-                  value: context.watch<ThemeCubit>().state == ThemeMode.dark,
-                  onChanged: (_) => context.read<ThemeCubit>().toggle(),
-                ),
-                SwitchListTile(
-                  title: Text(l.languageTurkish),
-                  value:
-                      context.watch<LocaleCubit>().state.languageCode == 'tr',
-                  onChanged: (val) => context.read<LocaleCubit>().setLocale(
-                    Locale(val ? 'tr' : 'en'),
                   ),
-                ),
-                const SizedBox(height: 16),
-                _BookmarksSection(uid: profile.firebaseUid),
-                const SizedBox(height: 24),
-                FilledButton.tonal(
-                  onPressed: () => context.read<AuthBloc>().add(
-                    const AuthSignOutRequested(),
+                  const SizedBox(height: 16),
+                  _BookmarksSection(uid: profile.firebaseUid),
+                  const SizedBox(height: 24),
+                  FilledButton.tonal(
+                    onPressed: () => context.read<AuthBloc>().add(
+                      const AuthSignOutRequested(),
+                    ),
+                    child: Text(l.signOut),
                   ),
-                  child: Text(l.signOut),
-                ),
-              ],
+                ],
+              ),
             );
           },
         ),

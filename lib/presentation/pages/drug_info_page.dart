@@ -31,7 +31,10 @@ class _DrugInfoPageState extends State<DrugInfoPage> {
       appBar: AppBar(
         title: Text(l10n.navDrugInfo),
       ),
-      body: Column(
+      body: GestureDetector(
+        onTap: () => FocusScope.of(context).unfocus(),
+        behavior: HitTestBehavior.opaque,
+        child: Column(
         children: [
           // ── Search field ──────────────────────────────────────────────────
           Padding(
@@ -97,6 +100,7 @@ class _DrugInfoPageState extends State<DrugInfoPage> {
             ),
           ),
         ],
+        ),
       ),
     );
   }
