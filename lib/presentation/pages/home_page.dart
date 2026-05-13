@@ -44,7 +44,7 @@ class HomePage extends StatelessWidget {
           label: l10n.navDrugInfo,
           subtitle: l10n.drugInfoSubtitle,
           route: AppConstants.routeDrugInfo,
-          available: false,
+          available: true,
         ),
         _Feature(
           icon: Icons.calculate_rounded,

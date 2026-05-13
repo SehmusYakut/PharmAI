@@ -68,4 +68,5 @@ flutter:
 
   assets:
     - assets/data/icd10_codes.csv
+    - assets/data/drugs_data.json
     - assets/images/

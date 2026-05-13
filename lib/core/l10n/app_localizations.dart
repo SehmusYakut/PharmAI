@@ -63,6 +63,17 @@ class AppLocalizations {
   String get searchBack => _isTr ? 'Geri' : 'Back';
   String get searchClear => _isTr ? 'Temizle' : 'Clear';
 
+  // ── Drug search page ───────────────────────────────────────────────────────
+  String get drugSearchPlaceholder => _isTr
+      ? 'İlaç adı, etken madde veya ATC kodu ara…'
+      : 'Search drug name, ingredient, or ATC code…';
+  String get drugSearchHint => _isTr
+      ? 'İlaç adı veya etken madde girin'
+      : 'Enter a drug name or active ingredient';
+  String get drugSearchHintExample => _isTr
+      ? 'Örn: "Aspirin", "Etodolak", "M01AB08"'
+      : 'e.g. "Aspirin", "Etodolac", "M01AB08"';
+
   // ── Calculators ────────────────────────────────────────────────────────────
   String get calcTitle =>
       _isTr ? 'Klinik Hesaplayıcılar' : 'Clinical Calculators';

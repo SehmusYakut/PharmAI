@@ -9,6 +9,7 @@ import 'core/config/app_config.dart';
 import 'core/l10n/app_localizations.dart';
 import 'core/router/app_router.dart';
 import 'core/theme/app_theme.dart';
+import 'data/datasources/local/drug_json_parser.dart';
 import 'data/datasources/local/icd10_csv_parser.dart';
 import 'data/datasources/local/local_database_service.dart';
 import 'firebase_options.dart';
@@ -33,8 +34,11 @@ void main() async {
   // Non-blocking: locale code is a best-effort fire-and-forget at startup.
   FirebaseAuth.instance.setLanguageCode(sl<LocaleCubit>().state.languageCode);
 
-  // Seed ICD-10 after the first frame so it never blocks the UI.
-  WidgetsBinding.instance.addPostFrameCallback((_) => _seedIcd10IfEmpty());
+  // Seed databases after the first frame so they never block the UI.
+  WidgetsBinding.instance.addPostFrameCallback((_) {
+    _seedIcd10IfEmpty();
+    _seedDrugsIfEmpty();
+  });
 
   runApp(
     MultiBlocProvider(
@@ -67,6 +71,14 @@ Future<void> _seedIcd10IfEmpty() async {
   if (count > 0) return;
   final models = await Icd10CsvParser.parseFromAssets();
   await db.putAllIcd10(models);
+}
+
+Future<void> _seedDrugsIfEmpty() async {
+  final db = sl<LocalDatabaseService>();
+  final count = await db.countDrugs();
+  if (count > 0) return;
+  final models = await DrugJsonParser.parseFromAssets();
+  await db.putAllDrugs(models);
 }
 
 class PharmAIApp extends StatelessWidget {

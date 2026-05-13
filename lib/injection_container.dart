@@ -3,18 +3,22 @@ import 'package:get_it/get_it.dart';
 import 'package:pharmai/core/auth/auth_state_notifier.dart';
 import 'package:pharmai/data/datasources/local/local_database_service.dart';
 import 'package:pharmai/data/repositories/auth_repository_impl.dart';
+import 'package:pharmai/data/repositories/drug_repository_impl.dart';
 import 'package:pharmai/data/repositories/icd10_repository_impl.dart';
 import 'package:pharmai/data/repositories/profile_repository_impl.dart';
 import 'package:pharmai/domain/repositories/auth_repository.dart';
+import 'package:pharmai/domain/repositories/drug_repository.dart';
 import 'package:pharmai/domain/repositories/icd10_repository.dart';
 import 'package:pharmai/domain/repositories/profile_repository.dart';
 import 'package:pharmai/domain/usecases/get_or_create_profile.dart';
+import 'package:pharmai/domain/usecases/search_drugs.dart';
 import 'package:pharmai/domain/usecases/search_icd10.dart';
 import 'package:pharmai/domain/usecases/sign_in_with_google.dart';
 import 'package:pharmai/domain/usecases/sign_out.dart';
 import 'package:pharmai/domain/usecases/update_profile.dart';
 import 'package:pharmai/presentation/bloc/auth/auth_bloc.dart';
 import 'package:pharmai/presentation/bloc/calculator/calculator_cubit.dart';
+import 'package:pharmai/presentation/bloc/drug_search/drug_search_bloc.dart';
 import 'package:pharmai/presentation/bloc/icd10_search/icd10_search_cubit.dart';
 import 'package:pharmai/presentation/bloc/locale/locale_cubit.dart';
 import 'package:pharmai/presentation/bloc/theme/theme_cubit.dart';
@@ -36,9 +40,12 @@ Future<void> initDependencies() async {
       () => ProfileRepositoryImpl(sl()));
   sl.registerLazySingleton<AuthRepository>(
       () => AuthRepositoryImpl(sl(), sl()));
+  sl.registerLazySingleton<DrugRepository>(
+      () => DrugRepositoryImpl(sl()));
 
   // ── Use-cases ─────────────────────────────────────────────────────────────
   sl.registerLazySingleton(() => SearchIcd10(sl()));
+  sl.registerLazySingleton(() => SearchDrugs(sl()));
   sl.registerLazySingleton(() => SignInWithGoogle(sl()));
   sl.registerLazySingleton(() => SignOut(sl()));
   sl.registerLazySingleton(() => GetOrCreateProfile(sl()));
@@ -46,6 +53,7 @@ Future<void> initDependencies() async {
 
   // ── BLoCs / Cubits ────────────────────────────────────────────────────────
   sl.registerFactory(() => Icd10SearchCubit(sl()));
+  sl.registerFactory(() => DrugSearchBloc(sl()));
   sl.registerFactory(() => CalculatorCubit());
   sl.registerLazySingleton(() => ThemeCubit(sl()));
   sl.registerLazySingleton(() => LocaleCubit(sl()));

@@ -5,6 +5,7 @@ import 'package:pharmai/core/auth/auth_state_notifier.dart';
 import 'package:pharmai/core/constants/app_constants.dart';
 import 'package:pharmai/injection_container.dart';
 import 'package:pharmai/presentation/bloc/calculator/calculator_cubit.dart';
+import 'package:pharmai/presentation/bloc/drug_search/drug_search_bloc.dart';
 import 'package:pharmai/presentation/bloc/icd10_search/icd10_search_cubit.dart';
 import 'package:pharmai/presentation/pages/calculators_page.dart';
 import 'package:pharmai/presentation/pages/drug_info_page.dart';
@@ -45,7 +46,10 @@ final GoRouter appRouter = GoRouter(
     GoRoute(
       path: AppConstants.routeDrugInfo,
       name: 'drugInfo',
-      builder: (context, _) => const DrugInfoPage(),
+      builder: (context, _) => BlocProvider(
+        create: (_) => sl<DrugSearchBloc>(),
+        child: const DrugInfoPage(),
+      ),
     ),
     GoRoute(
       path: AppConstants.routeCalculators,

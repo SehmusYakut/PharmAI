@@ -2,7 +2,9 @@ import 'package:isar/isar.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:pharmai/core/config/app_config.dart';
 import 'package:pharmai/core/constants/app_constants.dart';
+import 'package:pharmai/core/utils/text_utils.dart';
 import 'package:pharmai/data/models/bookmark_model.dart';
+import 'package:pharmai/data/models/drug_model.dart';
 import 'package:pharmai/data/models/icd10_code_model.dart';
 import 'package:pharmai/data/models/local_profile_model.dart';
 
@@ -26,7 +28,12 @@ class LocalDatabaseService {
   Future<Isar> _open() async {
     final dir = await getApplicationDocumentsDirectory();
     return Isar.open(
-      [Icd10CodeModelSchema, LocalProfileModelSchema, BookmarkModelSchema],
+      [
+        Icd10CodeModelSchema,
+        LocalProfileModelSchema,
+        BookmarkModelSchema,
+        DrugModelSchema,
+      ],
       directory: dir.path,
       name: AppConfig.isarDbName,
     );
@@ -164,5 +171,52 @@ class LocalDatabaseService {
   Future<void> clearIcd10() async {
     final isar = await db;
     await isar.writeTxn(() => isar.icd10CodeModels.clear());
+  }
+
+  // ── Drug queries ────────────────────────────────────────────────────────────
+
+  /// Searches drugs by Turkish-normalised [query] against the pre-computed
+  /// [DrugModel.searchKey] (covers productName + activeIngredient), with an
+  /// additional ATC-code startsWith pass prioritised first.
+  ///
+  /// Returns at most [AppConstants.maxSearchResults] records.
+  Future<List<DrugModel>> searchDrugs(String query) async {
+    final trimmed = query.trim();
+    if (trimmed.isEmpty) return [];
+    final normalised = TextUtils.normalize(trimmed);
+    final isar = await db;
+
+    // Pass 1: ATC code prefix — fast index scan, highest precision.
+    final atcHits = await isar.drugModels
+        .where()
+        .atcCodeStartsWith(trimmed.toUpperCase())
+        .limit(AppConstants.maxSearchResults)
+        .findAll();
+
+    final atcIds = {for (final m in atcHits) m.id};
+
+    // Pass 2: normalised name / ingredient contains — handles Turkish chars.
+    final nameHits = await isar.drugModels
+        .filter()
+        .searchKeyContains(normalised, caseSensitive: false)
+        .limit(AppConstants.maxSearchResults * 2)
+        .findAll();
+
+    final extra = nameHits.where((m) => !atcIds.contains(m.id)).toList();
+    final merged = [...atcHits, ...extra];
+    return merged.take(AppConstants.maxSearchResults).toList();
+  }
+
+  /// Bulk-upsert [models] inside a single write transaction.
+  Future<int> putAllDrugs(List<DrugModel> models) async {
+    final isar = await db;
+    await isar.writeTxn(() => isar.drugModels.putAll(models));
+    return models.length;
+  }
+
+  /// Total drug records in the store.
+  Future<int> countDrugs() async {
+    final isar = await db;
+    return isar.drugModels.count();
   }
 }
