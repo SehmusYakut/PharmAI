@@ -72,10 +72,6 @@ class Icd10ResultCard extends StatelessWidget {
               runSpacing: 8,
               children: [
                 _ChapterChip(label: code.chapterCode, color: badgeColor),
-                _StatusChip(
-                  label: code.isActive ? 'Aktif' : 'Pasif',
-                  color: code.isActive ? colors.secondary : colors.outline,
-                ),
               ],
             ),
           ),
@@ -123,20 +119,6 @@ class Icd10ResultCard extends StatelessWidget {
                       ),
                     ),
                   ],
-                  const SizedBox(height: 8),
-                  _InfoRow(
-                    icon: Icons.verified_rounded,
-                    label: 'Durum',
-                    child: Text(
-                      code.isActive ? 'Aktif' : 'Pasif',
-                      style: text.bodySmall?.copyWith(
-                        color: code.isActive
-                            ? Colors.green.shade700
-                            : colors.error,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ),
                   if (code.url != null) ...[
                     const SizedBox(height: 8),
                     _InfoRow(

@@ -71,83 +71,80 @@ class _HomePageState extends State<HomePage> {
     final l10n = AppLocalizations.of(context);
     final features = HomePage._features(l10n);
 
-    return BlocProvider(
-      create: (_) => sl<OnboardingCubit>()..initialize(),
-      child: BlocListener<OnboardingCubit, OnboardingState>(
-        listener: (_, state) => _maybeShowOnboarding(state),
-        child: Scaffold(
-          body: Stack(
-            children: [
-              const _DashboardBackdrop(),
-              SafeArea(
-                child: CustomScrollView(
-                  physics: const BouncingScrollPhysics(
-                    parent: AlwaysScrollableScrollPhysics(),
+    return BlocListener<OnboardingCubit, OnboardingState>(
+      listener: (_, state) => _maybeShowOnboarding(state),
+      child: Scaffold(
+        body: Stack(
+          children: [
+            const _DashboardBackdrop(),
+            SafeArea(
+              child: CustomScrollView(
+                physics: const BouncingScrollPhysics(
+                  parent: AlwaysScrollableScrollPhysics(),
+                ),
+                slivers: [
+                  SliverToBoxAdapter(
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(20, 16, 20, 16),
+                      child: _DashboardHeader(l10n: l10n),
+                    ),
                   ),
-                  slivers: [
-                    SliverToBoxAdapter(
-                      child: Padding(
-                        padding: const EdgeInsets.fromLTRB(20, 16, 20, 16),
-                        child: _DashboardHeader(l10n: l10n),
+                  SliverToBoxAdapter(
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(20, 0, 20, 12),
+                      child: _SectionTitle(
+                        title: l10n.features,
+                        subtitle: l10n.homeFeaturesSubtitle,
                       ),
                     ),
-                    SliverToBoxAdapter(
-                      child: Padding(
-                        padding: const EdgeInsets.fromLTRB(20, 0, 20, 12),
-                        child: _SectionTitle(
-                          title: l10n.features,
-                          subtitle: l10n.homeFeaturesSubtitle,
-                        ),
-                      ),
-                    ),
-                    SliverPadding(
-                      padding: const EdgeInsets.symmetric(horizontal: 20),
-                      sliver: SliverLayoutBuilder(
-                        builder: (context, constraints) {
-                          final crossAxisExtent = constraints.crossAxisExtent;
-                          final columnCount = crossAxisExtent >= 1024
-                              ? 3
-                              : crossAxisExtent >= 720
-                              ? 2
-                              : 1;
+                  ),
+                  SliverPadding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    sliver: SliverLayoutBuilder(
+                      builder: (context, constraints) {
+                        final crossAxisExtent = constraints.crossAxisExtent;
+                        final columnCount = crossAxisExtent >= 1024
+                            ? 3
+                            : crossAxisExtent >= 720
+                            ? 2
+                            : 1;
 
-                          if (columnCount == 1) {
-                            return SliverList(
-                              delegate: SliverChildBuilderDelegate(
-                                (context, index) => Padding(
-                                  padding: const EdgeInsets.only(bottom: 16),
-                                  child: _GlassFeatureCard(
-                                    feature: features[index],
-                                  ),
-                                ),
-                                childCount: features.length,
-                              ),
-                            );
-                          }
-
-                          return SliverGrid(
+                        if (columnCount == 1) {
+                          return SliverList(
                             delegate: SliverChildBuilderDelegate(
-                              (context, index) =>
-                                  _GlassFeatureCard(feature: features[index]),
+                              (context, index) => Padding(
+                                padding: const EdgeInsets.only(bottom: 16),
+                                child: _GlassFeatureCard(
+                                  feature: features[index],
+                                ),
+                              ),
                               childCount: features.length,
                             ),
-                            gridDelegate:
-                                SliverGridDelegateWithFixedCrossAxisCount(
-                                  crossAxisCount: columnCount,
-                                  crossAxisSpacing: 16,
-                                  mainAxisSpacing: 16,
-                                  mainAxisExtent: 178,
-                                ),
                           );
-                        },
-                      ),
+                        }
+
+                        return SliverGrid(
+                          delegate: SliverChildBuilderDelegate(
+                            (context, index) =>
+                                _GlassFeatureCard(feature: features[index]),
+                            childCount: features.length,
+                          ),
+                          gridDelegate:
+                              SliverGridDelegateWithFixedCrossAxisCount(
+                                crossAxisCount: columnCount,
+                                crossAxisSpacing: 16,
+                                mainAxisSpacing: 16,
+                                mainAxisExtent: 178,
+                              ),
+                        );
+                      },
                     ),
-                    const SliverToBoxAdapter(child: SizedBox(height: 28)),
-                  ],
-                ),
+                  ),
+                  const SliverToBoxAdapter(child: SizedBox(height: 28)),
+                ],
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
@@ -534,21 +531,17 @@ class _GlassFeatureCard extends StatelessWidget {
                       spacing: 8,
                       runSpacing: 8,
                       children: [
-                        _CardPill(
-                          icon: feature.available
-                              ? Icons.check_circle_rounded
-                              : Icons.schedule_rounded,
-                          label: feature.available
-                              ? l10n.badgeActive
-                              : l10n.badgeSoon,
-                          accent: feature.available
-                              ? colors.secondary
-                              : colors.outline,
-                        ),
+                        if (!feature.available)
+                          _CardPill(
+                            icon: Icons.schedule_rounded,
+                            label: l10n.badgeSoon,
+                            accent: colors.outline,
+                          ),
                         _CardPill(
                           icon: Icons.touch_app_rounded,
                           label: l10n.cardTapToOpen,
                           accent: feature.accent,
+                          textColor: Colors.cyan.shade900,
                         ),
                       ],
                     ),
@@ -568,15 +561,18 @@ class _CardPill extends StatelessWidget {
     required this.icon,
     required this.label,
     required this.accent,
+    this.textColor,
   });
 
   final IconData icon;
   final String label;
   final Color accent;
+  final Color? textColor;
 
   @override
   Widget build(BuildContext context) {
     final text = Theme.of(context).textTheme;
+    final effectiveTextColor = textColor ?? accent;
 
     return Container(
       decoration: BoxDecoration(
@@ -587,12 +583,12 @@ class _CardPill extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 14, color: accent),
+          Icon(icon, size: 14, color: effectiveTextColor),
           const SizedBox(width: 6),
           Text(
             label,
             style: text.labelMedium?.copyWith(
-              color: accent,
+              color: effectiveTextColor,
               fontWeight: FontWeight.w700,
             ),
           ),

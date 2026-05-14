@@ -21,6 +21,7 @@ import 'firebase_options.dart';
 import 'injection_container.dart';
 import 'presentation/bloc/auth/auth_bloc.dart';
 import 'presentation/bloc/locale/locale_cubit.dart';
+import 'presentation/bloc/onboarding/onboarding_cubit.dart';
 import 'presentation/bloc/theme/theme_cubit.dart';
 
 bool _seedFlowStarted = false;
@@ -52,6 +53,7 @@ void main() async {
         BlocProvider(create: (_) => sl<ThemeCubit>()),
         BlocProvider(create: (_) => sl<LocaleCubit>()),
         BlocProvider(create: (_) => sl<AuthBloc>()..add(const AuthStarted())),
+        BlocProvider(create: (_) => sl<OnboardingCubit>()..initialize()),
       ],
       child: BlocListener<LocaleCubit, Locale>(
         listener: (context, locale) {

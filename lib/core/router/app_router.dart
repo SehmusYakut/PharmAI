@@ -7,6 +7,10 @@ import 'package:pharmai/injection_container.dart';
 import 'package:pharmai/presentation/bloc/calculator/calculator_cubit.dart';
 import 'package:pharmai/presentation/bloc/drug_search/drug_search_bloc.dart';
 import 'package:pharmai/presentation/bloc/icd10_search/icd10_search_cubit.dart';
+import 'package:pharmai/presentation/pages/calculators/bmi_calculator_page.dart';
+import 'package:pharmai/presentation/pages/calculators/gfr_calculator_page.dart';
+import 'package:pharmai/presentation/pages/calculators/iv_drip_rate_calculator_page.dart';
+import 'package:pharmai/presentation/pages/calculators/pediatric_weight_calculator_page.dart';
 import 'package:pharmai/presentation/pages/calculators_page.dart';
 import 'package:pharmai/presentation/pages/drug_info_page.dart';
 import 'package:pharmai/presentation/pages/home_page.dart';
@@ -58,6 +62,40 @@ final GoRouter appRouter = GoRouter(
         create: (_) => sl<CalculatorCubit>(),
         child: const CalculatorsPage(),
       ),
+      routes: [
+        GoRoute(
+          path: 'bmi',
+          name: 'calcBmi',
+          builder: (context, _) => BlocProvider(
+            create: (_) => sl<CalculatorCubit>(),
+            child: const BmiCalculatorPage(),
+          ),
+        ),
+        GoRoute(
+          path: 'gfr',
+          name: 'calcGfr',
+          builder: (context, _) => BlocProvider(
+            create: (_) => sl<CalculatorCubit>(),
+            child: const GfrCalculatorPage(),
+          ),
+        ),
+        GoRoute(
+          path: 'pediatric',
+          name: 'calcPediatric',
+          builder: (context, _) => BlocProvider(
+            create: (_) => sl<CalculatorCubit>(),
+            child: const PediatricWeightCalculatorPage(),
+          ),
+        ),
+        GoRoute(
+          path: 'iv-rate',
+          name: 'calcIvRate',
+          builder: (context, _) => BlocProvider(
+            create: (_) => sl<CalculatorCubit>(),
+            child: const IvDripRateCalculatorPage(),
+          ),
+        ),
+      ],
     ),
     GoRoute(
       path: AppConstants.routeLogin,

@@ -4,6 +4,10 @@ abstract class AppConstants {
   static const String routeIcd10Search = '/icd10';
   static const String routeDrugInfo = '/drugs';
   static const String routeCalculators = '/calculators';
+  static const String routeCalcBmi = '/calculators/bmi';
+  static const String routeCalcGfr = '/calculators/gfr';
+  static const String routeCalcPediatric = '/calculators/pediatric';
+  static const String routeCalcIvRate = '/calculators/iv-rate';
   static const String routePrivacyPolicy = '/privacy';
   static const String routeKvkk = '/kvkk';
   static const String routeLogin = '/login';
