@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pharmai/core/l10n/app_localizations.dart';
 import 'package:pharmai/core/utils/calculator_models.dart';
 
 // ── BMI ────────────────────────────────────────────────────────────────────────
@@ -32,17 +33,15 @@ class BmiResultCard extends StatelessWidget {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('VKİ',
-                      style:
-                          text.labelSmall?.copyWith(color: color)),
+                  Text('VKİ', style: text.labelSmall?.copyWith(color: color)),
                   Text(
                     '${result.bmi}',
                     style: text.displaySmall?.copyWith(
-                        color: color, fontWeight: FontWeight.bold),
+                      color: color,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
-                  Text('kg/m²',
-                      style:
-                          text.labelSmall?.copyWith(color: color)),
+                  Text('kg/m²', style: text.labelSmall?.copyWith(color: color)),
                 ],
               ),
               const SizedBox(width: 20),
@@ -51,14 +50,13 @@ class BmiResultCard extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _Chip(
-                        label: _categoryLabel(result.category),
-                        color: color),
+                    _Chip(label: _categoryLabel(result.category), color: color),
                     const SizedBox(height: 6),
                     Text(
                       _categoryRange(result.category),
-                      style: text.bodySmall
-                          ?.copyWith(color: color.withValues(alpha: 0.8)),
+                      style: text.bodySmall?.copyWith(
+                        color: color.withValues(alpha: 0.8),
+                      ),
                     ),
                   ],
                 ),
@@ -71,34 +69,34 @@ class BmiResultCard extends StatelessWidget {
   }
 
   static Color _categoryColor(BmiCategory cat) => switch (cat) {
-        BmiCategory.severelyUnderweight => Colors.indigo,
-        BmiCategory.underweight => Colors.blue,
-        BmiCategory.normalWeight => Colors.green,
-        BmiCategory.overweight => Colors.orange,
-        BmiCategory.obeseClassI => Colors.deepOrange,
-        BmiCategory.obeseClassII => Colors.red,
-        BmiCategory.obeseClassIII => Colors.red.shade900,
-      };
+    BmiCategory.severelyUnderweight => Colors.indigo,
+    BmiCategory.underweight => Colors.blue,
+    BmiCategory.normalWeight => Colors.green,
+    BmiCategory.overweight => Colors.orange,
+    BmiCategory.obeseClassI => Colors.deepOrange,
+    BmiCategory.obeseClassII => Colors.red,
+    BmiCategory.obeseClassIII => Colors.red.shade900,
+  };
 
   static String _categoryLabel(BmiCategory cat) => switch (cat) {
-        BmiCategory.severelyUnderweight => 'Ciddi Düşük Ağırlık',
-        BmiCategory.underweight => 'Düşük Ağırlık',
-        BmiCategory.normalWeight => 'Normal Ağırlık',
-        BmiCategory.overweight => 'Fazla Kilolu',
-        BmiCategory.obeseClassI => 'Obezite – Sınıf I',
-        BmiCategory.obeseClassII => 'Obezite – Sınıf II',
-        BmiCategory.obeseClassIII => 'Obezite – Sınıf III',
-      };
+    BmiCategory.severelyUnderweight => 'Ciddi Düşük Ağırlık',
+    BmiCategory.underweight => 'Düşük Ağırlık',
+    BmiCategory.normalWeight => 'Normal Ağırlık',
+    BmiCategory.overweight => 'Fazla Kilolu',
+    BmiCategory.obeseClassI => 'Obezite – Sınıf I',
+    BmiCategory.obeseClassII => 'Obezite – Sınıf II',
+    BmiCategory.obeseClassIII => 'Obezite – Sınıf III',
+  };
 
   static String _categoryRange(BmiCategory cat) => switch (cat) {
-        BmiCategory.severelyUnderweight => '< 16,0 kg/m²',
-        BmiCategory.underweight => '16,0 – 18,4 kg/m²',
-        BmiCategory.normalWeight => '18,5 – 24,9 kg/m²',
-        BmiCategory.overweight => '25,0 – 29,9 kg/m²',
-        BmiCategory.obeseClassI => '30,0 – 34,9 kg/m²',
-        BmiCategory.obeseClassII => '35,0 – 39,9 kg/m²',
-        BmiCategory.obeseClassIII => '≥ 40,0 kg/m²',
-      };
+    BmiCategory.severelyUnderweight => '< 16,0 kg/m²',
+    BmiCategory.underweight => '16,0 – 18,4 kg/m²',
+    BmiCategory.normalWeight => '18,5 – 24,9 kg/m²',
+    BmiCategory.overweight => '25,0 – 29,9 kg/m²',
+    BmiCategory.obeseClassI => '30,0 – 34,9 kg/m²',
+    BmiCategory.obeseClassII => '35,0 – 39,9 kg/m²',
+    BmiCategory.obeseClassIII => '≥ 40,0 kg/m²',
+  };
 }
 
 // ── GFR ────────────────────────────────────────────────────────────────────────
@@ -133,7 +131,9 @@ class GfrResultCard extends StatelessWidget {
               Row(
                 children: [
                   _StageBadge(
-                      label: _stageLabel(result.ckdStage), color: color),
+                    label: _stageLabel(result.ckdStage),
+                    color: color,
+                  ),
                   const SizedBox(width: 10),
                   Expanded(
                     child: Text(
@@ -180,31 +180,127 @@ class GfrResultCard extends StatelessWidget {
   }
 
   static Color _stageColor(CkdStage s) => switch (s) {
-        CkdStage.g1 => Colors.green,
-        CkdStage.g2 => Colors.lightGreen.shade700,
-        CkdStage.g3a => Colors.amber.shade800,
-        CkdStage.g3b => Colors.orange,
-        CkdStage.g4 => Colors.deepOrange,
-        CkdStage.g5 => Colors.red,
-      };
+    CkdStage.g1 => Colors.green,
+    CkdStage.g2 => Colors.lightGreen.shade700,
+    CkdStage.g3a => Colors.amber.shade800,
+    CkdStage.g3b => Colors.orange,
+    CkdStage.g4 => Colors.deepOrange,
+    CkdStage.g5 => Colors.red,
+  };
 
   static String _stageLabel(CkdStage s) => switch (s) {
-        CkdStage.g1 => 'G1',
-        CkdStage.g2 => 'G2',
-        CkdStage.g3a => 'G3a',
-        CkdStage.g3b => 'G3b',
-        CkdStage.g4 => 'G4',
-        CkdStage.g5 => 'G5',
-      };
+    CkdStage.g1 => 'G1',
+    CkdStage.g2 => 'G2',
+    CkdStage.g3a => 'G3a',
+    CkdStage.g3b => 'G3b',
+    CkdStage.g4 => 'G4',
+    CkdStage.g5 => 'G5',
+  };
 
   static String _stageDescription(CkdStage s) => switch (s) {
-        CkdStage.g1 => 'Normal veya yüksek  (≥ 90 mL/min/1.73m²)',
-        CkdStage.g2 => 'Hafif azalmış  (60–89)',
-        CkdStage.g3a => 'Hafif–orta azalmış  (45–59)',
-        CkdStage.g3b => 'Orta–ciddi azalmış  (30–44)',
-        CkdStage.g4 => 'Ciddi azalmış  (15–29)',
-        CkdStage.g5 => 'Böbrek yetmezliği  (< 15)',
-      };
+    CkdStage.g1 => 'Normal veya yüksek  (≥ 90 mL/min/1.73m²)',
+    CkdStage.g2 => 'Hafif azalmış  (60–89)',
+    CkdStage.g3a => 'Hafif–orta azalmış  (45–59)',
+    CkdStage.g3b => 'Orta–ciddi azalmış  (30–44)',
+    CkdStage.g4 => 'Ciddi azalmış  (15–29)',
+    CkdStage.g5 => 'Böbrek yetmezliği  (< 15)',
+  };
+}
+
+// ── Pediatric Estimated Weight ───────────────────────────────────────────────
+
+class PediatricWeightResultCard extends StatelessWidget {
+  const PediatricWeightResultCard({super.key, required this.result});
+  final PediatricWeightResult result;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final text = Theme.of(context).textTheme;
+    final colors = Theme.of(context).colorScheme;
+
+    return Padding(
+      padding: const EdgeInsets.only(top: 12),
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          color: colors.primary.withValues(alpha: 0.08),
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(color: colors.primary.withValues(alpha: 0.4)),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(14),
+          child: Row(
+            children: [
+              Icon(Icons.monitor_weight, color: colors.primary),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(l10n.calcEstimatedWeight, style: text.labelMedium),
+                    Text(
+                      '${result.weightKg.toStringAsFixed(1)} ${l10n.calcKgUnit}',
+                      style: text.headlineSmall?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// ── IV Drip Rate ─────────────────────────────────────────────────────────────
+
+class IvDripRateResultCard extends StatelessWidget {
+  const IvDripRateResultCard({super.key, required this.result});
+  final IvDripRateResult result;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final text = Theme.of(context).textTheme;
+    final colors = Theme.of(context).colorScheme;
+
+    return Padding(
+      padding: const EdgeInsets.only(top: 12),
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          color: colors.tertiary.withValues(alpha: 0.1),
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(color: colors.tertiary.withValues(alpha: 0.4)),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(14),
+          child: Row(
+            children: [
+              Icon(Icons.water_drop, color: colors.tertiary),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(l10n.calcDropsPerMinute, style: text.labelMedium),
+                    Text(
+                      '${result.dropsPerMinute} ${l10n.calcDropsPerMinuteUnit}',
+                      style: text.headlineSmall?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
 }
 
 // ── Shared private widgets ─────────────────────────────────────────────────────
@@ -283,15 +379,16 @@ class _EquationResult extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label,
-            style:
-                text.labelMedium?.copyWith(fontWeight: FontWeight.w600)),
-        Text(note,
-            style: text.labelSmall?.copyWith(color: outline)),
+        Text(
+          label,
+          style: text.labelMedium?.copyWith(fontWeight: FontWeight.w600),
+        ),
+        Text(note, style: text.labelSmall?.copyWith(color: outline)),
         const SizedBox(height: 4),
-        Text(value,
-            style: text.headlineSmall
-                ?.copyWith(fontWeight: FontWeight.bold)),
+        Text(
+          value,
+          style: text.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
+        ),
         Text(unit, style: text.labelSmall?.copyWith(color: outline)),
       ],
     );

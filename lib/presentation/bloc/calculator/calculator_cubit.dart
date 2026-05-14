@@ -10,14 +10,15 @@ class CalculatorCubit extends Cubit<CalculatorState> {
   // Shadow fields let us update one calculator's result without wiping the other.
   BmiResult? _bmiResult;
   GfrResult? _gfrResult;
+  PediatricWeightResult? _pediatricWeightResult;
+  IvDripRateResult? _ivDripRateResult;
   String? _bmiError;
   String? _gfrError;
+  String? _pediatricWeightError;
+  String? _ivDripRateError;
 
   void calculateBmi({required double weightKg, required double heightCm}) {
-    CalculatorEngine.calculateBmi(
-      weightKg: weightKg,
-      heightCm: heightCm,
-    ).fold(
+    CalculatorEngine.calculateBmi(weightKg: weightKg, heightCm: heightCm).fold(
       (f) {
         _bmiResult = null;
         _bmiError = f.message;
@@ -54,18 +55,72 @@ class CalculatorCubit extends Cubit<CalculatorState> {
     _emit();
   }
 
+  void calculatePediatricEstimatedWeight({
+    required int ageValue,
+    required PediatricAgeUnit ageUnit,
+  }) {
+    CalculatorEngine.calculatePediatricEstimatedWeight(
+      ageValue: ageValue,
+      ageUnit: ageUnit,
+    ).fold(
+      (f) {
+        _pediatricWeightResult = null;
+        _pediatricWeightError = f.message;
+      },
+      (r) {
+        _pediatricWeightResult = r;
+        _pediatricWeightError = null;
+      },
+    );
+    _emit();
+  }
+
+  void calculateIvDripRate({
+    required double volumeMl,
+    required int totalTime,
+    required IvTimeUnit timeUnit,
+    required int dropFactor,
+  }) {
+    CalculatorEngine.calculateIvDripRate(
+      volumeMl: volumeMl,
+      totalTime: totalTime,
+      timeUnit: timeUnit,
+      dropFactor: dropFactor,
+    ).fold(
+      (f) {
+        _ivDripRateResult = null;
+        _ivDripRateError = f.message;
+      },
+      (r) {
+        _ivDripRateResult = r;
+        _ivDripRateError = null;
+      },
+    );
+    _emit();
+  }
+
   void reset() {
     _bmiResult = null;
     _gfrResult = null;
+    _pediatricWeightResult = null;
+    _ivDripRateResult = null;
     _bmiError = null;
     _gfrError = null;
+    _pediatricWeightError = null;
+    _ivDripRateError = null;
     emit(const CalculatorState());
   }
 
-  void _emit() => emit(CalculatorState(
-        bmiResult: _bmiResult,
-        gfrResult: _gfrResult,
-        bmiError: _bmiError,
-        gfrError: _gfrError,
-      ));
+  void _emit() => emit(
+    CalculatorState(
+      bmiResult: _bmiResult,
+      gfrResult: _gfrResult,
+      pediatricWeightResult: _pediatricWeightResult,
+      ivDripRateResult: _ivDripRateResult,
+      bmiError: _bmiError,
+      gfrError: _gfrError,
+      pediatricWeightError: _pediatricWeightError,
+      ivDripRateError: _ivDripRateError,
+    ),
+  );
 }

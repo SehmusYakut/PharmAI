@@ -1,11 +1,14 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:get_it/get_it.dart';
 import 'package:pharmai/core/auth/auth_state_notifier.dart';
+import 'package:pharmai/data/datasources/local/app_preferences_local_data_source.dart';
 import 'package:pharmai/data/datasources/local/local_database_service.dart';
+import 'package:pharmai/data/repositories/app_preferences_repository_impl.dart';
 import 'package:pharmai/data/repositories/auth_repository_impl.dart';
 import 'package:pharmai/data/repositories/drug_repository_impl.dart';
 import 'package:pharmai/data/repositories/icd10_repository_impl.dart';
 import 'package:pharmai/data/repositories/profile_repository_impl.dart';
+import 'package:pharmai/domain/repositories/app_preferences_repository.dart';
 import 'package:pharmai/domain/repositories/auth_repository.dart';
 import 'package:pharmai/domain/repositories/drug_repository.dart';
 import 'package:pharmai/domain/repositories/icd10_repository.dart';
@@ -21,6 +24,7 @@ import 'package:pharmai/presentation/bloc/calculator/calculator_cubit.dart';
 import 'package:pharmai/presentation/bloc/drug_search/drug_search_bloc.dart';
 import 'package:pharmai/presentation/bloc/icd10_search/icd10_search_cubit.dart';
 import 'package:pharmai/presentation/bloc/locale/locale_cubit.dart';
+import 'package:pharmai/presentation/bloc/onboarding/onboarding_cubit.dart';
 import 'package:pharmai/presentation/bloc/theme/theme_cubit.dart';
 
 final GetIt sl = GetIt.instance;
@@ -31,17 +35,23 @@ Future<void> initDependencies() async {
 
   // ── Infrastructure ────────────────────────────────────────────────────────
   sl.registerLazySingleton<LocalDatabaseService>(() => LocalDatabaseService());
+  sl.registerLazySingleton<AppPreferencesLocalDataSource>(
+    () => AppPreferencesLocalDataSource(),
+  );
   sl.registerLazySingleton<FirebaseAuth>(() => FirebaseAuth.instance);
 
   // ── Repositories ──────────────────────────────────────────────────────────
-  sl.registerLazySingleton<Icd10Repository>(
-      () => Icd10RepositoryImpl(sl()));
+  sl.registerLazySingleton<Icd10Repository>(() => Icd10RepositoryImpl(sl()));
+  sl.registerLazySingleton<AppPreferencesRepository>(
+    () => AppPreferencesRepositoryImpl(sl()),
+  );
   sl.registerLazySingleton<ProfileRepository>(
-      () => ProfileRepositoryImpl(sl()));
+    () => ProfileRepositoryImpl(sl()),
+  );
   sl.registerLazySingleton<AuthRepository>(
-      () => AuthRepositoryImpl(sl(), sl()));
-  sl.registerLazySingleton<DrugRepository>(
-      () => DrugRepositoryImpl(sl()));
+    () => AuthRepositoryImpl(sl(), sl()),
+  );
+  sl.registerLazySingleton<DrugRepository>(() => DrugRepositoryImpl(sl()));
 
   // ── Use-cases ─────────────────────────────────────────────────────────────
   sl.registerLazySingleton(() => SearchIcd10(sl()));
@@ -55,6 +65,7 @@ Future<void> initDependencies() async {
   sl.registerFactory(() => Icd10SearchCubit(sl()));
   sl.registerFactory(() => DrugSearchBloc(sl()));
   sl.registerFactory(() => CalculatorCubit());
+  sl.registerFactory(() => OnboardingCubit(sl()));
   sl.registerLazySingleton(() => ThemeCubit(sl()));
   sl.registerLazySingleton(() => LocaleCubit(sl()));
   sl.registerLazySingleton(

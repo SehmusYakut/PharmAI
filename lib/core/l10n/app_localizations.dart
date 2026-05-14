@@ -24,10 +24,41 @@ class AppLocalizations {
   String get appTagline => _isTr
       ? 'Klinik Karar Destek Platformu'
       : 'Clinical Decision Support Platform';
-  String get appVersion => 'v1.0.0';
+  String get dashboardTitle => _isTr ? 'Klinik Panel' : 'Clinical Dashboard';
+  String get dashboardWelcome => _isTr ? 'Hoş geldiniz.' : 'Welcome.';
+
+  // ── Onboarding ─────────────────────────────────────────────────────────────
+  String get onboardingTitle =>
+      _isTr ? 'Hızlı Uygulama Turu' : 'Quick App Tour';
+  String get onboardingSkip => _isTr ? 'Geç' : 'Skip';
+  String get onboardingBack => _isTr ? 'Geri' : 'Back';
+  String get onboardingNext => _isTr ? 'İleri' : 'Next';
+  String get onboardingDone => _isTr ? 'Tamam' : 'Done';
+  String get onboardingStepWelcomeTitle =>
+      _isTr ? 'Klinik destek tek ekranda' : 'Clinical support in one place';
+  String get onboardingStepWelcomeDescription => _isTr
+      ? 'PharmAI, tanısal arama, ilaç bilgisi ve hesaplayıcıları hızlı bir akışta birleştirir.'
+      : 'PharmAI combines diagnostic search, drug insights, and calculators in one fast workflow.';
+  String get onboardingStepIcdTitle => _isTr ? 'ICD-10 Arama' : 'ICD-10 Search';
+  String get onboardingStepIcdDescription => _isTr
+      ? 'Kod veya tanım yazarak ilgili ICD-10 kayıtlarına saniyeler içinde ulaşın.'
+      : 'Find ICD-10 entries in seconds by typing a code or diagnosis description.';
+  String get onboardingStepDrugTitle =>
+      _isTr ? 'İlaç Bilgisi' : 'Drug Information';
+  String get onboardingStepDrugDescription => _isTr
+      ? 'Etken madde, ATC kodu ve detaylı açıklamaları tek noktadan inceleyin.'
+      : 'Review active ingredient, ATC code, and detailed medication notes from a single view.';
+  String get onboardingStepCalcTitle =>
+      _isTr ? 'Klinik Hesaplayıcılar' : 'Clinical Calculators';
+  String get onboardingStepCalcDescription => _isTr
+      ? 'BMI, GFH, pediatrik ağırlık ve IV damla hızı sonuçlarını kanıta dayalı formül bilgisi ile görün.'
+      : 'Use BMI, GFR, pediatric weight, and IV drip tools with transparent evidence details.';
 
   // ── Home page ──────────────────────────────────────────────────────────────
   String get features => _isTr ? 'Özellikler' : 'Features';
+  String get homeFeaturesSubtitle => _isTr
+      ? 'Temel klinik araçlara hızlı erişim.'
+      : 'Fast access to core clinical tools.';
 
   String get navIcd10 => _isTr ? 'ICD-10 Arama' : 'ICD-10 Search';
   String get navDrugInfo => _isTr ? 'İlaç Bilgisi' : 'Drug Info';
@@ -42,6 +73,7 @@ class AppLocalizations {
 
   String get badgeActive => _isTr ? 'AKTİF' : 'ACTIVE';
   String get badgeSoon => _isTr ? 'YAKINDA' : 'SOON';
+  String get cardTapToOpen => _isTr ? 'Açmak için dokun' : 'Tap to open';
 
   String get themeLightTooltip =>
       _isTr ? 'Açık temaya geç' : 'Switch to light mode';
@@ -78,11 +110,29 @@ class AppLocalizations {
   String get calcTitle =>
       _isTr ? 'Klinik Hesaplayıcılar' : 'Clinical Calculators';
   String get calcCalculate => _isTr ? 'Hesapla' : 'Calculate';
+  String get calcInfoTooltip =>
+      _isTr ? 'Formül ve kaynak bilgisi' : 'Formula and source';
+  String get calcInfoTitle =>
+      _isTr ? 'Kanıt ve Formül' : 'Evidence and Formula';
+  String get calcFormulaLabel => _isTr ? 'Formül' : 'Formula';
+  String get calcReferenceLabel => _isTr ? 'Referans' : 'Reference';
   String get calcBmiTitle =>
       _isTr ? 'Vücut Kitle İndeksi (VKİ)' : 'Body Mass Index (BMI)';
+  String get calcBmiFormula => _isTr
+      ? 'BMI = ağırlık(kg) / [boy(m)]^2'
+      : 'BMI = weight(kg) / [height(m)]^2';
+  String get calcBmiReference => _isTr
+      ? 'WHO Technical Report Series 854 (1995)'
+      : 'WHO Technical Report Series 854 (1995)';
   String get calcGfrTitle => _isTr
       ? 'Glomerüler Filtrasyon Hızı (GFH)'
       : 'Glomerular Filtration Rate (GFR)';
+  String get calcGfrFormula => _isTr
+      ? 'CKD-EPI 2021 + Cockcroft-Gault (doz ayarı)'
+      : 'CKD-EPI 2021 + Cockcroft-Gault (dose adjustment)';
+  String get calcGfrReference => _isTr
+      ? 'Inker et al., NEJM 2021; Cockcroft-Gault 1976; KDIGO 2022'
+      : 'Inker et al., NEJM 2021; Cockcroft-Gault 1976; KDIGO 2022';
   String get calcWeight => _isTr ? 'Ağırlık' : 'Weight';
   String get calcHeight => _isTr ? 'Boy' : 'Height';
   String get calcAge => _isTr ? 'Yaş' : 'Age';
@@ -90,6 +140,45 @@ class AppLocalizations {
       _isTr ? 'Serum Kreatinin' : 'Serum Creatinine';
   String get calcMale => _isTr ? 'Erkek' : 'Male';
   String get calcFemale => _isTr ? 'Kadın' : 'Female';
+  String get calcPediatricWeightTitle => _isTr
+      ? 'Pediatrik Tahmini Ağırlık (APLS)'
+      : 'Pediatric Estimated Weight (APLS)';
+  String get calcPediatricWeightFormula => _isTr
+      ? '1-12 ay: (0.5 x ay) + 4, 1-5 yaş: (2 x yaş) + 8, 6-12 yaş: (3 x yaş) + 7'
+      : '1-12 months: (0.5 x months) + 4, 1-5 years: (2 x age) + 8, 6-12 years: (3 x age) + 7';
+  String get calcPediatricWeightReference =>
+      _isTr ? 'Referans: APLS Kılavuzu' : 'Reference: APLS Guidelines';
+  String get calcPediatricWeightCitation => _isTr
+      ? 'Updated APLS formülleri (1-12 ay, 1-12 yaş)'
+      : 'Updated APLS formulas (1-12 months, 1-12 years)';
+  String get calcIvDripRateTitle => _isTr ? 'IV Damla Hızı' : 'IV Drip Rate';
+  String get calcIvDripRateFormula => _isTr
+      ? 'Damla/dk = [Hacim(mL) x Damla faktörü(gtt/mL)] / Süre(dk)'
+      : 'Drops/min = [Volume(mL) x Drop factor(gtt/mL)] / Time(min)';
+  String get calcIvDripRateReference => _isTr
+      ? 'Referans: İnfüzyon Tedavi Standartları'
+      : 'Reference: Infusion Therapy Standards';
+  String get calcIvDripRateCitation => _isTr
+      ? 'Damla/dk = (Hacim x Damla Faktörü) / Süre(dk)'
+      : 'Drops/min = (Volume x Drop Factor) / Time(min)';
+  String get calcAgeUnit => _isTr ? 'Yaş Birimi' : 'Age Unit';
+  String get calcMonths => _isTr ? 'Ay' : 'Months';
+  String get calcYears => _isTr ? 'Yıl' : 'Years';
+  String get calcMonthsShort => _isTr ? 'ay' : 'mo';
+  String get calcYearsShort => _isTr ? 'yıl' : 'yr';
+  String get calcHours => _isTr ? 'Saat' : 'Hours';
+  String get calcMinutes => _isTr ? 'Dakika' : 'Minutes';
+  String get calcHoursShort => _isTr ? 'saat' : 'hr';
+  String get calcMinutesShort => _isTr ? 'dk' : 'min';
+  String get calcVolumeMl => _isTr ? 'Hacim (mL)' : 'Volume (mL)';
+  String get calcDropFactor => _isTr ? 'Damla Faktörü' : 'Drop Factor';
+  String get calcTotalTime => _isTr ? 'Toplam Süre' : 'Total Time';
+  String get calcTimeUnit => _isTr ? 'Süre Birimi' : 'Time Unit';
+  String get calcDropsPerMinute => _isTr ? 'Damla / dakika' : 'Drops / minute';
+  String get calcDropsPerMinuteUnit => _isTr ? 'gtt/dk' : 'gtt/min';
+  String get calcEstimatedWeight =>
+      _isTr ? 'Tahmini Ağırlık' : 'Estimated Weight';
+  String get calcKgUnit => 'kg';
 
   // ── Auth & Profile ─────────────────────────────────────────────────────────
   String get signInWithGoogle =>

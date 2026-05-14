@@ -15,10 +15,7 @@ class CalculatorsPage extends StatelessWidget {
     final l10n = AppLocalizations.of(context);
     return Scaffold(
       resizeToAvoidBottomInset: true,
-      appBar: AppBar(
-        title: Text(l10n.calcTitle),
-        centerTitle: false,
-      ),
+      appBar: AppBar(title: Text(l10n.calcTitle), centerTitle: false),
       body: GestureDetector(
         onTap: () => FocusScope.of(context).unfocus(),
         behavior: HitTestBehavior.opaque,
@@ -30,6 +27,10 @@ class CalculatorsPage extends StatelessWidget {
               _BmiSection(l10n: l10n),
               const SizedBox(height: 16),
               _GfrSection(l10n: l10n),
+              const SizedBox(height: 16),
+              _PediatricWeightSection(l10n: l10n),
+              const SizedBox(height: 16),
+              _IvDripRateSection(l10n: l10n),
             ],
           ),
         ),
@@ -64,9 +65,9 @@ class _BmiSectionState extends State<_BmiSection> {
     final height = double.tryParse(_heightCtrl.text.replaceAll(',', '.'));
     if (weight == null || height == null) return;
     context.read<CalculatorCubit>().calculateBmi(
-          weightKg: weight,
-          heightCm: height,
-        );
+      weightKg: weight,
+      heightCm: height,
+    );
   }
 
   @override
@@ -76,6 +77,8 @@ class _BmiSectionState extends State<_BmiSection> {
       icon: Icons.monitor_weight_outlined,
       title: l.calcBmiTitle,
       citation: 'WHO Technical Report Series 854 (1995)',
+      formula: l.calcBmiFormula,
+      reference: l.calcBmiReference,
       onCalculate: _calculate,
       body: Row(
         children: [
@@ -104,7 +107,8 @@ class _BmiSectionState extends State<_BmiSection> {
         buildWhen: (p, c) =>
             p.bmiResult != c.bmiResult || p.bmiError != c.bmiError,
         builder: (context, state) {
-          if (state.bmiError != null) return CalculatorErrorText(state.bmiError!);
+          if (state.bmiError != null)
+            return CalculatorErrorText(state.bmiError!);
           if (state.bmiResult == null) return const SizedBox.shrink();
           return BmiResultCard(result: state.bmiResult!);
         },
@@ -143,11 +147,11 @@ class _GfrSectionState extends State<_GfrSection> {
     final weight = double.tryParse(_weightCtrl.text.replaceAll(',', '.'));
     if (scr == null || age == null || weight == null) return;
     context.read<CalculatorCubit>().calculateGfr(
-          serumCreatinineMgDl: scr,
-          ageYears: age,
-          sex: _sex,
-          weightKg: weight,
-        );
+      serumCreatinineMgDl: scr,
+      ageYears: age,
+      sex: _sex,
+      weightKg: weight,
+    );
   }
 
   @override
@@ -158,6 +162,8 @@ class _GfrSectionState extends State<_GfrSection> {
       title: l.calcGfrTitle,
       citation:
           'CKD-EPI 2021 · Inker et al., NEJM 385:1737  ·  Cockcroft-Gault, Nephron 1976  ·  KDIGO 2022',
+      formula: l.calcGfrFormula,
+      reference: l.calcGfrReference,
       onCalculate: _calculate,
       body: Column(
         children: [
@@ -197,15 +203,40 @@ class _GfrSectionState extends State<_GfrSection> {
               Expanded(
                 child: SegmentedButton<BiologicalSex>(
                   showSelectedIcon: false,
+                  style: const ButtonStyle(
+                    visualDensity: VisualDensity.compact,
+                    padding: WidgetStatePropertyAll(
+                      EdgeInsets.symmetric(horizontal: 8, vertical: 10),
+                    ),
+                    textStyle: WidgetStatePropertyAll(
+                      TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+                    ),
+                  ),
                   segments: [
                     ButtonSegment(
                       value: BiologicalSex.male,
-                      label: Text(l.calcMale),
+                      label: FittedBox(
+                        fit: BoxFit.scaleDown,
+                        child: Text(
+                          l.calcMale,
+                          maxLines: 1,
+                          softWrap: false,
+                          style: const TextStyle(fontSize: 12),
+                        ),
+                      ),
                       icon: const Icon(Icons.male),
                     ),
                     ButtonSegment(
                       value: BiologicalSex.female,
-                      label: Text(l.calcFemale),
+                      label: FittedBox(
+                        fit: BoxFit.scaleDown,
+                        child: Text(
+                          l.calcFemale,
+                          maxLines: 1,
+                          softWrap: false,
+                          style: const TextStyle(fontSize: 12),
+                        ),
+                      ),
                       icon: const Icon(Icons.female),
                     ),
                   ],
@@ -221,9 +252,254 @@ class _GfrSectionState extends State<_GfrSection> {
         buildWhen: (p, c) =>
             p.gfrResult != c.gfrResult || p.gfrError != c.gfrError,
         builder: (context, state) {
-          if (state.gfrError != null) return CalculatorErrorText(state.gfrError!);
+          if (state.gfrError != null)
+            return CalculatorErrorText(state.gfrError!);
           if (state.gfrResult == null) return const SizedBox.shrink();
           return GfrResultCard(result: state.gfrResult!);
+        },
+      ),
+    );
+  }
+}
+
+// ── Pediatric Estimated Weight (APLS) ───────────────────────────────────────
+
+class _PediatricWeightSection extends StatefulWidget {
+  const _PediatricWeightSection({required this.l10n});
+  final AppLocalizations l10n;
+
+  @override
+  State<_PediatricWeightSection> createState() =>
+      _PediatricWeightSectionState();
+}
+
+class _PediatricWeightSectionState extends State<_PediatricWeightSection> {
+  final _ageCtrl = TextEditingController();
+  PediatricAgeUnit _ageUnit = PediatricAgeUnit.years;
+
+  @override
+  void dispose() {
+    _ageCtrl.dispose();
+    super.dispose();
+  }
+
+  void _calculate() {
+    final ageValue = int.tryParse(_ageCtrl.text);
+    if (ageValue == null) return;
+    context.read<CalculatorCubit>().calculatePediatricEstimatedWeight(
+      ageValue: ageValue,
+      ageUnit: _ageUnit,
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l = widget.l10n;
+    return CalculatorFormCard(
+      icon: Icons.child_care_outlined,
+      title: l.calcPediatricWeightTitle,
+      citation: l.calcPediatricWeightCitation,
+      formula: l.calcPediatricWeightFormula,
+      reference: l.calcPediatricWeightReference,
+      onCalculate: _calculate,
+      body: Row(
+        children: [
+          Expanded(
+            child: CalculatorInputField(
+              controller: _ageCtrl,
+              label: l.calcAge,
+              unit: _ageUnit == PediatricAgeUnit.months
+                  ? l.calcMonthsShort
+                  : l.calcYearsShort,
+              decimal: false,
+              onSubmit: _calculate,
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: DropdownButtonFormField<PediatricAgeUnit>(
+              value: _ageUnit,
+              isExpanded: true,
+              decoration: InputDecoration(
+                labelText: l.calcAgeUnit,
+                border: const OutlineInputBorder(),
+                isDense: true,
+              ),
+              items: [
+                DropdownMenuItem(
+                  value: PediatricAgeUnit.months,
+                  child: Text(l.calcMonths),
+                ),
+                DropdownMenuItem(
+                  value: PediatricAgeUnit.years,
+                  child: Text(l.calcYears),
+                ),
+              ],
+              onChanged: (value) {
+                if (value == null) return;
+                setState(() => _ageUnit = value);
+              },
+            ),
+          ),
+        ],
+      ),
+      result: BlocBuilder<CalculatorCubit, CalculatorState>(
+        buildWhen: (p, c) =>
+            p.pediatricWeightResult != c.pediatricWeightResult ||
+            p.pediatricWeightError != c.pediatricWeightError,
+        builder: (context, state) {
+          if (state.pediatricWeightError != null) {
+            return CalculatorErrorText(state.pediatricWeightError!);
+          }
+          if (state.pediatricWeightResult == null)
+            return const SizedBox.shrink();
+          return PediatricWeightResultCard(
+            result: state.pediatricWeightResult!,
+          );
+        },
+      ),
+    );
+  }
+}
+
+// ── IV Drip Rate ─────────────────────────────────────────────────────────────
+
+class _IvDripRateSection extends StatefulWidget {
+  const _IvDripRateSection({required this.l10n});
+  final AppLocalizations l10n;
+
+  @override
+  State<_IvDripRateSection> createState() => _IvDripRateSectionState();
+}
+
+class _IvDripRateSectionState extends State<_IvDripRateSection> {
+  final _volumeCtrl = TextEditingController();
+  final _timeCtrl = TextEditingController();
+  IvTimeUnit _timeUnit = IvTimeUnit.hours;
+  int _dropFactor = 20;
+
+  @override
+  void dispose() {
+    _volumeCtrl.dispose();
+    _timeCtrl.dispose();
+    super.dispose();
+  }
+
+  void _calculate() {
+    final volume = double.tryParse(_volumeCtrl.text.replaceAll(',', '.'));
+    final time = int.tryParse(_timeCtrl.text);
+    if (volume == null || time == null) return;
+
+    context.read<CalculatorCubit>().calculateIvDripRate(
+      volumeMl: volume,
+      totalTime: time,
+      timeUnit: _timeUnit,
+      dropFactor: _dropFactor,
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l = widget.l10n;
+    return CalculatorFormCard(
+      icon: Icons.water_drop_outlined,
+      title: l.calcIvDripRateTitle,
+      citation: l.calcIvDripRateCitation,
+      formula: l.calcIvDripRateFormula,
+      reference: l.calcIvDripRateReference,
+      onCalculate: _calculate,
+      body: Column(
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: CalculatorInputField(
+                  controller: _volumeCtrl,
+                  label: l.calcVolumeMl,
+                  unit: 'mL',
+                  decimal: true,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: DropdownButtonFormField<int>(
+                  value: _dropFactor,
+                  isExpanded: true,
+                  decoration: InputDecoration(
+                    labelText: l.calcDropFactor,
+                    border: const OutlineInputBorder(),
+                    isDense: true,
+                  ),
+                  items: const [10, 15, 20, 60]
+                      .map(
+                        (value) => DropdownMenuItem(
+                          value: value,
+                          child: Text('$value gtt/mL'),
+                        ),
+                      )
+                      .toList(),
+                  onChanged: (value) {
+                    if (value == null) return;
+                    setState(() => _dropFactor = value);
+                  },
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              Expanded(
+                child: CalculatorInputField(
+                  controller: _timeCtrl,
+                  label: l.calcTotalTime,
+                  unit: _timeUnit == IvTimeUnit.hours
+                      ? l.calcHoursShort
+                      : l.calcMinutesShort,
+                  decimal: false,
+                  onSubmit: _calculate,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: DropdownButtonFormField<IvTimeUnit>(
+                  value: _timeUnit,
+                  isExpanded: true,
+                  decoration: InputDecoration(
+                    labelText: l.calcTimeUnit,
+                    border: const OutlineInputBorder(),
+                    isDense: true,
+                  ),
+                  items: [
+                    DropdownMenuItem(
+                      value: IvTimeUnit.hours,
+                      child: Text(l.calcHours),
+                    ),
+                    DropdownMenuItem(
+                      value: IvTimeUnit.minutes,
+                      child: Text(l.calcMinutes),
+                    ),
+                  ],
+                  onChanged: (value) {
+                    if (value == null) return;
+                    setState(() => _timeUnit = value);
+                  },
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+      result: BlocBuilder<CalculatorCubit, CalculatorState>(
+        buildWhen: (p, c) =>
+            p.ivDripRateResult != c.ivDripRateResult ||
+            p.ivDripRateError != c.ivDripRateError,
+        builder: (context, state) {
+          if (state.ivDripRateError != null) {
+            return CalculatorErrorText(state.ivDripRateError!);
+          }
+          if (state.ivDripRateResult == null) return const SizedBox.shrink();
+          return IvDripRateResultCard(result: state.ivDripRateResult!);
         },
       ),
     );

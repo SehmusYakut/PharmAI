@@ -1,11 +1,16 @@
+import 'dart:async';
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:go_router/go_router.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
+import 'core/auth/auth_state_notifier.dart';
 import 'core/config/app_config.dart';
+import 'core/constants/app_constants.dart';
 import 'core/l10n/app_localizations.dart';
 import 'core/router/app_router.dart';
 import 'core/theme/app_theme.dart';
@@ -17,6 +22,8 @@ import 'injection_container.dart';
 import 'presentation/bloc/auth/auth_bloc.dart';
 import 'presentation/bloc/locale/locale_cubit.dart';
 import 'presentation/bloc/theme/theme_cubit.dart';
+
+bool _seedFlowStarted = false;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -34,10 +41,9 @@ void main() async {
   // Non-blocking: locale code is a best-effort fire-and-forget at startup.
   FirebaseAuth.instance.setLanguageCode(sl<LocaleCubit>().state.languageCode);
 
-  // Seed databases after the first frame so they never block the UI.
+  // Seed databases after the first frame in a single background queue.
   WidgetsBinding.instance.addPostFrameCallback((_) {
-    _seedIcd10IfEmpty();
-    _seedDrugsIfEmpty();
+    unawaited(_runBackgroundSeedFlow());
   });
 
   runApp(
@@ -65,6 +71,23 @@ void main() async {
   );
 }
 
+Future<void> _runBackgroundSeedFlow() async {
+  if (_seedFlowStarted) return;
+  _seedFlowStarted = true;
+
+  // Let first paint + initial interactions complete before heavy I/O/CPU work.
+  await Future<void>.delayed(const Duration(seconds: 2));
+
+  try {
+    await _seedIcd10IfEmpty();
+    // Add a small breathing window so frame scheduling can recover.
+    await Future<void>.delayed(const Duration(milliseconds: 300));
+    await _seedDrugsIfEmpty();
+  } catch (_) {
+    // Best-effort seed flow: parsing errors should not crash app startup.
+  }
+}
+
 Future<void> _seedIcd10IfEmpty() async {
   final db = sl<LocalDatabaseService>();
   final count = await db.countIcd10();
@@ -86,8 +109,21 @@ class PharmAIApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final themeMode = context.watch<ThemeCubit>().state;
-    final locale = context.watch<LocaleCubit>().state;
+    ThemeMode themeMode = ThemeMode.system;
+    Locale locale = const Locale('tr');
+
+    try {
+      themeMode = context.watch<ThemeCubit>().state;
+    } catch (_) {
+      themeMode = ThemeMode.system;
+    }
+
+    try {
+      locale = context.watch<LocaleCubit>().state;
+    } catch (_) {
+      locale = const Locale('tr');
+    }
+
     return MaterialApp.router(
       title: AppConfig.appName,
       debugShowCheckedModeBanner: false,
@@ -95,7 +131,7 @@ class PharmAIApp extends StatelessWidget {
       darkTheme: AppTheme.dark,
       themeMode: themeMode,
       locale: locale,
-      routerConfig: appRouter,
+      routerConfig: buildRouterConfig(),
       localizationsDelegates: const [
         AppLocalizations.delegate,
         GlobalMaterialLocalizations.delegate,
@@ -105,4 +141,21 @@ class PharmAIApp extends StatelessWidget {
       supportedLocales: AppLocalizations.supportedLocales,
     );
   }
+}
+
+GoRouter buildRouterConfig() {
+  if (sl.isRegistered<AuthStateNotifier>()) {
+    return appRouter;
+  }
+
+  return GoRouter(
+    initialLocation: AppConstants.routeHome,
+    routes: [
+      GoRoute(
+        path: AppConstants.routeHome,
+        builder: (_, __) =>
+            const Scaffold(body: Center(child: SizedBox.shrink())),
+      ),
+    ],
+  );
 }

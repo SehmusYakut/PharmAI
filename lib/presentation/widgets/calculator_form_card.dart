@@ -13,6 +13,8 @@ class CalculatorFormCard extends StatelessWidget {
     required this.icon,
     required this.title,
     required this.citation,
+    this.formula,
+    this.reference,
     required this.body,
     required this.onCalculate,
     required this.result,
@@ -24,6 +26,12 @@ class CalculatorFormCard extends StatelessWidget {
   /// Literature reference shown as a muted subtitle below the title.
   final String citation;
 
+  /// Concise equation shown in the info sheet.
+  final String? formula;
+
+  /// Medical guideline/literature reference shown in the info sheet.
+  final String? reference;
+
   /// Input fields area — Row/Column of [CalculatorInputField] widgets.
   final Widget body;
 
@@ -31,6 +39,68 @@ class CalculatorFormCard extends StatelessWidget {
 
   /// BlocBuilder-produced result card, or [SizedBox.shrink] when empty.
   final Widget result;
+
+  bool get _hasEvidenceInfo =>
+      formula != null &&
+      formula!.trim().isNotEmpty &&
+      reference != null &&
+      reference!.trim().isNotEmpty;
+
+  void _showEvidenceSheet(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final colors = Theme.of(context).colorScheme;
+    final text = Theme.of(context).textTheme;
+
+    showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (context) {
+        return SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(20, 16, 20, 20),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Center(
+                  child: Container(
+                    width: 44,
+                    height: 4,
+                    margin: const EdgeInsets.only(bottom: 12),
+                    decoration: BoxDecoration(
+                      color: colors.outlineVariant,
+                      borderRadius: BorderRadius.circular(999),
+                    ),
+                  ),
+                ),
+                Text(
+                  l10n.calcInfoTitle,
+                  style: text.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  '${l10n.calcFormulaLabel}: ${formula!}',
+                  style: text.bodyMedium,
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  '${l10n.calcReferenceLabel}: ${reference!}',
+                  style: text.bodyMedium?.copyWith(
+                    color: colors.onSurfaceVariant,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -48,16 +118,19 @@ class CalculatorFormCard extends StatelessWidget {
               children: [
                 Icon(icon, color: colors.primary, size: 22),
                 const SizedBox(width: 8),
-                Expanded(
-                  child: Text(title, style: text.titleMedium),
-                ),
+                Expanded(child: Text(title, style: text.titleMedium)),
+                if (_hasEvidenceInfo)
+                  IconButton(
+                    tooltip: AppLocalizations.of(context).calcInfoTooltip,
+                    icon: const Icon(Icons.info_outline, size: 20),
+                    onPressed: () => _showEvidenceSheet(context),
+                  ),
               ],
             ),
             const SizedBox(height: 2),
             Text(
               citation,
-              style:
-                  text.labelSmall?.copyWith(color: colors.outline),
+              style: text.labelSmall?.copyWith(color: colors.outline),
             ),
             const Divider(height: 24),
             // ── Input fields ─────────────────────────────────────────────────

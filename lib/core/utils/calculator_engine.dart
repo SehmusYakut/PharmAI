@@ -70,20 +70,75 @@ abstract class CalculatorEngine {
     final ckdEpi = _ckdEpi2021(serumCreatinineMgDl, ageYears, sex);
     final cg = _cockcroftGault(serumCreatinineMgDl, ageYears, sex, weightKg);
 
-    return right(GfrResult(
-      ckdEpi2021: _round1(ckdEpi),
-      cockcroftGault: _round1(cg),
-      ckdStage: _classifyCkd(ckdEpi),
-    ));
+    return right(
+      GfrResult(
+        ckdEpi2021: _round1(ckdEpi),
+        cockcroftGault: _round1(cg),
+        ckdStage: _classifyCkd(ckdEpi),
+      ),
+    );
+  }
+
+  // ── Pediatric Estimated Weight (APLS) ────────────────────────────────────
+
+  /// Pediatric estimated weight using updated APLS formulas.
+  ///
+  /// 1–12 months: weight(kg) = (months × 0.5) + 4
+  /// 1–5 years:   weight(kg) = (years × 2) + 8
+  /// 6–12 years:  weight(kg) = (years × 3) + 7
+  static Either<ValidationFailure, PediatricWeightResult>
+  calculatePediatricEstimatedWeight({
+    required int ageValue,
+    required PediatricAgeUnit ageUnit,
+  }) {
+    final ageErr = _validatePediatricAge(ageValue, ageUnit);
+    if (ageErr != null) return left(ValidationFailure(ageErr));
+
+    final double weight = switch (ageUnit) {
+      PediatricAgeUnit.months => (ageValue * 0.5) + 4,
+      PediatricAgeUnit.years when ageValue <= 5 => (ageValue * 2.0) + 8.0,
+      PediatricAgeUnit.years => (ageValue * 3.0) + 7.0,
+    };
+
+    return right(PediatricWeightResult(weightKg: _round1(weight)));
+  }
+
+  // ── IV Drip Rate ──────────────────────────────────────────────────────────
+
+  /// IV drip rate in drops/min.
+  ///
+  /// Formula: drops/min = (volume mL × drop factor gtt/mL) / total time (min)
+  static Either<ValidationFailure, IvDripRateResult> calculateIvDripRate({
+    required double volumeMl,
+    required int totalTime,
+    required IvTimeUnit timeUnit,
+    required int dropFactor,
+  }) {
+    final volumeErr = _validateVolume(volumeMl);
+    if (volumeErr != null) return left(ValidationFailure(volumeErr));
+
+    final timeErr = _validateTotalTime(totalTime);
+    if (timeErr != null) return left(ValidationFailure(timeErr));
+
+    if (!const {10, 15, 20, 60}.contains(dropFactor)) {
+      return left(
+        const ValidationFailure(
+          'Drop factor must be 10, 15, 20, or 60 gtt/mL.',
+        ),
+      );
+    }
+
+    final timeMinutes = timeUnit == IvTimeUnit.hours
+        ? totalTime * 60
+        : totalTime;
+    final dropsPerMinute = ((volumeMl * dropFactor) / timeMinutes).round();
+
+    return right(IvDripRateResult(dropsPerMinute: dropsPerMinute));
   }
 
   // ── Algorithms ───────────────────────────────────────────────────────────────
 
-  static double _ckdEpi2021(
-    double scr,
-    int age,
-    BiologicalSex sex,
-  ) {
+  static double _ckdEpi2021(double scr, int age, BiologicalSex sex) {
     final isFemale = sex == BiologicalSex.female;
     final kappa = isFemale ? 0.7 : 0.9;
     final alpha = isFemale ? -0.241 : -0.302;
@@ -172,6 +227,32 @@ abstract class CalculatorEngine {
       return 'Serum creatinine must be at most '
           '${AppConstants.maxSerumCreatinine} mg/dL.';
     }
+    return null;
+  }
+
+  static String? _validatePediatricAge(int value, PediatricAgeUnit unit) {
+    if (value <= 0) return 'Age must be greater than zero.';
+    if (unit == PediatricAgeUnit.months) {
+      if (value < 1 || value > 12) {
+        return 'For months, age must be between 1 and 12.';
+      }
+      return null;
+    }
+
+    if (value < 1 || value > 12) {
+      return 'For years, age must be between 1 and 12.';
+    }
+    return null;
+  }
+
+  static String? _validateVolume(double ml) {
+    if (!ml.isFinite) return 'Volume must be a finite number.';
+    if (ml <= 0) return 'Volume must be greater than zero.';
+    return null;
+  }
+
+  static String? _validateTotalTime(int value) {
+    if (value <= 0) return 'Total time must be greater than zero.';
     return null;
   }
 

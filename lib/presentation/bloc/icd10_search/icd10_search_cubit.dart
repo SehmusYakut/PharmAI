@@ -29,7 +29,7 @@ class Icd10SearchCubit extends Cubit<Icd10SearchState> {
     _debounce?.cancel();
     final query = raw.trim();
 
-    if (query.length < AppConstants.minSearchLength) {
+    if (query.isEmpty) {
       _reset();
       emit(const Icd10SearchInitial());
       return;
@@ -81,7 +81,8 @@ class Icd10SearchCubit extends Cubit<Icd10SearchState> {
     final result = await _searchIcd10(query, offset: offset);
 
     result.fold(
-      (failure) => emit(Icd10SearchError(query: query, message: failure.message)),
+      (failure) =>
+          emit(Icd10SearchError(query: query, message: failure.message)),
       (fresh) {
         // Fresh page: rank by relevance (only for page 0 – appended pages keep
         // server order since the user has already seen ranked items above).
@@ -92,20 +93,21 @@ class Icd10SearchCubit extends Cubit<Icd10SearchState> {
           return;
         }
 
-        final previous =
-            append && state is Icd10SearchLoaded
-                ? (state as Icd10SearchLoaded).results
-                : <Icd10Code>[];
+        final previous = append && state is Icd10SearchLoaded
+            ? (state as Icd10SearchLoaded).results
+            : <Icd10Code>[];
 
         _nextOffset = offset + fresh.length;
 
-        emit(Icd10SearchLoaded(
-          query: query,
-          results: [...previous, ...page],
-          // More results exist when the server returned a full page.
-          canLoadMore: fresh.length == AppConstants.maxSearchResults,
-          isLoadingMore: false,
-        ));
+        emit(
+          Icd10SearchLoaded(
+            query: query,
+            results: [...previous, ...page],
+            // More results exist when the server returned a full page.
+            canLoadMore: fresh.length == AppConstants.maxSearchResults,
+            isLoadingMore: false,
+          ),
+        );
       },
     );
   }

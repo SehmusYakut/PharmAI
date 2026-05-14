@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart'; // context.pop()
+import 'package:pharmai/core/constants/app_constants.dart';
 import 'package:pharmai/core/l10n/app_localizations.dart';
 import 'package:pharmai/presentation/bloc/icd10_search/icd10_search_cubit.dart';
 import 'package:pharmai/presentation/bloc/icd10_search/icd10_search_state.dart';
@@ -100,7 +101,9 @@ class _Icd10SearchPageState extends State<Icd10SearchPage> {
                   placeholder: l10n.searchPlaceholder,
                 ),
               ),
-              Expanded(child: _buildBody(physics: const BouncingScrollPhysics())),
+              Expanded(
+                child: _buildBody(physics: const BouncingScrollPhysics()),
+              ),
             ],
           ),
         ),
@@ -119,7 +122,7 @@ class _Icd10SearchPageState extends State<Icd10SearchPage> {
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(64),
           child: Padding(
-            padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+            padding: const EdgeInsets.fromLTRB(20, 0, 20, 10),
             child: AdaptiveSearchField(
               controller: _queryController,
               focusNode: _focusNode,
@@ -140,33 +143,81 @@ class _Icd10SearchPageState extends State<Icd10SearchPage> {
   // ── Body ────────────────────────────────────────────────────────────────────
 
   Widget _buildBody({required ScrollPhysics physics}) {
-    return BlocConsumer<Icd10SearchCubit, Icd10SearchState>(
-      listener: (context, state) {
-        if (state is Icd10SearchInitial && _queryController.text.isNotEmpty) {
-          _queryController.clear();
-        }
-      },
+    return BlocBuilder<Icd10SearchCubit, Icd10SearchState>(
       builder: (context, state) {
-        return switch (state) {
-          Icd10SearchInitial() => const _HintView(),
-          Icd10SearchLoading() => const _LoadingView(),
-          Icd10SearchEmpty(:final query) => _EmptyView(query: query),
-          Icd10SearchError(:final message) => _ErrorView(message: message),
-          Icd10SearchLoaded() => _ResultsList(
-            state: state,
-            scrollController: _scrollController,
-            physics: physics,
+        return RefreshIndicator.adaptive(
+          onRefresh: _refreshCurrentQuery,
+          child: CustomScrollView(
+            controller: _scrollController,
+            physics: AlwaysScrollableScrollPhysics(parent: physics),
+            slivers: [
+              const SliverToBoxAdapter(child: SizedBox(height: 12)),
+              ..._buildStateSlivers(state),
+              const SliverToBoxAdapter(child: SizedBox(height: 24)),
+            ],
           ),
-        };
+        );
       },
     );
   }
+
+  Future<void> _refreshCurrentQuery() async {
+    final query = _queryController.text.trim();
+    if (query.isEmpty) return;
+
+    context.read<Icd10SearchCubit>().onQueryChanged(query);
+    await Future<void>.delayed(
+      const Duration(milliseconds: AppConstants.icd10SearchDebounceMs + 140),
+    );
+  }
+
+  List<Widget> _buildStateSlivers(Icd10SearchState state) => switch (state) {
+    Icd10SearchInitial() => [
+      const SliverFillRemaining(hasScrollBody: false, child: _HintView()),
+    ],
+    Icd10SearchLoading() => [
+      const SliverPadding(
+        padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+        sliver: SliverToBoxAdapter(child: _LoadingSkeletonList()),
+      ),
+    ],
+    Icd10SearchEmpty(:final query) => [
+      SliverFillRemaining(
+        hasScrollBody: false,
+        child: _EmptyView(query: query),
+      ),
+    ],
+    Icd10SearchError(:final message) => [
+      SliverFillRemaining(
+        hasScrollBody: false,
+        child: _ErrorView(message: message),
+      ),
+    ],
+    Icd10SearchLoaded() => [
+      SliverPadding(
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+        sliver: SliverList(
+          delegate: SliverChildBuilderDelegate((context, index) {
+            if (index >= state.results.length) {
+              return const _LoadMoreIndicator();
+            }
+            return Icd10ResultCard(
+              key: ValueKey(state.results[index].code),
+              code: state.results[index],
+              highlight: state.query,
+            );
+          }, childCount: state.results.length + (state.canLoadMore ? 1 : 0)),
+        ),
+      ),
+    ],
+  };
 
   void _onQueryChanged(String value) {
     context.read<Icd10SearchCubit>().onQueryChanged(value);
   }
 
   void _onClear() {
+    _queryController.clear();
     context.read<Icd10SearchCubit>().clear();
   }
 }
@@ -180,43 +231,107 @@ class _HintView extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final colors = Theme.of(context).colorScheme;
+    final text = Theme.of(context).textTheme;
     return Center(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(
-            Icons.manage_search_rounded,
-            size: 72,
-            color: colors.outlineVariant,
+      child: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Container(
+          constraints: const BoxConstraints(maxWidth: 420),
+          decoration: BoxDecoration(
+            color: colors.surfaceContainerLowest,
+            borderRadius: BorderRadius.circular(24),
+            border: Border.all(
+              color: colors.outlineVariant.withValues(alpha: 0.45),
+            ),
           ),
-          const SizedBox(height: 16),
-          Text(
-            l10n.searchHint,
-            style: Theme.of(context)
-                .textTheme
-                .bodyLarge
-                ?.copyWith(color: colors.onSurfaceVariant),
+          padding: const EdgeInsets.all(22),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 64,
+                height: 64,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: colors.primary.withValues(alpha: 0.1),
+                ),
+                child: Icon(
+                  Icons.manage_search_rounded,
+                  size: 34,
+                  color: colors.primary,
+                ),
+              ),
+              const SizedBox(height: 16),
+              Text(
+                l10n.searchHint,
+                style: text.titleMedium?.copyWith(
+                  color: colors.onSurface,
+                  fontWeight: FontWeight.w700,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 8),
+              Text(
+                l10n.searchHintExample,
+                style: text.bodyMedium?.copyWith(
+                  color: colors.onSurfaceVariant,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ],
           ),
-          const SizedBox(height: 4),
-          Text(
-            l10n.searchHintExample,
-            style: Theme.of(context)
-                .textTheme
-                .bodySmall
-                ?.copyWith(color: colors.outline),
-          ),
-        ],
+        ),
       ),
     );
   }
 }
 
-class _LoadingView extends StatelessWidget {
-  const _LoadingView();
+class _LoadingSkeletonList extends StatefulWidget {
+  const _LoadingSkeletonList();
+
+  @override
+  State<_LoadingSkeletonList> createState() => _LoadingSkeletonListState();
+}
+
+class _LoadingSkeletonListState extends State<_LoadingSkeletonList>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 1400),
+  )..repeat();
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
-    return const Center(child: CircularProgressIndicator.adaptive());
+    final colors = Theme.of(context).colorScheme;
+
+    return AnimatedBuilder(
+      animation: _controller,
+      builder: (context, child) {
+        return Column(
+          children: List.generate(
+            5,
+            (index) => Padding(
+              padding: const EdgeInsets.only(bottom: 12),
+              child: _ShimmerPanel(
+                progress: (_controller.value + index * 0.16) % 1.0,
+                baseColor: colors.surfaceContainerHighest.withValues(
+                  alpha: 0.55,
+                ),
+                highlightColor: colors.surfaceContainerLowest.withValues(
+                  alpha: 0.9,
+                ),
+              ),
+            ),
+          ),
+        );
+      },
+    );
   }
 }
 
@@ -229,24 +344,37 @@ class _EmptyView extends StatelessWidget {
     final l10n = AppLocalizations.of(context);
     final colors = Theme.of(context).colorScheme;
     return Center(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(
-            Icons.search_off_rounded,
-            size: 64,
-            color: colors.outlineVariant,
+      child: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Container(
+          constraints: const BoxConstraints(maxWidth: 420),
+          decoration: BoxDecoration(
+            color: colors.surfaceContainerLowest,
+            borderRadius: BorderRadius.circular(24),
+            border: Border.all(
+              color: colors.outlineVariant.withValues(alpha: 0.45),
+            ),
           ),
-          const SizedBox(height: 12),
-          Text(
-            l10n.searchEmpty(query),
-            style: Theme.of(context)
-                .textTheme
-                .bodyLarge
-                ?.copyWith(color: colors.onSurfaceVariant),
-            textAlign: TextAlign.center,
+          padding: const EdgeInsets.all(22),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                Icons.search_off_rounded,
+                size: 64,
+                color: colors.outlineVariant,
+              ),
+              const SizedBox(height: 12),
+              Text(
+                l10n.searchEmpty(query),
+                style: Theme.of(
+                  context,
+                ).textTheme.bodyLarge?.copyWith(color: colors.onSurfaceVariant),
+                textAlign: TextAlign.center,
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }
@@ -261,61 +389,31 @@ class _ErrorView extends StatelessWidget {
     final colors = Theme.of(context).colorScheme;
     return Center(
       child: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(Icons.error_outline_rounded, size: 64, color: colors.error),
-            const SizedBox(height: 12),
-            Text(
-              message,
-              style: Theme.of(context)
-                  .textTheme
-                  .bodyLarge
-                  ?.copyWith(color: colors.error),
-              textAlign: TextAlign.center,
-            ),
-          ],
+        padding: const EdgeInsets.all(20),
+        child: Container(
+          constraints: const BoxConstraints(maxWidth: 420),
+          decoration: BoxDecoration(
+            color: colors.surfaceContainerLowest,
+            borderRadius: BorderRadius.circular(24),
+            border: Border.all(color: colors.error.withValues(alpha: 0.25)),
+          ),
+          padding: const EdgeInsets.all(22),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.error_outline_rounded, size: 64, color: colors.error),
+              const SizedBox(height: 12),
+              Text(
+                message,
+                style: Theme.of(
+                  context,
+                ).textTheme.bodyLarge?.copyWith(color: colors.error),
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
         ),
       ),
-    );
-  }
-}
-
-// ── Results list ──────────────────────────────────────────────────────────────
-
-class _ResultsList extends StatelessWidget {
-  const _ResultsList({
-    required this.state,
-    required this.scrollController,
-    required this.physics,
-  });
-
-  final Icd10SearchLoaded state;
-  final ScrollController scrollController;
-  final ScrollPhysics physics;
-
-  @override
-  Widget build(BuildContext context) {
-    final results = state.results;
-    final itemCount = results.length + (state.canLoadMore ? 1 : 0);
-
-    return ListView.builder(
-      controller: scrollController,
-      physics: physics,
-      cacheExtent: 480,
-      padding: const EdgeInsets.symmetric(vertical: 8),
-      itemCount: itemCount,
-      itemBuilder: (context, index) {
-        if (index >= results.length) {
-          return const _LoadMoreIndicator();
-        }
-        return Icd10ResultCard(
-          key: ValueKey(results[index].code),
-          code: results[index],
-          highlight: state.query,
-        );
-      },
     );
   }
 }
@@ -325,9 +423,108 @@ class _LoadMoreIndicator extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Padding(
-      padding: EdgeInsets.symmetric(vertical: 20),
-      child: Center(child: CircularProgressIndicator.adaptive()),
+    final colors = Theme.of(context).colorScheme;
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 16),
+      child: Center(
+        child: SizedBox(
+          width: 44,
+          height: 44,
+          child: CircularProgressIndicator(
+            strokeWidth: 2.6,
+            color: colors.primary,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _ShimmerPanel extends StatelessWidget {
+  const _ShimmerPanel({
+    required this.progress,
+    required this.baseColor,
+    required this.highlightColor,
+  });
+
+  final double progress;
+  final Color baseColor;
+  final Color highlightColor;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        color: baseColor,
+        borderRadius: BorderRadius.circular(24),
+      ),
+      padding: const EdgeInsets.all(18),
+      child: ShaderMask(
+        blendMode: BlendMode.srcATop,
+        shaderCallback: (bounds) {
+          final start = -1.0 + (progress * 2.0);
+          return LinearGradient(
+            begin: Alignment(start, -0.2),
+            end: Alignment(start + 1.0, 0.2),
+            colors: [baseColor, highlightColor, baseColor],
+            stops: const [0.25, 0.5, 0.75],
+          ).createShader(bounds);
+        },
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              width: 84,
+              height: 14,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(999),
+              ),
+            ),
+            const SizedBox(height: 12),
+            Container(
+              width: double.infinity,
+              height: 16,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(999),
+              ),
+            ),
+            const SizedBox(height: 10),
+            Container(
+              width: 220,
+              height: 16,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(999),
+              ),
+            ),
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                Container(
+                  width: 84,
+                  height: 24,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(999),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Container(
+                  width: 54,
+                  height: 24,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(999),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

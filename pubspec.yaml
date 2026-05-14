@@ -43,6 +43,7 @@ dependencies:
 
   # File System (needed for Isar directory on device)
   path_provider: ^2.1.1
+  shared_preferences: ^2.3.3
 
   # RFC 4180-compliant CSV parsing (handles embedded newlines in quoted fields)
   csv: ^6.0.0
