@@ -1,11 +1,11 @@
 {
-    "name": "pharmai",
-    "short_name": "pharmai",
+    "name": "PharmAI",
+    "short_name": "PharmAI",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",
     "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
+    "description": "PharmAI app.",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [

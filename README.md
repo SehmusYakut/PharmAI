@@ -1,4 +1,4 @@
-# pharmai
+# PharmAI
 
 A new Flutter project.
 
