@@ -44,6 +44,12 @@ abstract class Icd10CsvParser {
     return compute(_parseCsvData, raw);
   }
 
+  /// Parses raw CSV content already loaded in memory.
+  ///
+  /// Use this inside background isolates where asset loading is handled
+  /// externally and synchronous parsing is preferred.
+  static List<Icd10CodeModel> parseRaw(String raw) => _parseCsvData(raw);
+
   static List<Icd10CodeModel> _parseCsvData(String raw) {
     // CsvToListConverter handles RFC 4180 quoting, including fields that
     // contain embedded newlines (the `chapter` and `domain` columns).
@@ -110,10 +116,7 @@ abstract class Icd10CsvParser {
     final lines = raw.split('\n').map((l) => l.trim()).toList();
     final desc = lines.isNotEmpty ? lines[0] : '';
     final code = lines.length >= 2 ? _stripParens(lines[1]) : '';
-    return (
-      desc.isEmpty ? null : desc,
-      code.isEmpty ? null : code,
-    );
+    return (desc.isEmpty ? null : desc, code.isEmpty ? null : code);
   }
 
   /// Removes surrounding parentheses: "(A00-B99)" → "A00-B99".

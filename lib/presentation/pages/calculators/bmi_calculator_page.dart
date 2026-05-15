@@ -13,7 +13,22 @@ class BmiCalculatorPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.calcBmiTitle)),
+      appBar: AppBar(
+        title: SizedBox(
+          height: 44,
+          child: FittedBox(
+            fit: BoxFit.scaleDown,
+            alignment: Alignment.centerLeft,
+            child: Text(
+              l10n.calcBmiTitle,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              softWrap: true,
+              textAlign: TextAlign.start,
+            ),
+          ),
+        ),
+      ),
       body: GestureDetector(
         onTap: () => FocusScope.of(context).unfocus(),
         behavior: HitTestBehavior.opaque,
@@ -93,7 +108,8 @@ class _BmiSectionState extends State<_BmiSection> {
         buildWhen: (p, c) =>
             p.bmiResult != c.bmiResult || p.bmiError != c.bmiError,
         builder: (context, state) {
-          if (state.bmiError != null) return CalculatorErrorText(state.bmiError!);
+          if (state.bmiError != null)
+            return CalculatorErrorText(state.bmiError!);
           if (state.bmiResult == null) return const SizedBox.shrink();
           return BmiResultCard(result: state.bmiResult!);
         },

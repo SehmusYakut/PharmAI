@@ -1,4 +1,4 @@
-import 'dart:ui';
+import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -258,7 +258,7 @@ class _DashboardHeader extends StatelessWidget {
       child: ClipRRect(
         borderRadius: BorderRadius.circular(30),
         child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
+          filter: ui.ImageFilter.blur(sigmaX: 18, sigmaY: 18),
           child: Stack(
             children: [
               Positioned(
@@ -284,8 +284,8 @@ class _DashboardHeader extends StatelessWidget {
                   children: [
                     Row(
                       children: [
-                        _BrandMark(appName: l10n.appName),
-                        const Spacer(),
+                        Expanded(child: _BrandMark(appName: l10n.appName)),
+                        const SizedBox(width: 12),
                         _ThemeToggleButton(),
                         const SizedBox(width: 10),
                         _ProfileButton(),
@@ -334,35 +334,48 @@ class _BrandMark extends StatelessWidget {
     final text = Theme.of(context).textTheme;
 
     return Row(
+      mainAxisSize: MainAxisSize.min,
       children: [
         ClipRRect(
           borderRadius: BorderRadius.circular(12),
           child: Image.asset(
-            'assets/images/app_logo.png',
+            'assets/images/app_logo_clean.png',
             width: 98,
             height: 98,
             fit: BoxFit.contain,
+            errorBuilder: (context, error, stackTrace) => Image.asset(
+              'assets/images/app_icon.png',
+              width: 98,
+              height: 98,
+              fit: BoxFit.contain,
+            ),
           ),
         ),
         const SizedBox(width: 12),
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              appName,
-              style: text.titleLarge?.copyWith(
-                color: Colors.white,
-                fontWeight: FontWeight.w800,
-                letterSpacing: -0.4,
+        Flexible(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                appName,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: text.titleLarge?.copyWith(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: -0.4,
+                ),
               ),
-            ),
-            Text(
-              AppLocalizations.of(context).dashboardTitle,
-              style: text.labelMedium?.copyWith(
-                color: Colors.white.withValues(alpha: 0.82),
+              Text(
+                AppLocalizations.of(context).dashboardTitle,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: text.labelMedium?.copyWith(
+                  color: Colors.white.withValues(alpha: 0.82),
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ],
     );
@@ -526,25 +539,14 @@ class _GlassFeatureCard extends StatelessWidget {
                         height: 1.45,
                       ),
                     ),
-                    const SizedBox(height: 12),
-                    Wrap(
-                      spacing: 8,
-                      runSpacing: 8,
-                      children: [
-                        if (!feature.available)
-                          _CardPill(
-                            icon: Icons.schedule_rounded,
-                            label: l10n.badgeSoon,
-                            accent: colors.outline,
-                          ),
-                        _CardPill(
-                          icon: Icons.touch_app_rounded,
-                          label: l10n.cardTapToOpen,
-                          accent: feature.accent,
-                          textColor: Colors.cyan.shade900,
-                        ),
-                      ],
-                    ),
+                    if (!feature.available) ...[
+                      const SizedBox(height: 12),
+                      _CardPill(
+                        icon: Icons.schedule_rounded,
+                        label: l10n.badgeSoon,
+                        accent: colors.outline,
+                      ),
+                    ],
                   ],
                 ),
               ),

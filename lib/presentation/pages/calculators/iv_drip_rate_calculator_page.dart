@@ -14,7 +14,22 @@ class IvDripRateCalculatorPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.calcIvDripRateTitle)),
+      appBar: AppBar(
+        title: SizedBox(
+          height: 44,
+          child: FittedBox(
+            fit: BoxFit.scaleDown,
+            alignment: Alignment.centerLeft,
+            child: Text(
+              l10n.calcIvDripRateTitle,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              softWrap: true,
+              textAlign: TextAlign.start,
+            ),
+          ),
+        ),
+      ),
       body: GestureDetector(
         onTap: () => FocusScope.of(context).unfocus(),
         behavior: HitTestBehavior.opaque,

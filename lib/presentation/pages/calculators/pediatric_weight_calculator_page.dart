@@ -14,7 +14,22 @@ class PediatricWeightCalculatorPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.calcPediatricWeightTitle)),
+      appBar: AppBar(
+        title: SizedBox(
+          height: 44,
+          child: FittedBox(
+            fit: BoxFit.scaleDown,
+            alignment: Alignment.centerLeft,
+            child: Text(
+              l10n.calcPediatricWeightTitle,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              softWrap: true,
+              textAlign: TextAlign.start,
+            ),
+          ),
+        ),
+      ),
       body: GestureDetector(
         onTap: () => FocusScope.of(context).unfocus(),
         behavior: HitTestBehavior.opaque,

@@ -14,7 +14,22 @@ class GfrCalculatorPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     return Scaffold(
-      appBar: AppBar(title: Text(l10n.calcGfrTitle)),
+      appBar: AppBar(
+        title: SizedBox(
+          height: 44,
+          child: FittedBox(
+            fit: BoxFit.scaleDown,
+            alignment: Alignment.centerLeft,
+            child: Text(
+              l10n.calcGfrTitle,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              softWrap: true,
+              textAlign: TextAlign.start,
+            ),
+          ),
+        ),
+      ),
       body: GestureDetector(
         onTap: () => FocusScope.of(context).unfocus(),
         behavior: HitTestBehavior.opaque,
@@ -161,7 +176,8 @@ class _GfrSectionState extends State<_GfrSection> {
         buildWhen: (p, c) =>
             p.gfrResult != c.gfrResult || p.gfrError != c.gfrError,
         builder: (context, state) {
-          if (state.gfrError != null) return CalculatorErrorText(state.gfrError!);
+          if (state.gfrError != null)
+            return CalculatorErrorText(state.gfrError!);
           if (state.gfrResult == null) return const SizedBox.shrink();
           return GfrResultCard(result: state.gfrResult!);
         },

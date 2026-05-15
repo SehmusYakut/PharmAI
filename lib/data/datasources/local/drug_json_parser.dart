@@ -27,6 +27,12 @@ abstract class DrugJsonParser {
     return compute(_parseJsonData, raw);
   }
 
+  /// Parses raw JSON content already loaded in memory.
+  ///
+  /// Use this in background isolates when asset loading is performed
+  /// separately from parsing.
+  static List<DrugModel> parseRaw(String raw) => _parseJsonData(raw);
+
   // Top-level function required by compute().
   static List<DrugModel> _parseJsonData(String raw) {
     final root = jsonDecode(raw);

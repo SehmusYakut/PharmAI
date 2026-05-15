@@ -46,10 +46,58 @@ class CalculatorFormCard extends StatelessWidget {
       reference != null &&
       reference!.trim().isNotEmpty;
 
+  List<InlineSpan> _buildFormulaSpans(
+    String formulaText,
+    TextStyle? baseStyle,
+    TextStyle? emphasisStyle,
+  ) {
+    final regex = RegExp(r'\[[^\]]+\]');
+    final matches = regex.allMatches(formulaText).toList();
+
+    if (matches.isEmpty) {
+      return [TextSpan(text: formulaText, style: baseStyle)];
+    }
+
+    final spans = <InlineSpan>[];
+    var currentIndex = 0;
+
+    for (final match in matches) {
+      if (match.start > currentIndex) {
+        spans.add(
+          TextSpan(
+            text: formulaText.substring(currentIndex, match.start),
+            style: baseStyle,
+          ),
+        );
+      }
+      spans.add(
+        TextSpan(
+          text: formulaText.substring(match.start, match.end),
+          style: emphasisStyle,
+        ),
+      );
+      currentIndex = match.end;
+    }
+
+    if (currentIndex < formulaText.length) {
+      spans.add(
+        TextSpan(text: formulaText.substring(currentIndex), style: baseStyle),
+      );
+    }
+
+    return spans;
+  }
+
   void _showEvidenceSheet(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final colors = Theme.of(context).colorScheme;
     final text = Theme.of(context).textTheme;
+    final formulaStyle = text.bodyMedium?.copyWith(height: 1.5);
+    final formulaEmphasisStyle = text.bodyMedium?.copyWith(
+      height: 1.5,
+      fontWeight: FontWeight.w700,
+      color: colors.onSurface,
+    );
 
     showModalBottomSheet<void>(
       context: context,
@@ -82,15 +130,50 @@ class CalculatorFormCard extends StatelessWidget {
                     fontWeight: FontWeight.w700,
                   ),
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: 16),
                 Text(
-                  '${l10n.calcFormulaLabel}: ${formula!}',
-                  style: text.bodyMedium,
+                  l10n.calcFormulaLabel,
+                  style: text.labelLarge?.copyWith(
+                    color: colors.onSurfaceVariant,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: 10),
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(14),
+                  decoration: BoxDecoration(
+                    color: colors.surfaceContainerHighest.withValues(
+                      alpha: 0.65,
+                    ),
+                    borderRadius: BorderRadius.circular(14),
+                    border: Border.all(
+                      color: colors.outlineVariant.withValues(alpha: 0.6),
+                    ),
+                  ),
+                  child: Text.rich(
+                    TextSpan(
+                      children: _buildFormulaSpans(
+                        formula!,
+                        formulaStyle,
+                        formulaEmphasisStyle,
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 16),
                 Text(
-                  '${l10n.calcReferenceLabel}: ${reference!}',
-                  style: text.bodyMedium?.copyWith(
+                  l10n.calcReferenceLabel,
+                  style: text.labelMedium?.copyWith(
+                    fontStyle: FontStyle.italic,
+                    color: colors.onSurfaceVariant,
+                  ),
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  reference!,
+                  style: text.bodySmall?.copyWith(
+                    fontStyle: FontStyle.italic,
                     color: colors.onSurfaceVariant,
                   ),
                 ),

@@ -119,8 +119,8 @@ class AppLocalizations {
   String get calcBmiTitle =>
       _isTr ? 'Vücut Kitle İndeksi (VKİ)' : 'Body Mass Index (BMI)';
   String get calcBmiFormula => _isTr
-      ? 'BMI = ağırlık(kg) / [boy(m)]^2'
-      : 'BMI = weight(kg) / [height(m)]^2';
+      ? '• BMI = ağırlık(kg) / [boy(m)]^2'
+      : '• BMI = weight(kg) / [height(m)]^2';
   String get calcBmiReference => _isTr
       ? 'WHO Technical Report Series 854 (1995)'
       : 'WHO Technical Report Series 854 (1995)';
@@ -128,8 +128,8 @@ class AppLocalizations {
       ? 'Glomerüler Filtrasyon Hızı (GFH)'
       : 'Glomerular Filtration Rate (GFR)';
   String get calcGfrFormula => _isTr
-      ? 'CKD-EPI 2021 + Cockcroft-Gault (doz ayarı)'
-      : 'CKD-EPI 2021 + Cockcroft-Gault (dose adjustment)';
+      ? '• CKD-EPI 2021 Cockcroft-Gault (doz ayarı)'
+      : '• CKD-EPI 2021 Cockcroft-Gault (dose adjustment)';
   String get calcGfrReference => _isTr
       ? 'Inker et al., NEJM 2021; Cockcroft-Gault 1976; KDIGO 2022'
       : 'Inker et al., NEJM 2021; Cockcroft-Gault 1976; KDIGO 2022';
@@ -144,8 +144,8 @@ class AppLocalizations {
       ? 'Pediatrik Tahmini Ağırlık (APLS)'
       : 'Pediatric Estimated Weight (APLS)';
   String get calcPediatricWeightFormula => _isTr
-      ? '1-12 ay: (0.5 x ay) + 4, 1-5 yaş: (2 x yaş) + 8, 6-12 yaş: (3 x yaş) + 7'
-      : '1-12 months: (0.5 x months) + 4, 1-5 years: (2 x age) + 8, 6-12 years: (3 x age) + 7';
+      ? '• 1-12 ay: (0.5 x ay) + 4\n• 1-5 yaş: (2 x yaş) + 8\n• 6-12 yaş: (3 x yaş) + 7'
+      : '• 1-12 months: (0.5 x months) + 4\n• 1-5 years: (2 x age) + 8\n• 6-12 years: (3 x age) + 7';
   String get calcPediatricWeightReference =>
       _isTr ? 'Referans: APLS Kılavuzu' : 'Reference: APLS Guidelines';
   String get calcPediatricWeightCitation => _isTr
@@ -153,8 +153,8 @@ class AppLocalizations {
       : 'Updated APLS formulas (1-12 months, 1-12 years)';
   String get calcIvDripRateTitle => _isTr ? 'IV Damla Hızı' : 'IV Drip Rate';
   String get calcIvDripRateFormula => _isTr
-      ? 'Damla/dk = [Hacim(mL) x Damla faktörü(gtt/mL)] / Süre(dk)'
-      : 'Drops/min = [Volume(mL) x Drop factor(gtt/mL)] / Time(min)';
+      ? '• Damla/dk = [Hacim(mL) x Damla faktörü(gtt/mL)]\n / Süre(dk)'
+      : '• Drops/min = [Volume(mL) x Drop factor(gtt/mL)]\n / Time(min)';
   String get calcIvDripRateReference => _isTr
       ? 'Referans: İnfüzyon Tedavi Standartları'
       : 'Reference: Infusion Therapy Standards';

@@ -50,7 +50,7 @@
   "calcBmiReference": "WHO Technical Report Series 854 (1995)",
   "calcGfrFormula": "CKD-EPI 2021 + Cockcroft-Gault (doz ayarı)",
   "calcGfrReference": "Inker et al., NEJM 2021; Cockcroft-Gault 1976; KDIGO 2022",
-  "calcPediatricWeightTitle": "Pediatrik Tahmini Ağırlık (APLS)",
+  "calcPediatricWeightTitle": "Pediatrik Tahmini Ağırlık",
   "calcPediatricWeightFormula": "1-12 ay: (0.5 x ay) + 4, 1-5 yaş: (2 x yaş) + 8, 6-12 yaş: (3 x yaş) + 7",
   "calcPediatricWeightReference": "Referans: APLS Kılavuzu",
   "calcIvDripRateTitle": "IV Damla Hızı",
