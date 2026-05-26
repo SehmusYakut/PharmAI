@@ -47,6 +47,7 @@ class _DrugInfoPageState extends State<DrugInfoPage> {
                       DrugSearchQueryChanged(value),
                     ),
                     placeholder: l10n.drugSearchPlaceholder,
+                    clearTooltip: l10n.searchClear,
                   ),
                 ),
               ),

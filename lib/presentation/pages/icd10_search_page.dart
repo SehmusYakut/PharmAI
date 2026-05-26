@@ -99,6 +99,7 @@ class _Icd10SearchPageState extends State<Icd10SearchPage> {
                   focusNode: _focusNode,
                   onChanged: _onQueryChanged,
                   placeholder: l10n.searchPlaceholder,
+                  clearTooltip: l10n.searchClear,
                 ),
               ),
               Expanded(
@@ -128,6 +129,7 @@ class _Icd10SearchPageState extends State<Icd10SearchPage> {
               focusNode: _focusNode,
               onChanged: _onQueryChanged,
               placeholder: l10n.searchPlaceholder,
+              clearTooltip: l10n.searchClear,
             ),
           ),
         ),

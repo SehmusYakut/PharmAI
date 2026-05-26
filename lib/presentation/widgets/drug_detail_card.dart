@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pharmai/core/l10n/app_localizations.dart';
 import 'package:pharmai/core/utils/drug_text_formatter.dart';
 import 'package:pharmai/domain/entities/drug.dart';
 
@@ -34,9 +35,8 @@ class _DrugDetailCardState extends State<DrugDetailCard> {
     final colors = Theme.of(context).colorScheme;
     final text = Theme.of(context).textTheme;
     final drug = widget.drug;
-    final detailsLabel = Localizations.localeOf(context).languageCode == 'tr'
-        ? 'İlaç Bilgisi'
-        : 'Drug Details';
+    final l10n = AppLocalizations.of(context);
+    final detailsLabel = l10n.drugDetailsLabel;
 
     return AnimatedContainer(
       duration: const Duration(milliseconds: 240),
@@ -227,6 +227,8 @@ class _DescriptionBody extends StatelessWidget {
     final colors = Theme.of(context).colorScheme;
     final text = Theme.of(context).textTheme;
 
+    final l10n = AppLocalizations.of(context);
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -261,7 +263,7 @@ class _DescriptionBody extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    '• ',
+                    l10n.drugBullet,
                     style: text.bodySmall?.copyWith(
                       color: colors.primary,
                       height: 1.5,

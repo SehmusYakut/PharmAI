@@ -1,3 +1,5 @@
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+
 /// AppConfig – single source of truth for environment, feature flags,
 /// and Privacy-by-Design / KVKK compliance settings.
 ///
@@ -53,6 +55,23 @@ class AppConfig {
   // ── Database ────────────────────────────────────────────────────────────────
 
   static const String isarDbName = 'pharmai_db';
+
+  // ── Gemini API ─────────────────────────────────────────────────────────────
+
+  /// Loads from .env first, falls back to --dart-define=GEMINI_API_KEY=...
+  static String get geminiApiKey {
+    final fromDefine = const String.fromEnvironment('GEMINI_API_KEY');
+    if (fromDefine.trim().isNotEmpty) return fromDefine.trim();
+    if (dotenv.isInitialized) {
+      return (dotenv.env['GEMINI_API_KEY'] ?? '').trim();
+    }
+    return '';
+  }
+
+  static void ensureGeminiApiKeyLoaded() {
+    final apiKey = geminiApiKey;
+    assert(apiKey.isNotEmpty, 'API Key cannot be empty');
+  }
 
   // ── Supported locales ───────────────────────────────────────────────────────
 

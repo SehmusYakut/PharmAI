@@ -84,8 +84,7 @@ class _GfrSectionState extends State<_GfrSection> {
     return CalculatorFormCard(
       icon: Icons.water_drop_outlined,
       title: l.calcGfrTitle,
-      citation:
-          'CKD-EPI 2021 · Inker et al., NEJM 385:1737  ·  Cockcroft-Gault, Nephron 1976  ·  KDIGO 2022',
+      citation: l.calcGfrCitation,
       formula: l.calcGfrFormula,
       reference: l.calcGfrReference,
       onCalculate: _calculate,
@@ -97,7 +96,7 @@ class _GfrSectionState extends State<_GfrSection> {
                 child: CalculatorInputField(
                   controller: _scrCtrl,
                   label: l.calcSerumCreatinine,
-                  unit: 'mg/dL',
+                  unit: l.calcMgDlUnit,
                   decimal: true,
                 ),
               ),
@@ -106,7 +105,7 @@ class _GfrSectionState extends State<_GfrSection> {
                 child: CalculatorInputField(
                   controller: _ageCtrl,
                   label: l.calcAge,
-                  unit: 'yıl',
+                  unit: l.calcYearsShort,
                   decimal: false,
                 ),
               ),
@@ -119,7 +118,7 @@ class _GfrSectionState extends State<_GfrSection> {
                 child: CalculatorInputField(
                   controller: _weightCtrl,
                   label: l.calcWeight,
-                  unit: 'kg',
+                  unit: l.calcKgUnit,
                   decimal: true,
                 ),
               ),

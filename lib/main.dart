@@ -9,6 +9,7 @@ import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 import 'core/auth/auth_state_notifier.dart';
 import 'core/config/app_config.dart';
@@ -32,14 +33,34 @@ bool _seedFlowStarted = false;
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Firebase and Google Sign-In are independent — initialise in parallel.
-  await Future.wait([
-    Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform),
-    GoogleSignIn.instance.initialize(
+  try {
+    await dotenv.load(fileName: '.env');
+  } catch (_) {
+    // .env is optional in debug; missing file should not crash startup.
+  }
+
+  // Only print and check GEMINI_API_KEY if dotenv is initialized
+  if (dotenv.isInitialized) {
+    print('Loaded GEMINI_API_KEY: \'${dotenv.env['GEMINI_API_KEY']}\'');
+    AppConfig.ensureGeminiApiKeyLoaded();
+  } else {
+    print('dotenv not initialized; skipping GEMINI_API_KEY check.');
+  }
+
+  try {
+    await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  } catch (e) {
+    debugPrint('Firebase init error: $e');
+  }
+
+  try {
+    await GoogleSignIn.instance.initialize(
       serverClientId:
           '521840446802-9h88fdbbebbv4s1mjme987p4mm4esrlh.apps.googleusercontent.com',
-    ),
-  ]);
+    );
+  } catch (e) {
+    debugPrint('GoogleSignIn init error: $e');
+  }
 
   await initDependencies();
   // Non-blocking: locale code is a best-effort fire-and-forget at startup.

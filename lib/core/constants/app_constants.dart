@@ -12,6 +12,7 @@ abstract class AppConstants {
   static const String routeKvkk = '/kvkk';
   static const String routeLogin = '/login';
   static const String routeProfile = '/profile';
+  static const String routeChatDashboard = '/chat';
 
   // ── Isar collection names ───────────────────────────────────────────────────
   static const String collectionIcd10 = 'icd10_entries';
@@ -21,6 +22,9 @@ abstract class AppConstants {
   static const int icd10SearchDebounceMs = 300;
   static const int minSearchLength = 2;
   static const int maxSearchResults = 50;
+
+  // ── Chat ───────────────────────────────────────────────────────────────────
+  static const int chatFreeQueryLimit = 3;
 
   // ── Calculator input limits ─────────────────────────────────────────────────
   static const double minWeightKg = 0.5;

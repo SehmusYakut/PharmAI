@@ -9,6 +9,10 @@ import 'package:pharmai/data/models/drug_model.dart';
 import 'package:pharmai/data/models/icd10_code_model.dart';
 import 'package:pharmai/data/models/local_profile_model.dart';
 
+import 'package:pharmai/data/models/chat_session_model.dart';
+import 'package:pharmai/data/models/chat_message_model.dart';
+import 'package:pharmai/data/models/chat_usage_model.dart';
+
 class SeedRequest {
   const SeedRequest({
     required this.dbDirectory,
@@ -27,6 +31,7 @@ Future<void> seedLocalDatabaseInBackground(SeedRequest request) async {
     BackgroundIsolateBinaryMessenger.ensureInitialized(
       request.rootIsolateToken,
     );
+    await Isar.initializeIsarCore(download: true);
 
     final isar = await Isar.open(
       [
@@ -34,6 +39,9 @@ Future<void> seedLocalDatabaseInBackground(SeedRequest request) async {
         LocalProfileModelSchema,
         BookmarkModelSchema,
         DrugModelSchema,
+        ChatSessionModelSchema,
+        ChatMessageModelSchema,
+        ChatUsageModelSchema,
       ],
       directory: request.dbDirectory,
       name: request.dbName,

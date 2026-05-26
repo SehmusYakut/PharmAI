@@ -4,6 +4,9 @@ import 'package:pharmai/core/config/app_config.dart';
 import 'package:pharmai/core/constants/app_constants.dart';
 import 'package:pharmai/core/utils/text_utils.dart';
 import 'package:pharmai/data/models/bookmark_model.dart';
+import 'package:pharmai/data/models/chat_message_model.dart';
+import 'package:pharmai/data/models/chat_session_model.dart';
+import 'package:pharmai/data/models/chat_usage_model.dart';
 import 'package:pharmai/data/models/drug_model.dart';
 import 'package:pharmai/data/models/icd10_code_model.dart';
 import 'package:pharmai/data/models/local_profile_model.dart';
@@ -26,6 +29,7 @@ class LocalDatabaseService {
   Future<Isar> get db async => _db ??= await _open();
 
   Future<Isar> _open() async {
+    await Isar.initializeIsarCore(download: true);
     final dir = await getApplicationDocumentsDirectory();
     return Isar.open(
       [
@@ -33,6 +37,9 @@ class LocalDatabaseService {
         LocalProfileModelSchema,
         BookmarkModelSchema,
         DrugModelSchema,
+        ChatSessionModelSchema,
+        ChatMessageModelSchema,
+        ChatUsageModelSchema,
       ],
       directory: dir.path,
       name: AppConfig.isarDbName,

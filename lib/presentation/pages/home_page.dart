@@ -5,7 +5,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:pharmai/core/constants/app_constants.dart';
 import 'package:pharmai/core/l10n/app_localizations.dart';
-import 'package:pharmai/injection_container.dart';
 import 'package:pharmai/presentation/bloc/auth/auth_bloc.dart';
 import 'package:pharmai/presentation/bloc/onboarding/onboarding_cubit.dart';
 import 'package:pharmai/presentation/bloc/onboarding/onboarding_state.dart';
@@ -46,11 +45,21 @@ class HomePage extends StatefulWidget {
       accent: const Color(0xFF155E75),
       glow: const Color(0xFF67E8F9),
     ),
+    _Feature(
+      icon: Icons.forum_rounded,
+      label: l10n.navChat,
+      subtitle: l10n.chatSubtitle,
+      route: AppConstants.routeChatDashboard,
+      available: true,
+      accent: const Color(0xFF1F4D7A),
+      glow: const Color(0xFF7CC6FE),
+    ),
   ];
 }
 
 class _HomePageState extends State<HomePage> {
   bool _onboardingPresented = false;
+  bool _shouldOpenChatAfterSignIn = false;
 
   Future<void> _maybeShowOnboarding(OnboardingState state) async {
     if (state.isLoading || !state.shouldShow || _onboardingPresented) return;
@@ -66,13 +75,41 @@ class _HomePageState extends State<HomePage> {
     await context.read<OnboardingCubit>().completeOnboarding();
   }
 
+  void _handleChatFabTap() {
+    final authState = context.read<AuthBloc>().state;
+    if (authState is AuthAuthenticated) {
+      context.push(AppConstants.routeChatDashboard);
+      return;
+    }
+    if (authState is AuthLoading) return;
+    _shouldOpenChatAfterSignIn = true;
+    context.read<AuthBloc>().add(const AuthGoogleSignInRequested());
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final features = HomePage._features(l10n);
 
-    return BlocListener<OnboardingCubit, OnboardingState>(
-      listener: (_, state) => _maybeShowOnboarding(state),
+    return MultiBlocListener(
+      listeners: [
+        BlocListener<OnboardingCubit, OnboardingState>(
+          listener: (_, state) => _maybeShowOnboarding(state),
+        ),
+        BlocListener<AuthBloc, AuthState>(
+          listener: (context, state) {
+            if (!_shouldOpenChatAfterSignIn) return;
+            if (state is AuthAuthenticated) {
+              _shouldOpenChatAfterSignIn = false;
+              context.push(AppConstants.routeChatDashboard);
+              return;
+            }
+            if (state is AuthError || state is AuthUnauthenticated) {
+              _shouldOpenChatAfterSignIn = false;
+            }
+          },
+        ),
+      ],
       child: Scaffold(
         body: Stack(
           children: [
@@ -140,12 +177,17 @@ class _HomePageState extends State<HomePage> {
                       },
                     ),
                   ),
-                  const SliverToBoxAdapter(child: SizedBox(height: 28)),
+                  const SliverToBoxAdapter(child: SizedBox(height: 96)),
                 ],
               ),
             ),
           ],
         ),
+        floatingActionButton: _ChatFab(
+          tooltip: l10n.navChat,
+          onPressed: _handleChatFabTap,
+        ),
+        floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
       ),
     );
   }
@@ -563,18 +605,16 @@ class _CardPill extends StatelessWidget {
     required this.icon,
     required this.label,
     required this.accent,
-    this.textColor,
   });
 
   final IconData icon;
   final String label;
   final Color accent;
-  final Color? textColor;
 
   @override
   Widget build(BuildContext context) {
     final text = Theme.of(context).textTheme;
-    final effectiveTextColor = textColor ?? accent;
+    final effectiveTextColor = accent;
 
     return Container(
       decoration: BoxDecoration(
@@ -595,6 +635,60 @@ class _CardPill extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+// ── Chat FAB ───────────────────────────────────────────────────────────────
+
+class _ChatFab extends StatelessWidget {
+  const _ChatFab({required this.onPressed, required this.tooltip});
+
+  final VoidCallback onPressed;
+  final String tooltip;
+
+  @override
+  Widget build(BuildContext context) {
+    return FloatingActionButton(
+      heroTag: 'home-chat-fab',
+      onPressed: onPressed,
+      elevation: 0,
+      highlightElevation: 0,
+      backgroundColor: Colors.transparent,
+      tooltip: tooltip,
+      child: Container(
+        width: 62,
+        height: 62,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          gradient: const LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [Color(0xFF14F0FF), Color(0xFF1DE5A1)],
+          ),
+          border: Border.all(
+            color: Colors.white.withValues(alpha: 0.65),
+            width: 1.2,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: const Color(0xFF14F0FF).withValues(alpha: 0.55),
+              blurRadius: 20,
+              offset: const Offset(0, 8),
+            ),
+            BoxShadow(
+              color: const Color(0xFF1DE5A1).withValues(alpha: 0.35),
+              blurRadius: 30,
+              offset: const Offset(0, 12),
+            ),
+          ],
+        ),
+        child: const Icon(
+          Icons.chat_bubble_outline_rounded,
+          color: Colors.white,
+          size: 28,
+        ),
       ),
     );
   }

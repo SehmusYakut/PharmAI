@@ -6,6 +6,92 @@ import 'package:flutter/widgets.dart';
 /// No code generation required — add this delegate to [MaterialApp] and call
 /// [AppLocalizations.of(context)] anywhere in the widget tree.
 class AppLocalizations {
+  String get drugBullet => _isTr ? '•' : '•';
+  // ── Drug Details ─────────────────────────────────────────────────────────
+  String get drugDetailsLabel => _isTr ? 'İlaç Detayları' : 'Drug Details';
+
+  // ── ICD-10 Result Card Labels ───────────────────────────────────────────
+  String get icd10LangEn => _isTr ? 'İngilizce Tanım' : 'English Description';
+  String get icd10ChapterLabel => _isTr ? 'Bölüm' : 'Chapter';
+  String get icd10BlockLabel => _isTr ? 'Blok' : 'Block';
+  String get icd10WhoLabel => _isTr ? 'WHO Tanımı' : 'WHO Definition';
+  // ── GFR Stages ───────────────────────────────────────────────────────────
+  String get calcGfrStageG1 => _isTr ? 'G1' : 'G1';
+  String get calcGfrStageG2 => _isTr ? 'G2' : 'G2';
+  String get calcGfrStageG3a => _isTr ? 'G3a' : 'G3a';
+  String get calcGfrStageG3b => _isTr ? 'G3b' : 'G3b';
+  String get calcGfrStageG4 => _isTr ? 'G4' : 'G4';
+  String get calcGfrStageG5 => _isTr ? 'G5' : 'G5';
+  String get calcGfrStageDescG1 =>
+      _isTr ? 'Normal veya yüksek' : 'Normal or high';
+  String get calcGfrStageDescG2 => _isTr ? 'Hafif azalma' : 'Mildly decreased';
+  String get calcGfrStageDescG3a =>
+      _isTr ? 'Hafif-orta azalma' : 'Mild-moderate decrease';
+  String get calcGfrStageDescG3b =>
+      _isTr ? 'Orta-ciddi azalma' : 'Moderate-severe decrease';
+  String get calcGfrStageDescG4 =>
+      _isTr ? 'Ciddi azalma' : 'Severely decreased';
+  String get calcGfrStageDescG5 =>
+      _isTr ? 'Böbrek yetmezliği' : 'Kidney failure';
+  // ── BMI Categories & Ranges ─────────────────────────────────────────────
+  String get calcBmiAbbrev => _isTr ? 'VKİ' : 'BMI';
+  String get calcBmiUnit => 'kg/m²';
+  String get calcBmiCatSeverelyUnderweight =>
+      _isTr ? 'Ciddi düşük ağırlık' : 'Severely underweight';
+  String get calcBmiCatUnderweight => _isTr ? 'Düşük ağırlık' : 'Underweight';
+  String get calcBmiCatNormal => _isTr ? 'Normal ağırlık' : 'Normal weight';
+  String get calcBmiCatOverweight => _isTr ? 'Fazla kilolu' : 'Overweight';
+  String get calcBmiCatObeseClassI =>
+      _isTr ? 'Obezite - Sınıf I' : 'Obesity - Class I';
+  String get calcBmiCatObeseClassII =>
+      _isTr ? 'Obezite - Sınıf II' : 'Obesity - Class II';
+  String get calcBmiCatObeseClassIII =>
+      _isTr ? 'Obezite - Sınıf III' : 'Obesity - Class III';
+  String get calcBmiRangeSeverelyUnderweight =>
+      _isTr ? '< 16,0 kg/m²' : '< 16.0 kg/m²';
+  String get calcBmiRangeUnderweight =>
+      _isTr ? '16,0 - 18,4 kg/m²' : '16.0 - 18.4 kg/m²';
+  String get calcBmiRangeNormal =>
+      _isTr ? '18,5 - 24,9 kg/m²' : '18.5 - 24.9 kg/m²';
+  String get calcBmiRangeOverweight =>
+      _isTr ? '25,0 - 29,9 kg/m²' : '25.0 - 29.9 kg/m²';
+  String get calcBmiRangeObeseClassI =>
+      _isTr ? '30,0 - 34,9 kg/m²' : '30.0 - 34.9 kg/m²';
+  String get calcBmiRangeObeseClassII =>
+      _isTr ? '35,0 - 39,9 kg/m²' : '35.0 - 39.9 kg/m²';
+  String get calcBmiRangeObeseClassIII =>
+      _isTr ? '>= 40,0 kg/m²' : '>= 40.0 kg/m²';
+
+  // ── GFR Labels ─────────────────────────────────────────────────────────--
+  String get calcGfrCkdEpiLabel => _isTr ? 'CKD-EPI 2021' : 'CKD-EPI 2021';
+  String get calcGfrCkdEpiNote =>
+      _isTr ? 'Evreleme için tercih edilir' : 'Preferred for staging';
+  String get calcGfrCkdEpiUnit => 'mL/min/1.73m²';
+  String get calcGfrCockcroftLabel =>
+      _isTr ? 'Cockcroft-Gault' : 'Cockcroft-Gault';
+  String get calcGfrCockcroftNote =>
+      _isTr ? 'İlaç dozlaması için tercih edilir' : 'Preferred for drug dosing';
+  String get calcGfrCockcroftUnit => 'mL/min';
+  // ── Chat Rename & Error ─────────────────────────────────────────────────--
+  String get chatRenameAction => _isTr ? 'Yeniden Adlandır' : 'Rename';
+  String get chatErrorLocalSave =>
+      _isTr ? 'Yerel kaydetme hatası.' : 'Local save error.';
+  String get chatErrorUpgrade =>
+      _isTr ? 'Yükseltme başarısız.' : 'Upgrade failed.';
+  String get chatErrorRename => _isTr
+      ? 'Sohbet oturumu yeniden adlandırılamadı.'
+      : 'Failed to rename chat session.';
+  String get chatRenameTitle =>
+      _isTr ? 'Sohbeti Yeniden Adlandır' : 'Rename Chat';
+  String get chatRenameHint =>
+      _isTr ? 'Yeni oturum adını girin' : 'Enter a new session name';
+  String get chatRenameCancel => _isTr ? 'İptal' : 'Cancel';
+  String get chatRenameSave => _isTr ? 'Kaydet' : 'Save';
+  // ── Error & Routing ───────────────────────────────────────────────────────
+  String get chatInvalidSession =>
+      _isTr ? 'Geçersiz sohbet oturumu.' : 'Invalid chat session.';
+  String routeNotFound(String uri) =>
+      _isTr ? 'Sayfa bulunamadı: $uri' : 'Page not found: $uri';
   const AppLocalizations(this.locale);
   final Locale locale;
 
@@ -63,6 +149,7 @@ class AppLocalizations {
   String get navIcd10 => _isTr ? 'ICD-10 Arama' : 'ICD-10 Search';
   String get navDrugInfo => _isTr ? 'İlaç Bilgisi' : 'Drug Info';
   String get navCalculators => _isTr ? 'Hesaplayıcılar' : 'Calculators';
+  String get navChat => _isTr ? 'Klinik Sohbet' : 'Clinical Chat';
 
   String get icd10Subtitle =>
       _isTr ? 'Hızlı kod ve tanım araması' : 'Fast code and definition lookup';
@@ -70,6 +157,9 @@ class AppLocalizations {
       _isTr ? 'Güncel ilaç rehberi' : 'Current drug reference';
   String get calculatorsSubtitle =>
       _isTr ? 'BMI, GFH ve klinik skorlar' : 'BMI, GFR and clinical scores';
+  String get chatSubtitle => _isTr
+      ? 'Yapay zeka ile klinik sorular sorun'
+      : 'Ask clinical questions with AI';
 
   String get badgeActive => _isTr ? 'AKTİF' : 'ACTIVE';
   String get badgeSoon => _isTr ? 'YAKINDA' : 'SOON';
@@ -79,6 +169,28 @@ class AppLocalizations {
       _isTr ? 'Açık temaya geç' : 'Switch to light mode';
   String get themeDarkTooltip =>
       _isTr ? 'Koyu temaya geç' : 'Switch to dark mode';
+
+  // ── Chat ─────────────────────────────────────────────────────────────────-
+  String get chatDashboardTitle => _isTr ? 'Klinik Sohbet' : 'Clinical Chat';
+  String get chatNewChat => _isTr ? 'Yeni sohbet' : 'New chat';
+  String get chatNewSessionTitle => _isTr ? 'Yeni sohbet' : 'New chat';
+  String get chatEmptyTitle =>
+      _isTr ? 'Henüz sohbet yok' : 'No conversations yet';
+  String get chatEmptySubtitle => _isTr
+      ? 'Yeni bir klinik sohbet başlatarak geçmişinizi oluşturun.'
+      : 'Start a new clinical chat to build your history.';
+  String get chatInputHint =>
+      _isTr ? 'Klinik bir soru yazın...' : 'Ask a clinical question...';
+  String get chatTyping => _isTr ? 'Düşünüyor...' : 'Thinking...';
+  String get chatLimitTitle =>
+      _isTr ? 'Ücretsiz limit doldu' : 'Free tier limit reached';
+  String get chatLimitBody => _isTr
+      ? '3 ücretsiz soruyu kullandınız. Devam etmek için premiuma yükseltin.'
+      : 'You have used your 3 free questions. Upgrade to premium to continue.';
+  String get chatUpgradeSubtitle => _isTr
+      ? 'Sınırsız klinik sohbet, öncelikli yanıtlar ve daha zengin bağlam.'
+      : 'Unlimited clinical chat, priority responses, and richer context.';
+  String get chatGoPremium => _isTr ? 'Premiuma Geç' : 'Go Premium';
 
   // ── ICD-10 search page ─────────────────────────────────────────────────────
   String get icd10SearchTitle => _isTr ? 'ICD-10 Ara' : 'ICD-10 Search';
@@ -107,6 +219,9 @@ class AppLocalizations {
       : 'e.g. "Aspirin", "Etodolac", "M01AB08"';
 
   // ── Calculators ────────────────────────────────────────────────────────────
+  String get calcBmiCitation => _isTr
+      ? 'WHO Teknik Rapor Serisi 854 (1995)'
+      : 'WHO Technical Report Series 854 (1995)';
   String get calcTitle =>
       _isTr ? 'Klinik Hesaplayıcılar' : 'Clinical Calculators';
   String get calcCalculate => _isTr ? 'Hesapla' : 'Calculate';
@@ -179,6 +294,13 @@ class AppLocalizations {
   String get calcEstimatedWeight =>
       _isTr ? 'Tahmini Ağırlık' : 'Estimated Weight';
   String get calcKgUnit => 'kg';
+  String get calcMlUnit => 'mL';
+  String calcDropFactorOption(int value) => '$value gtt/mL';
+  String get calcCmUnit => 'cm';
+  String get calcMgDlUnit => 'mg/dL';
+  String get calcGfrCitation => _isTr
+      ? 'CKD-EPI 2021 · Inker ve ark., NEJM 385:1737 · Cockcroft-Gault, Nephron 1976 · KDIGO 2022'
+      : 'CKD-EPI 2021 · Inker et al., NEJM 385:1737 · Cockcroft-Gault, Nephron 1976 · KDIGO 2022';
 
   // ── Auth & Profile ─────────────────────────────────────────────────────────
   String get signInWithGoogle =>

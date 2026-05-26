@@ -11,8 +11,9 @@ class AdaptiveSearchField extends StatelessWidget {
     super.key,
     required this.controller,
     required this.onChanged,
+    required this.placeholder,
+    required this.clearTooltip,
     this.focusNode,
-    this.placeholder = 'Search ICD-10…',
     this.autofocus = false,
   });
 
@@ -26,6 +27,7 @@ class AdaptiveSearchField extends StatelessWidget {
   final FocusNode? focusNode;
 
   final String placeholder;
+  final String clearTooltip;
   final bool autofocus;
 
   @override
@@ -43,6 +45,7 @@ class AdaptiveSearchField extends StatelessWidget {
             focusNode: focusNode,
             onChanged: onChanged,
             placeholder: placeholder,
+            clearTooltip: clearTooltip,
             autofocus: autofocus,
           );
   }
@@ -90,6 +93,7 @@ class _MaterialField extends StatelessWidget {
     required this.controller,
     required this.onChanged,
     required this.placeholder,
+    required this.clearTooltip,
     required this.autofocus,
     this.focusNode,
   });
@@ -97,6 +101,7 @@ class _MaterialField extends StatelessWidget {
   final TextEditingController controller;
   final ValueChanged<String> onChanged;
   final String placeholder;
+  final String clearTooltip;
   final bool autofocus;
   final FocusNode? focusNode;
 
@@ -117,7 +122,7 @@ class _MaterialField extends StatelessWidget {
             if (value.text.isEmpty) return const SizedBox.shrink();
             return IconButton(
               icon: const Icon(Icons.cancel_rounded),
-              tooltip: 'Clear',
+              tooltip: clearTooltip,
               onPressed: () {
                 controller.clear();
                 onChanged('');

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pharmai/core/l10n/app_localizations.dart';
 import 'package:pharmai/domain/entities/icd10_code.dart';
 
 /// Expandable result card for a single ICD-10 code.
@@ -22,6 +23,7 @@ class Icd10ResultCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final badgeColor = _chapterColor(code.code);
     final text = Theme.of(context).textTheme;
     final colors = Theme.of(context).colorScheme;
@@ -88,7 +90,7 @@ class Icd10ResultCard extends StatelessWidget {
                 children: [
                   _InfoRow(
                     icon: Icons.language_rounded,
-                    label: 'EN',
+                    label: l10n.icd10LangEn,
                     child: _HighlightText(
                       text: code.descriptionEn,
                       highlight: highlight,
@@ -100,7 +102,7 @@ class Icd10ResultCard extends StatelessWidget {
                   const SizedBox(height: 10),
                   _InfoRow(
                     icon: Icons.folder_open_rounded,
-                    label: 'Bölüm',
+                    label: l10n.icd10ChapterLabel,
                     child: Text(
                       '${code.chapter} (${code.chapterCode})',
                       style: text.bodySmall,
@@ -110,7 +112,7 @@ class Icd10ResultCard extends StatelessWidget {
                     const SizedBox(height: 8),
                     _InfoRow(
                       icon: Icons.subdirectory_arrow_right_rounded,
-                      label: 'Alt Grup',
+                      label: l10n.icd10BlockLabel,
                       child: Text(
                         code.blockCode != null
                             ? '${code.blockDescription} (${code.blockCode})'
@@ -123,7 +125,7 @@ class Icd10ResultCard extends StatelessWidget {
                     const SizedBox(height: 8),
                     _InfoRow(
                       icon: Icons.link_rounded,
-                      label: 'WHO',
+                      label: l10n.icd10WhoLabel,
                       child: SelectableText(
                         code.url!,
                         style: text.bodySmall?.copyWith(color: colors.primary),
@@ -219,34 +221,6 @@ class _ChapterChip extends StatelessWidget {
             fontSize: 10,
             fontWeight: FontWeight.w600,
             color: color.withValues(alpha: 0.85),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _StatusChip extends StatelessWidget {
-  const _StatusChip({required this.label, required this.color});
-
-  final String label;
-  final Color color;
-
-  @override
-  Widget build(BuildContext context) {
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.12),
-        borderRadius: BorderRadius.circular(999),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-        child: Text(
-          label,
-          style: TextStyle(
-            fontSize: 10,
-            fontWeight: FontWeight.w700,
-            color: color.withValues(alpha: 0.9),
           ),
         ),
       ),

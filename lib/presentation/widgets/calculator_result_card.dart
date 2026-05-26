@@ -14,6 +14,7 @@ class BmiResultCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final color = _categoryColor(result.category);
     final text = Theme.of(context).textTheme;
 
@@ -33,7 +34,10 @@ class BmiResultCard extends StatelessWidget {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('VKİ', style: text.labelSmall?.copyWith(color: color)),
+                  Text(
+                    l10n.calcBmiAbbrev,
+                    style: text.labelSmall?.copyWith(color: color),
+                  ),
                   Text(
                     '${result.bmi}',
                     style: text.displaySmall?.copyWith(
@@ -41,7 +45,10 @@ class BmiResultCard extends StatelessWidget {
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                  Text('kg/m²', style: text.labelSmall?.copyWith(color: color)),
+                  Text(
+                    l10n.calcBmiUnit,
+                    style: text.labelSmall?.copyWith(color: color),
+                  ),
                 ],
               ),
               const SizedBox(width: 20),
@@ -50,10 +57,13 @@ class BmiResultCard extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _Chip(label: _categoryLabel(result.category), color: color),
+                    _Chip(
+                      label: _categoryLabel(l10n, result.category),
+                      color: color,
+                    ),
                     const SizedBox(height: 6),
                     Text(
-                      _categoryRange(result.category),
+                      _categoryRange(l10n, result.category),
                       style: text.bodySmall?.copyWith(
                         color: color.withValues(alpha: 0.8),
                       ),
@@ -78,25 +88,27 @@ class BmiResultCard extends StatelessWidget {
     BmiCategory.obeseClassIII => Colors.red.shade900,
   };
 
-  static String _categoryLabel(BmiCategory cat) => switch (cat) {
-    BmiCategory.severelyUnderweight => 'Ciddi Düşük Ağırlık',
-    BmiCategory.underweight => 'Düşük Ağırlık',
-    BmiCategory.normalWeight => 'Normal Ağırlık',
-    BmiCategory.overweight => 'Fazla Kilolu',
-    BmiCategory.obeseClassI => 'Obezite – Sınıf I',
-    BmiCategory.obeseClassII => 'Obezite – Sınıf II',
-    BmiCategory.obeseClassIII => 'Obezite – Sınıf III',
-  };
+  static String _categoryLabel(AppLocalizations l10n, BmiCategory cat) =>
+      switch (cat) {
+        BmiCategory.severelyUnderweight => l10n.calcBmiCatSeverelyUnderweight,
+        BmiCategory.underweight => l10n.calcBmiCatUnderweight,
+        BmiCategory.normalWeight => l10n.calcBmiCatNormal,
+        BmiCategory.overweight => l10n.calcBmiCatOverweight,
+        BmiCategory.obeseClassI => l10n.calcBmiCatObeseClassI,
+        BmiCategory.obeseClassII => l10n.calcBmiCatObeseClassII,
+        BmiCategory.obeseClassIII => l10n.calcBmiCatObeseClassIII,
+      };
 
-  static String _categoryRange(BmiCategory cat) => switch (cat) {
-    BmiCategory.severelyUnderweight => '< 16,0 kg/m²',
-    BmiCategory.underweight => '16,0 – 18,4 kg/m²',
-    BmiCategory.normalWeight => '18,5 – 24,9 kg/m²',
-    BmiCategory.overweight => '25,0 – 29,9 kg/m²',
-    BmiCategory.obeseClassI => '30,0 – 34,9 kg/m²',
-    BmiCategory.obeseClassII => '35,0 – 39,9 kg/m²',
-    BmiCategory.obeseClassIII => '≥ 40,0 kg/m²',
-  };
+  static String _categoryRange(AppLocalizations l10n, BmiCategory cat) =>
+      switch (cat) {
+        BmiCategory.severelyUnderweight => l10n.calcBmiRangeSeverelyUnderweight,
+        BmiCategory.underweight => l10n.calcBmiRangeUnderweight,
+        BmiCategory.normalWeight => l10n.calcBmiRangeNormal,
+        BmiCategory.overweight => l10n.calcBmiRangeOverweight,
+        BmiCategory.obeseClassI => l10n.calcBmiRangeObeseClassI,
+        BmiCategory.obeseClassII => l10n.calcBmiRangeObeseClassII,
+        BmiCategory.obeseClassIII => l10n.calcBmiRangeObeseClassIII,
+      };
 }
 
 // ── GFR ────────────────────────────────────────────────────────────────────────
@@ -111,6 +123,7 @@ class GfrResultCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final color = _stageColor(result.ckdStage);
     final text = Theme.of(context).textTheme;
 
@@ -131,13 +144,13 @@ class GfrResultCard extends StatelessWidget {
               Row(
                 children: [
                   _StageBadge(
-                    label: _stageLabel(result.ckdStage),
+                    label: _stageLabel(l10n, result.ckdStage),
                     color: color,
                   ),
                   const SizedBox(width: 10),
                   Expanded(
                     child: Text(
-                      _stageDescription(result.ckdStage),
+                      _stageDescription(l10n, result.ckdStage),
                       style: text.bodySmall?.copyWith(color: color),
                     ),
                   ),
@@ -151,10 +164,10 @@ class GfrResultCard extends StatelessWidget {
                   children: [
                     Expanded(
                       child: _EquationResult(
-                        label: 'CKD-EPI 2021',
-                        note: 'Evreleme için tercih edilir',
+                        label: l10n.calcGfrCkdEpiLabel,
+                        note: l10n.calcGfrCkdEpiNote,
                         value: '${result.ckdEpi2021}',
-                        unit: 'mL/min/1.73m²',
+                        unit: l10n.calcGfrCkdEpiUnit,
                       ),
                     ),
                     VerticalDivider(
@@ -163,10 +176,10 @@ class GfrResultCard extends StatelessWidget {
                     ),
                     Expanded(
                       child: _EquationResult(
-                        label: 'Cockcroft-Gault',
-                        note: 'İlaç dozlaması için tercih edilir',
+                        label: l10n.calcGfrCockcroftLabel,
+                        note: l10n.calcGfrCockcroftNote,
                         value: '${result.cockcroftGault}',
-                        unit: 'mL/min',
+                        unit: l10n.calcGfrCockcroftUnit,
                       ),
                     ),
                   ],
@@ -188,23 +201,24 @@ class GfrResultCard extends StatelessWidget {
     CkdStage.g5 => Colors.red,
   };
 
-  static String _stageLabel(CkdStage s) => switch (s) {
-    CkdStage.g1 => 'G1',
-    CkdStage.g2 => 'G2',
-    CkdStage.g3a => 'G3a',
-    CkdStage.g3b => 'G3b',
-    CkdStage.g4 => 'G4',
-    CkdStage.g5 => 'G5',
+  static String _stageLabel(AppLocalizations l10n, CkdStage s) => switch (s) {
+    CkdStage.g1 => l10n.calcGfrStageG1,
+    CkdStage.g2 => l10n.calcGfrStageG2,
+    CkdStage.g3a => l10n.calcGfrStageG3a,
+    CkdStage.g3b => l10n.calcGfrStageG3b,
+    CkdStage.g4 => l10n.calcGfrStageG4,
+    CkdStage.g5 => l10n.calcGfrStageG5,
   };
 
-  static String _stageDescription(CkdStage s) => switch (s) {
-    CkdStage.g1 => 'Normal veya yüksek  (≥ 90 mL/min/1.73m²)',
-    CkdStage.g2 => 'Hafif azalmış  (60–89)',
-    CkdStage.g3a => 'Hafif–orta azalmış  (45–59)',
-    CkdStage.g3b => 'Orta–ciddi azalmış  (30–44)',
-    CkdStage.g4 => 'Ciddi azalmış  (15–29)',
-    CkdStage.g5 => 'Böbrek yetmezliği  (< 15)',
-  };
+  static String _stageDescription(AppLocalizations l10n, CkdStage s) =>
+      switch (s) {
+        CkdStage.g1 => l10n.calcGfrStageDescG1,
+        CkdStage.g2 => l10n.calcGfrStageDescG2,
+        CkdStage.g3a => l10n.calcGfrStageDescG3a,
+        CkdStage.g3b => l10n.calcGfrStageDescG3b,
+        CkdStage.g4 => l10n.calcGfrStageDescG4,
+        CkdStage.g5 => l10n.calcGfrStageDescG5,
+      };
 }
 
 // ── Pediatric Estimated Weight ───────────────────────────────────────────────

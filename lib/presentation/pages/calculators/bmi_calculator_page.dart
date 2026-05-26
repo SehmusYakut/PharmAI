@@ -77,7 +77,7 @@ class _BmiSectionState extends State<_BmiSection> {
     return CalculatorFormCard(
       icon: Icons.monitor_weight_outlined,
       title: l.calcBmiTitle,
-      citation: 'WHO Technical Report Series 854 (1995)',
+      citation: l.calcBmiCitation,
       formula: l.calcBmiFormula,
       reference: l.calcBmiReference,
       onCalculate: _calculate,
@@ -87,7 +87,7 @@ class _BmiSectionState extends State<_BmiSection> {
             child: CalculatorInputField(
               controller: _weightCtrl,
               label: l.calcWeight,
-              unit: 'kg',
+              unit: l.calcKgUnit,
               decimal: true,
               onSubmit: _calculate,
             ),
@@ -97,7 +97,7 @@ class _BmiSectionState extends State<_BmiSection> {
             child: CalculatorInputField(
               controller: _heightCtrl,
               label: l.calcHeight,
-              unit: 'cm',
+              unit: l.calcCmUnit,
               decimal: true,
               onSubmit: _calculate,
             ),

@@ -95,7 +95,7 @@ class _IvDripRateSectionState extends State<_IvDripRateSection> {
                 child: CalculatorInputField(
                   controller: _volumeCtrl,
                   label: l.calcVolumeMl,
-                  unit: 'mL',
+                  unit: l.calcMlUnit,
                   decimal: true,
                 ),
               ),
@@ -113,7 +113,7 @@ class _IvDripRateSectionState extends State<_IvDripRateSection> {
                       .map(
                         (value) => DropdownMenuItem(
                           value: value,
-                          child: Text('$value gtt/mL'),
+                          child: Text(l.calcDropFactorOption(value)),
                         ),
                       )
                       .toList(),

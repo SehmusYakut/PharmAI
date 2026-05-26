@@ -3,8 +3,10 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:pharmai/core/auth/auth_state_notifier.dart';
 import 'package:pharmai/core/constants/app_constants.dart';
+import 'package:pharmai/core/l10n/app_localizations.dart';
 import 'package:pharmai/injection_container.dart';
 import 'package:pharmai/presentation/bloc/calculator/calculator_cubit.dart';
+import 'package:pharmai/presentation/bloc/chat/chat_bloc.dart';
 import 'package:pharmai/presentation/bloc/drug_search/drug_search_bloc.dart';
 import 'package:pharmai/presentation/bloc/icd10_search/icd10_search_cubit.dart';
 import 'package:pharmai/presentation/pages/calculators/bmi_calculator_page.dart';
@@ -15,6 +17,8 @@ import 'package:pharmai/presentation/pages/calculators_page.dart';
 import 'package:pharmai/presentation/pages/drug_info_page.dart';
 import 'package:pharmai/presentation/pages/home_page.dart';
 import 'package:pharmai/presentation/pages/icd10_search_page.dart';
+import 'package:pharmai/presentation/pages/chat/chat_dashboard_page.dart';
+import 'package:pharmai/presentation/pages/chat/chat_room_page.dart';
 import 'package:pharmai/presentation/pages/login_page.dart';
 import 'package:pharmai/presentation/pages/profile_page.dart';
 
@@ -26,6 +30,9 @@ final GoRouter appRouter = GoRouter(
     final isAuth = sl<AuthStateNotifier>().isAuthenticated;
     final loc = state.matchedLocation;
     if (!isAuth && loc == AppConstants.routeProfile) {
+      return AppConstants.routeLogin;
+    }
+    if (!isAuth && loc.startsWith(AppConstants.routeChatDashboard)) {
       return AppConstants.routeLogin;
     }
     if (isAuth && loc == AppConstants.routeLogin) {
@@ -107,7 +114,38 @@ final GoRouter appRouter = GoRouter(
       name: 'profile',
       builder: (context, _) => const ProfilePage(),
     ),
+    GoRoute(
+      path: AppConstants.routeChatDashboard,
+      name: 'chatDashboard',
+      builder: (context, _) => BlocProvider(
+        create: (_) => sl<ChatBloc>(),
+        child: const ChatDashboardPage(),
+      ),
+      routes: [
+        GoRoute(
+          path: ':sessionId',
+          name: 'chatRoom',
+          builder: (context, state) {
+            final id = int.tryParse(state.pathParameters['sessionId'] ?? '');
+            if (id == null) {
+              final l10n = AppLocalizations.of(context);
+              return Scaffold(
+                body: Center(child: Text(l10n.chatInvalidSession)),
+              );
+            }
+            return BlocProvider(
+              create: (_) => sl<ChatBloc>(),
+              child: ChatRoomPage(sessionId: id),
+            );
+          },
+        ),
+      ],
+    ),
   ],
-  errorBuilder: (_, state) =>
-      Scaffold(body: Center(child: Text('Route not found: ${state.uri}'))),
+  errorBuilder: (context, state) {
+    final l10n = AppLocalizations.of(context);
+    return Scaffold(
+      body: Center(child: Text(l10n.routeNotFound(state.uri.toString()))),
+    );
+  },
 );
