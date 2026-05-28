@@ -49,6 +49,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
     on<RenameSession>(_onRenameSession);
     on<SendMessage>(_onSendMessage);
     on<UpgradeToPremium>(_onUpgradeToPremium);
+    on<_UpdateSessionTitle>(_onUpdateSessionTitle);
   }
 
   final FetchChatSessions _fetchChatSessions;
@@ -66,7 +67,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
     FetchSessions event,
     Emitter<ChatState> emit,
   ) async {
-    emit(const ChatLoading());
+    emit(ChatLoading(sessions: state.sessions));
     final sessionsResult = await _fetchChatSessions(event.userId);
     await sessionsResult.fold((failure) async => emit(const ChatInitial()), (
       sessions,
@@ -112,7 +113,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
     StartNewChat event,
     Emitter<ChatState> emit,
   ) async {
-    emit(const ChatLoading());
+    emit(ChatLoading(sessions: state.sessions));
     final createResult = await _startChatSession(event.userId);
     await createResult.fold((_) async => emit(const ChatInitial()), (
       session,
@@ -209,7 +210,10 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
       current.copyWith(
         messages: updatedMessages,
         isSending: true,
+        isStreaming: true,
+        streamingText: '',
         errorMessage: null,
+        status: ChatStatus.typing,
       ),
     );
 
@@ -219,8 +223,11 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
         current.copyWith(
           messages: updatedMessages,
           isSending: false,
+          isStreaming: false,
+          streamingText: '',
           errorMessage: null,
           errorKey: ChatErrorKey.localSaveFailed,
+          status: ChatStatus.failure,
         ),
       );
       return;
@@ -230,40 +237,80 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
       unawaited(_ensureSessionTitle(prompt: trimmed, current: current));
     }
 
-    final replyResult = await _sendChatMessage(
+    final replyStream = _sendChatMessage(
       history: current.messages,
       message: trimmed,
+      localeCode: event.localeCode,
     );
 
-    await replyResult.fold(
-      (failure) async {
+    final buffer = StringBuffer();
+    await for (final chunkResult in replyStream) {
+      if (chunkResult.isLeft()) {
+        final failure = chunkResult.getLeft().toNullable();
         emit(
           current.copyWith(
             messages: updatedMessages,
             isSending: false,
-            errorMessage: failure.message,
+            isStreaming: false,
+            streamingText: '',
+            errorMessage: failure?.message,
             errorKey: null,
+            status: ChatStatus.failure,
           ),
         );
-      },
-      (reply) async {
-        final modelMessage = ChatMessage(
-          id: 0,
-          sessionId: current.session.id,
-          role: ChatRole.model,
-          content: reply,
-          timestamp: DateTime.now(),
-        );
-        await _addChatMessage(modelMessage);
-        await _incrementChatUsage(event.userId);
-        emit(
-          current.copyWith(
-            messages: [...updatedMessages, modelMessage],
-            isSending: false,
-            errorKey: null,
-          ),
-        );
-      },
+        return;
+      }
+
+      final chunk = chunkResult.getOrElse((_) => '');
+      if (chunk.isEmpty) continue;
+      buffer.write(chunk);
+      emit(
+        current.copyWith(
+          messages: updatedMessages,
+          isSending: true,
+          isStreaming: true,
+          streamingText: buffer.toString(),
+          errorMessage: null,
+          errorKey: null,
+          status: ChatStatus.typing,
+        ),
+      );
+    }
+
+    final reply = buffer.toString().trim();
+    if (reply.isEmpty) {
+      emit(
+        current.copyWith(
+          messages: updatedMessages,
+          isSending: false,
+          isStreaming: false,
+          streamingText: '',
+          errorMessage: 'Empty response from Gemini.',
+          errorKey: null,
+          status: ChatStatus.failure,
+        ),
+      );
+      return;
+    }
+
+    final modelMessage = ChatMessage(
+      id: 0,
+      sessionId: current.session.id,
+      role: ChatRole.model,
+      content: reply,
+      timestamp: DateTime.now(),
+    );
+    await _addChatMessage(modelMessage);
+    await _incrementChatUsage(event.userId);
+    emit(
+      current.copyWith(
+        messages: [...updatedMessages, modelMessage],
+        isSending: false,
+        isStreaming: false,
+        streamingText: '',
+        errorKey: null,
+        status: ChatStatus.success,
+      ),
     );
   }
 
@@ -278,6 +325,15 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
       (_) => emit(current.copyWith(errorKey: ChatErrorKey.upgradeFailed)),
       (_) => emit(current.copyWith(errorKey: null)),
     );
+  }
+
+  void _onUpdateSessionTitle(
+    _UpdateSessionTitle event,
+    Emitter<ChatState> emit,
+  ) {
+    final current = state;
+    if (current is! ChatRoomState) return;
+    emit(current.copyWith(session: event.session, sessions: event.sessions));
   }
 
   Future<void> _ensureSessionTitle({
@@ -307,6 +363,6 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
         )
         .toList();
 
-    emit(latest.copyWith(session: updatedSession, sessions: updatedSessions));
+    add(_UpdateSessionTitle(session: updatedSession, sessions: updatedSessions));
   }
 }

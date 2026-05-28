@@ -7,20 +7,24 @@ import 'package:pharmai/data/datasources/local/local_database_service.dart';
 import 'package:pharmai/data/datasources/remote/gemini_chat_service.dart';
 import 'package:pharmai/data/repositories/app_preferences_repository_impl.dart';
 import 'package:pharmai/data/repositories/auth_repository_impl.dart';
+import 'package:pharmai/data/repositories/bookmark_repository_impl.dart';
 import 'package:pharmai/data/repositories/chat_repository_impl.dart';
 import 'package:pharmai/data/repositories/drug_repository_impl.dart';
 import 'package:pharmai/data/repositories/icd10_repository_impl.dart';
 import 'package:pharmai/data/repositories/profile_repository_impl.dart';
 import 'package:pharmai/domain/repositories/app_preferences_repository.dart';
 import 'package:pharmai/domain/repositories/auth_repository.dart';
+import 'package:pharmai/domain/repositories/bookmark_repository.dart';
 import 'package:pharmai/domain/repositories/chat_repository.dart';
 import 'package:pharmai/domain/repositories/drug_repository.dart';
 import 'package:pharmai/domain/repositories/icd10_repository.dart';
 import 'package:pharmai/domain/repositories/profile_repository.dart';
 import 'package:pharmai/domain/usecases/add_chat_message.dart';
+import 'package:pharmai/domain/usecases/fetch_bookmarks_by_type.dart';
 import 'package:pharmai/domain/usecases/fetch_chat_messages.dart';
 import 'package:pharmai/domain/usecases/fetch_chat_sessions.dart';
 import 'package:pharmai/domain/usecases/generate_chat_title.dart';
+import 'package:pharmai/domain/usecases/is_bookmarked.dart';
 import 'package:pharmai/domain/usecases/get_chat_usage.dart';
 import 'package:pharmai/domain/usecases/increment_chat_usage.dart';
 import 'package:pharmai/domain/usecases/get_or_create_profile.dart';
@@ -31,10 +35,12 @@ import 'package:pharmai/domain/usecases/search_icd10.dart';
 import 'package:pharmai/domain/usecases/sign_in_with_google.dart';
 import 'package:pharmai/domain/usecases/sign_out.dart';
 import 'package:pharmai/domain/usecases/start_chat_session.dart';
+import 'package:pharmai/domain/usecases/toggle_bookmark.dart';
 import 'package:pharmai/domain/usecases/update_profile.dart';
 import 'package:pharmai/domain/usecases/upgrade_to_premium.dart'
     as chat_usecases;
 import 'package:pharmai/presentation/bloc/auth/auth_bloc.dart';
+import 'package:pharmai/presentation/bloc/bookmark/bookmark_bloc.dart';
 import 'package:pharmai/presentation/bloc/calculator/calculator_cubit.dart';
 import 'package:pharmai/presentation/bloc/chat/chat_bloc.dart';
 import 'package:pharmai/presentation/bloc/drug_search/drug_search_bloc.dart';
@@ -67,6 +73,9 @@ Future<void> initDependencies() async {
   sl.registerLazySingleton<ProfileRepository>(
     () => ProfileRepositoryImpl(sl()),
   );
+  sl.registerLazySingleton<BookmarkRepository>(
+    () => BookmarkRepositoryImpl(sl()),
+  );
   sl.registerLazySingleton<AuthRepository>(
     () => AuthRepositoryImpl(sl(), sl()),
   );
@@ -89,6 +98,9 @@ Future<void> initDependencies() async {
   sl.registerLazySingleton(() => GenerateChatTitle(sl()));
   sl.registerLazySingleton(() => AddChatMessage(sl()));
   sl.registerLazySingleton(() => SendChatMessage(sl()));
+  sl.registerLazySingleton(() => FetchBookmarksByType(sl()));
+  sl.registerLazySingleton(() => IsBookmarked(sl()));
+  sl.registerLazySingleton(() => ToggleBookmark(sl()));
   sl.registerLazySingleton(() => GetChatUsage(sl()));
   sl.registerLazySingleton(() => IncrementChatUsage(sl()));
   sl.registerLazySingleton(() => chat_usecases.UpgradeToPremium(sl()));
@@ -97,6 +109,13 @@ Future<void> initDependencies() async {
   sl.registerFactory(() => Icd10SearchCubit(sl()));
   sl.registerFactory(() => DrugSearchBloc(sl()));
   sl.registerFactory(() => CalculatorCubit());
+  sl.registerFactory(
+    () => BookmarkBloc(
+      fetchBookmarksByType: sl(),
+      isBookmarked: sl(),
+      toggleBookmark: sl(),
+    ),
+  );
   sl.registerFactory(() => OnboardingCubit(sl()));
   sl.registerLazySingleton(() => ThemeCubit(sl()));
   sl.registerLazySingleton(() => LocaleCubit(sl()));

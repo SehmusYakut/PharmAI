@@ -69,7 +69,9 @@ class _GfrSectionState extends State<_GfrSection> {
     final scr = double.tryParse(_scrCtrl.text.replaceAll(',', '.'));
     final age = int.tryParse(_ageCtrl.text);
     final weight = double.tryParse(_weightCtrl.text.replaceAll(',', '.'));
-    if (scr == null || age == null || weight == null) return;
+    if (scr == null || age == null || weight == null) {
+      return;
+    }
     context.read<CalculatorCubit>().calculateGfr(
       serumCreatinineMgDl: scr,
       ageYears: age,
@@ -175,9 +177,12 @@ class _GfrSectionState extends State<_GfrSection> {
         buildWhen: (p, c) =>
             p.gfrResult != c.gfrResult || p.gfrError != c.gfrError,
         builder: (context, state) {
-          if (state.gfrError != null)
+          if (state.gfrError != null) {
             return CalculatorErrorText(state.gfrError!);
-          if (state.gfrResult == null) return const SizedBox.shrink();
+          }
+          if (state.gfrResult == null) {
+            return const SizedBox.shrink();
+          }
           return GfrResultCard(result: state.gfrResult!);
         },
       ),

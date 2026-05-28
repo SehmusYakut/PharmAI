@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:pharmai/core/l10n/app_localizations.dart';
+import 'package:pharmai/domain/entities/bookmark.dart';
 import 'package:pharmai/domain/entities/icd10_code.dart';
+import 'package:pharmai/presentation/bloc/auth/auth_bloc.dart';
+import 'package:pharmai/presentation/bloc/bookmark/bookmark_bloc.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 /// Expandable result card for a single ICD-10 code.
 ///
@@ -27,6 +31,9 @@ class Icd10ResultCard extends StatelessWidget {
     final badgeColor = _chapterColor(code.code);
     final text = Theme.of(context).textTheme;
     final colors = Theme.of(context).colorScheme;
+    final auth = context.read<AuthBloc>().state;
+    final userId = auth is AuthAuthenticated ? auth.profile.firebaseUid : null;
+    final itemId = code.code;
 
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
@@ -54,6 +61,12 @@ class Icd10ResultCard extends StatelessWidget {
           ),
           iconColor: colors.primary,
           collapsedIconColor: colors.outline,
+          trailing: _BookmarkButton(
+            userId: userId,
+            itemId: itemId,
+            title: code.code,
+            subtitle: code.descriptionTr,
+          ),
           leading: _CodeBadge(codeStr: code.code, color: badgeColor),
           title: _HighlightText(
             text: code.descriptionTr,
@@ -224,6 +237,67 @@ class _ChapterChip extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+}
+
+class _BookmarkButton extends StatelessWidget {
+  const _BookmarkButton({
+    required this.userId,
+    required this.itemId,
+    required this.title,
+    required this.subtitle,
+  });
+
+  final String? userId;
+  final String itemId;
+  final String title;
+  final String subtitle;
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocBuilder<BookmarkBloc, BookmarkState>(
+      builder: (context, state) {
+        if (userId == null) {
+          return const IconButton(
+            onPressed: null,
+            icon: Icon(Icons.bookmark_border_rounded),
+          );
+        }
+
+        if (!state.hasStatus(BookmarkItemType.icd10, itemId)) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            context.read<BookmarkBloc>().add(
+              BookmarkStatusRequested(
+                userId: userId!,
+                itemType: BookmarkItemType.icd10,
+                itemId: itemId,
+              ),
+            );
+          });
+        }
+
+        final isSaved = state.isBookmarked(BookmarkItemType.icd10, itemId);
+        return IconButton(
+          onPressed: () {
+            final bookmark = Bookmark(
+              id: 0,
+              userId: userId!,
+              itemType: BookmarkItemType.icd10,
+              itemId: itemId,
+              title: title,
+              subtitle: subtitle,
+              savedAt: DateTime.now(),
+            );
+            context.read<BookmarkBloc>().add(
+              BookmarkToggleRequested(bookmark: bookmark),
+            );
+          },
+          icon: Icon(
+            isSaved ? Icons.bookmark_rounded : Icons.bookmark_border_rounded,
+          ),
+        );
+      },
     );
   }
 }

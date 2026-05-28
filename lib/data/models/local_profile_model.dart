@@ -14,7 +14,7 @@ class LocalProfileModel {
   String? customName;
   String? photoUrl;
   String languageCode = 'tr';
-  bool isDarkMode = false;
+  String themeMode = 'light';
 
   UserProfile toDomain() => UserProfile(
         firebaseUid: firebaseUid,
@@ -22,7 +22,7 @@ class LocalProfileModel {
         customName: customName,
         photoUrl: photoUrl,
         languageCode: languageCode,
-        isDarkMode: isDarkMode,
+        themeMode: themeMode,
       );
 
   static LocalProfileModel fromDomain(UserProfile p) => LocalProfileModel()
@@ -31,5 +31,5 @@ class LocalProfileModel {
     ..customName = p.customName
     ..photoUrl = p.photoUrl
     ..languageCode = p.languageCode
-    ..isDarkMode = p.isDarkMode;
+    ..themeMode = p.themeMode;
 }

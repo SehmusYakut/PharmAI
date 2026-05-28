@@ -45,15 +45,6 @@ class HomePage extends StatefulWidget {
       accent: const Color(0xFF155E75),
       glow: const Color(0xFF67E8F9),
     ),
-    _Feature(
-      icon: Icons.forum_rounded,
-      label: l10n.navChat,
-      subtitle: l10n.chatSubtitle,
-      route: AppConstants.routeChatDashboard,
-      available: true,
-      accent: const Color(0xFF1F4D7A),
-      glow: const Color(0xFF7CC6FE),
-    ),
   ];
 }
 
@@ -206,7 +197,7 @@ class _DashboardBackdrop extends StatelessWidget {
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            colors.background,
+            colors.surface,
             colors.surfaceContainerLowest.withValues(alpha: 0.98),
             colors.surfaceContainerHighest.withValues(alpha: 0.32),
           ],
@@ -731,12 +722,9 @@ class _ThemeToggleButton extends StatelessWidget {
     final l10n = AppLocalizations.of(context);
     final colors = Theme.of(context).colorScheme;
 
-    return BlocBuilder<ThemeCubit, ThemeMode>(
+    return BlocBuilder<ThemeCubit, String>(
       builder: (context, mode) {
-        final isDark =
-            mode == ThemeMode.dark ||
-            (mode == ThemeMode.system &&
-                MediaQuery.platformBrightnessOf(context) == Brightness.dark);
+        final isDark = mode == 'dark' || mode == 'midnight';
 
         return _ActionButton(
           tooltip: isDark ? l10n.themeLightTooltip : l10n.themeDarkTooltip,

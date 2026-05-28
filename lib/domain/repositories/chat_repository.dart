@@ -14,6 +14,12 @@ abstract class ChatRepository {
   Future<Either<Failure, String>> generateReply({
     required List<ChatMessage> history,
     required String message,
+    required String localeCode,
+  });
+  Stream<Either<Failure, String>> streamReply({
+    required List<ChatMessage> history,
+    required String message,
+    required String localeCode,
   });
   Future<Either<Failure, ChatUsage>> getUsage(String userId);
   Future<Either<Failure, Unit>> incrementUsage(String userId);

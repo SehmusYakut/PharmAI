@@ -11,20 +11,29 @@ class BookmarkModel {
   late String firebaseUid;
 
   @Index(type: IndexType.hash)
+  late String category;
+
+  @Index(type: IndexType.hash)
   late String code;
 
-  late String category;
   late DateTime savedAt;
 
   Bookmark toDomain() => Bookmark(
-        code: code,
-        category: category,
-        savedAt: savedAt,
-      );
+    id: id,
+    userId: firebaseUid,
+    itemType: BookmarkItemType.values.firstWhere(
+      (e) => e.name == category,
+      orElse: () => BookmarkItemType.icd10,
+    ),
+    itemId: code,
+    title: code, // Fallback as title is missing in current schema
+    subtitle: category, // Fallback as subtitle is missing in current schema
+    savedAt: savedAt,
+  );
 
-  static BookmarkModel fromDomain(String uid, Bookmark b) => BookmarkModel()
-    ..firebaseUid = uid
-    ..code = b.code
-    ..category = b.category
+  static BookmarkModel fromDomain(Bookmark b) => BookmarkModel()
+    ..firebaseUid = b.userId
+    ..category = b.itemType.name
+    ..code = b.itemId
     ..savedAt = b.savedAt;
 }

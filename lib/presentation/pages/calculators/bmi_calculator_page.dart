@@ -108,8 +108,9 @@ class _BmiSectionState extends State<_BmiSection> {
         buildWhen: (p, c) =>
             p.bmiResult != c.bmiResult || p.bmiError != c.bmiError,
         builder: (context, state) {
-          if (state.bmiError != null)
+          if (state.bmiError != null) {
             return CalculatorErrorText(state.bmiError!);
+          }
           if (state.bmiResult == null) return const SizedBox.shrink();
           return BmiResultCard(result: state.bmiResult!);
         },

@@ -49,18 +49,24 @@ final GoRouter appRouter = GoRouter(
     GoRoute(
       path: AppConstants.routeIcd10Search,
       name: 'icd10Search',
-      builder: (context, _) => BlocProvider(
-        create: (_) => sl<Icd10SearchCubit>(),
-        child: const Icd10SearchPage(),
-      ),
+      builder: (context, state) {
+        final query = state.uri.queryParameters['q'];
+        return BlocProvider(
+          create: (_) => sl<Icd10SearchCubit>(),
+          child: Icd10SearchPage(initialQuery: query),
+        );
+      },
     ),
     GoRoute(
       path: AppConstants.routeDrugInfo,
       name: 'drugInfo',
-      builder: (context, _) => BlocProvider(
-        create: (_) => sl<DrugSearchBloc>(),
-        child: const DrugInfoPage(),
-      ),
+      builder: (context, state) {
+        final query = state.uri.queryParameters['q'];
+        return BlocProvider(
+          create: (_) => sl<DrugSearchBloc>(),
+          child: DrugInfoPage(initialQuery: query),
+        );
+      },
     ),
     GoRoute(
       path: AppConstants.routeCalculators,

@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:fpdart/fpdart.dart' hide State;
 import 'package:go_router/go_router.dart';
 import 'package:pharmai/core/constants/app_constants.dart';
+import 'package:pharmai/core/error/failures.dart';
 import 'package:pharmai/core/l10n/app_localizations.dart';
 import 'package:pharmai/domain/entities/bookmark.dart';
 import 'package:pharmai/domain/entities/user_profile.dart';
+import 'package:pharmai/domain/repositories/bookmark_repository.dart';
 import 'package:pharmai/domain/repositories/profile_repository.dart';
 import 'package:pharmai/injection_container.dart';
 import 'package:pharmai/presentation/bloc/auth/auth_bloc.dart';
@@ -42,7 +45,9 @@ class _ProfilePageState extends State<ProfilePage> {
     await sl<ProfileRepository>().updateProfile(
       profile.copyWith(customName: _nameCtrl.text.trim()),
     );
-    setState(() => _saving = false);
+    if (mounted) {
+      setState(() => _saving = false);
+    }
   }
 
   @override
@@ -103,21 +108,80 @@ class _ProfilePageState extends State<ProfilePage> {
                             ),
                     ],
                   ),
+                  const SizedBox(height: 16),
+                  Text(l.themeLabel,
+                      style: Theme.of(context).textTheme.titleSmall),
                   const SizedBox(height: 8),
-                  SwitchListTile(
-                    title: Text(l.darkMode),
-                    value: context.watch<ThemeCubit>().state == ThemeMode.dark,
-                    onChanged: (_) => context.read<ThemeCubit>().toggle(),
-                  ),
-                  SwitchListTile(
-                    title: Text(l.languageTurkish),
-                    value:
-                        context.watch<LocaleCubit>().state.languageCode == 'tr',
-                    onChanged: (val) => context.read<LocaleCubit>().setLocale(
-                      Locale(val ? 'tr' : 'en'),
-                    ),
+                  Wrap(
+                    spacing: 8,
+                    children: [
+                      ChoiceChip(
+                        label: const Text('Light'),
+                        selected: context.watch<ThemeCubit>().state == 'light',
+                        onSelected: (val) => val
+                            ? context.read<ThemeCubit>().setTheme('light')
+                            : null,
+                      ),
+                      ChoiceChip(
+                        label: const Text('Dark'),
+                        selected: context.watch<ThemeCubit>().state == 'dark',
+                        onSelected: (val) => val
+                            ? context.read<ThemeCubit>().setTheme('dark')
+                            : null,
+                      ),
+                      ChoiceChip(
+                        label: Text(l.themeMidnight),
+                        selected:
+                            context.watch<ThemeCubit>().state == 'midnight',
+                        onSelected: (val) => val
+                            ? context.read<ThemeCubit>().setTheme('midnight')
+                            : null,
+                      ),
+                    ],
                   ),
                   const SizedBox(height: 16),
+                  Text(l.languageLabel,
+                      style: Theme.of(context).textTheme.titleSmall),
+                  const SizedBox(height: 8),
+                  Wrap(
+                    spacing: 8,
+                    children: [
+                      ChoiceChip(
+                        label: Text(l.languageTurkish),
+                        selected:
+                            context.watch<LocaleCubit>().state.languageCode ==
+                                'tr',
+                        onSelected: (val) => val
+                            ? context.read<LocaleCubit>().setLocale(
+                                  const Locale('tr'),
+                                )
+                            : null,
+                      ),
+                      ChoiceChip(
+                        label: Text(l.languageEnglish),
+                        selected:
+                            context.watch<LocaleCubit>().state.languageCode ==
+                                'en',
+                        onSelected: (val) => val
+                            ? context.read<LocaleCubit>().setLocale(
+                                  const Locale('en'),
+                                )
+                            : null,
+                      ),
+                      ChoiceChip(
+                        label: Text(l.languageGerman),
+                        selected:
+                            context.watch<LocaleCubit>().state.languageCode ==
+                                'de',
+                        onSelected: (val) => val
+                            ? context.read<LocaleCubit>().setLocale(
+                                  const Locale('de'),
+                                )
+                            : null,
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 24),
                   _BookmarksSection(uid: profile.firebaseUid),
                   const SizedBox(height: 24),
                   FilledButton.tonal(
@@ -168,28 +232,46 @@ class _BookmarksSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
-    return FutureBuilder(
-      future: sl<ProfileRepository>().getBookmarks(uid),
+    return FutureBuilder<Either<Failure, List<Bookmark>>>(
+      future: sl<BookmarkRepository>().fetchAllBookmarks(uid),
       builder: (context, snapshot) {
-        if (!snapshot.hasData) return const SizedBox.shrink();
-        final bookmarks = snapshot.data!.fold(
-          (_) => <Bookmark>[],
-          (list) => list,
-        );
-        if (bookmarks.isEmpty) return const SizedBox.shrink();
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(l.bookmarks, style: Theme.of(context).textTheme.titleMedium),
-            const SizedBox(height: 8),
-            ...bookmarks.map(
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        }
+        if (!snapshot.hasData || snapshot.data == null) {
+          return const SizedBox.shrink();
+        }
+        
+        final result = snapshot.data!;
+        return result.fold(
+          (failure) => const SizedBox.shrink(),
+          (bookmarks) {
+            if (bookmarks.isEmpty) return const SizedBox.shrink();
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(l.bookmarks, style: Theme.of(context).textTheme.titleMedium),
+                const SizedBox(height: 8),
+                ...bookmarks.map(
               (b) => ListTile(
-                leading: const Icon(Icons.bookmark_outline),
-                title: Text(b.code),
-                subtitle: Text(b.category),
+                leading: Icon(
+                  b.itemType == BookmarkItemType.icd10
+                      ? Icons.tag_rounded
+                      : Icons.medication_rounded,
+                ),
+                title: Text(b.title),
+                subtitle: Text(b.subtitle),
+                onTap: () {
+                  final route = b.itemType == BookmarkItemType.icd10
+                      ? AppConstants.routeIcd10Search
+                      : AppConstants.routeDrugInfo;
+                  context.push('$route?q=${Uri.encodeComponent(b.itemId)}');
+                },
               ),
             ),
-          ],
+              ],
+            );
+          },
         );
       },
     );

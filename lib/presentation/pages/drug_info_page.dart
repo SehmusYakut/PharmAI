@@ -9,14 +9,31 @@ import 'package:pharmai/presentation/widgets/adaptive_search_field.dart';
 import 'package:pharmai/presentation/widgets/drug_detail_card.dart';
 
 class DrugInfoPage extends StatefulWidget {
-  const DrugInfoPage({super.key});
+  const DrugInfoPage({super.key, this.initialQuery});
+
+  final String? initialQuery;
 
   @override
   State<DrugInfoPage> createState() => _DrugInfoPageState();
 }
 
 class _DrugInfoPageState extends State<DrugInfoPage> {
-  final _controller = TextEditingController();
+  late final TextEditingController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = TextEditingController(text: widget.initialQuery);
+    if (widget.initialQuery != null && widget.initialQuery!.isNotEmpty) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          context.read<DrugSearchBloc>().add(
+            DrugSearchQueryChanged(widget.initialQuery!),
+          );
+        }
+      });
+    }
+  }
 
   @override
   void dispose() {

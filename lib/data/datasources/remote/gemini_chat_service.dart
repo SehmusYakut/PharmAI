@@ -3,22 +3,24 @@ import 'package:pharmai/domain/entities/chat_message.dart';
 
 class GeminiChatService {
   GeminiChatService({required String apiKey})
-    : _apiKey = apiKey.trim(),
-      _model = apiKey.trim().isNotEmpty
+    : _model = apiKey.trim().isNotEmpty
           ? GenerativeModel(
               model: 'gemini-2.5-flash-lite',
               apiKey: apiKey.trim(),
             )
           : null;
 
-  final String _apiKey;
   final GenerativeModel? _model;
 
-  static const String _systemPrompt =
-      'You are a senior clinician. Provide concise, evidence-aligned medical '
-      'guidance for clinical decision support. Ask brief follow-up questions '
-      'if key data are missing. Structure answers with: Summary, Rationale, '
-      'Next steps. If uncertain, say so and suggest safe next actions.';
+  static const String _systemPromptBase =
+      'CRITICAL DIRECTIVE: You must reply 100% in the exact language the '
+      'user used to ask the question. If the input is Turkish, every single '
+      'word of your output must be Turkish (using local clinical jargon). If '
+      'English, reply 100% in English. Never mix languages, never include '
+      'translations of your response, and never default to English if the '
+      'prompt is in Turkish. You are PharmAI, a clinical assistant. Be '
+      'concise, no filler or generic disclaimers. Use bullets when helpful. '
+      'If key data are missing, ask one short follow-up question.';
 
   static const String _titlePrompt =
       'Generate a short 3-word chat title. Use title case, no punctuation. '
@@ -27,13 +29,17 @@ class GeminiChatService {
   Future<String> generateReply({
     required List<ChatMessage> history,
     required String message,
+    required String localeCode,
   }) async {
-    if (_model == null) {
-      throw Exception('Gemini API key is missing. Please configure it in .env.');
+    final model = _model;
+    if (model == null) {
+      throw Exception(
+        'Gemini API key is missing. Please configure it in .env.',
+      );
     }
 
     final contents = <Content>[
-      Content('user', [TextPart(_systemPrompt)]),
+      Content('user', [TextPart(_buildSystemPrompt(localeCode))]),
       ...history.map(
         (m) => Content(m.role == ChatRole.user ? 'user' : 'model', [
           TextPart(m.content),
@@ -42,7 +48,7 @@ class GeminiChatService {
       Content('user', [TextPart(message)]),
     ];
 
-    final response = await _model!.generateContent(contents);
+    final response = await model.generateContent(contents);
     final text = response.text?.trim();
     if (text == null || text.isEmpty) {
       throw Exception('Empty response from Gemini.');
@@ -50,9 +56,42 @@ class GeminiChatService {
     return text;
   }
 
+  Stream<String> streamReply({
+    required List<ChatMessage> history,
+    required String message,
+    required String localeCode,
+  }) async* {
+    final model = _model;
+    if (model == null) {
+      throw Exception(
+        'Gemini API key is missing. Please configure it in .env.',
+      );
+    }
+
+    final contents = <Content>[
+      Content('user', [TextPart(_buildSystemPrompt(localeCode))]),
+      ...history.map(
+        (m) => Content(m.role == ChatRole.user ? 'user' : 'model', [
+          TextPart(m.content),
+        ]),
+      ),
+      Content('user', [TextPart(message)]),
+    ];
+
+    final stream = model.generateContentStream(contents);
+    await for (final chunk in stream) {
+      final text = chunk.text;
+      if (text == null || text.isEmpty) continue;
+      yield text;
+    }
+  }
+
   Future<String> generateTitle({required String prompt}) async {
-    if (_model == null) {
-      throw Exception('Gemini API key is missing. Please configure it in .env.');
+    final model = _model;
+    if (model == null) {
+      throw Exception(
+        'Gemini API key is missing. Please configure it in .env.',
+      );
     }
 
     final contents = <Content>[
@@ -60,11 +99,16 @@ class GeminiChatService {
       Content('user', [TextPart(prompt)]),
     ];
 
-    final response = await _model!.generateContent(contents);
+    final response = await model.generateContent(contents);
     final text = response.text?.trim();
     if (text == null || text.isEmpty) {
       throw Exception('Empty title response from Gemini.');
     }
     return text;
+  }
+
+  static String _buildSystemPrompt(String localeCode) {
+    final locale = localeCode.trim().isEmpty ? 'tr' : localeCode.trim();
+    return '$_systemPromptBase\nLocale hint: $locale';
   }
 }

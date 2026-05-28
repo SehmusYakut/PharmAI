@@ -1,5 +1,3 @@
-import 'dart:ui';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:pharmai/core/l10n/app_localizations.dart';
@@ -7,6 +5,7 @@ import 'package:pharmai/domain/entities/chat_message.dart';
 import 'package:pharmai/domain/entities/chat_session.dart';
 import 'package:pharmai/presentation/bloc/auth/auth_bloc.dart';
 import 'package:pharmai/presentation/bloc/chat/chat_bloc.dart';
+import 'package:pharmai/presentation/bloc/locale/locale_cubit.dart';
 
 class ChatRoomPage extends StatefulWidget {
   const ChatRoomPage({super.key, required this.sessionId});
@@ -55,140 +54,93 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
 
-    return BlocListener<ChatBloc, ChatState>(
+    return BlocConsumer<ChatBloc, ChatState>(
       listener: (context, state) {
-        if (state is ChatRoomState) {
-          WidgetsBinding.instance.addPostFrameCallback(
-            (_) => _scrollToBottom(),
-          );
-          final error = _resolveErrorMessage(state, l10n);
-          if (error != null && error.isNotEmpty) {
-            ScaffoldMessenger.of(context)
-              ..hideCurrentSnackBar()
-              ..showSnackBar(SnackBar(content: Text(error)));
-          }
+        if (state.sessions.any((s) => s.id == widget.sessionId)) {
+          WidgetsBinding.instance.addPostFrameCallback((_) => _scrollToBottom());
         }
       },
-      child: BlocBuilder<ChatBloc, ChatState>(
-        builder: (context, state) {
-          if (state is ChatLoading || state is ChatInitial) {
-            return const Scaffold(
-              body: Center(child: CircularProgressIndicator()),
+      builder: (context, state) {
+        final session = state.sessions.cast<ChatSession?>().firstWhere(
+              (s) => s?.id == widget.sessionId,
+              orElse: () => null,
             );
-          }
-          if (state is! ChatRoomState) {
-            return const Scaffold(body: SizedBox.shrink());
-          }
 
-          final title = state.session.title.isEmpty
-              ? l10n.chatNewSessionTitle
-              : state.session.title;
-          final media = MediaQuery.of(context);
-          final isWide = media.size.width >= 900;
-
-          final chatContent = Column(
-            children: [
-              Expanded(
-                child: ListView.builder(
-                  controller: _scrollController,
-                  padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
-                  itemCount: state.messages.length + (state.isSending ? 1 : 0),
-                  itemBuilder: (context, index) {
-                    if (index >= state.messages.length) {
-                      return _TypingBubble(label: l10n.chatTyping);
+        return Scaffold(
+          appBar: AppBar(
+            title: Text(session?.title ?? l10n.chatNewSessionTitle),
+            actions: [
+              if (session != null)
+                PopupMenuButton<String>(
+                  onSelected: (val) {
+                    if (val == 'rename') {
+                      _openRenameDialog(
+                        context.read<ChatBloc>(),
+                        l10n,
+                        session,
+                      );
                     }
-                    final msg = state.messages[index];
-                    final isUser = msg.role == ChatRole.user;
-                    return _ChatBubble(message: msg.content, isUser: isUser);
                   },
-                ),
-              ),
-              _ChatComposer(
-                controller: _controller,
-                onSend: () => _handleSend(context),
-                hint: l10n.chatInputHint,
-                isSending: state.isSending,
-              ),
-            ],
-          );
-
-          return Scaffold(
-            appBar: AppBar(
-              title: Text(title),
-              actions: [
-                IconButton(
-                  tooltip: l10n.chatRenameAction,
-                  icon: const Icon(Icons.edit_rounded),
-                  onPressed: () =>
-                      _openRenameDialog(context, l10n, state.session),
-                ),
-              ],
-            ),
-            body: Stack(
-              children: [
-                if (isWide)
-                  Align(
-                    alignment: Alignment.bottomRight,
-                    child: Padding(
-                      padding: const EdgeInsets.fromLTRB(16, 16, 24, 24),
-                      child: ConstrainedBox(
-                        constraints: BoxConstraints(
-                          maxWidth: 420,
-                          maxHeight: media.size.height * 0.82,
-                        ),
-                        child: Material(
-                          color: Theme.of(context).colorScheme.surface,
-                          borderRadius: BorderRadius.circular(24),
-                          elevation: 8,
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(24),
-                            child: chatContent,
-                          ),
-                        ),
+                  itemBuilder: (context) => [
+                    PopupMenuItem(
+                      value: 'rename',
+                      child: Row(
+                        children: [
+                          const Icon(Icons.edit_outlined, size: 20),
+                          const SizedBox(width: 12),
+                          Text(l10n.chatRenameAction),
+                        ],
                       ),
                     ),
-                  )
-                else
-                  chatContent,
-                if (state is PremiumLimitReachedState)
-                  _PremiumOverlay(onUpgrade: () => _handleUpgrade(context)),
-              ],
-            ),
-          );
-        },
-      ),
+                  ],
+                ),
+            ],
+          ),
+          body: Column(
+            children: [
+              Expanded(
+                child: _MessageList(
+                  messages: state.messages,
+                  isLoading: state.status == ChatStatus.loading,
+                ),
+              ),
+              if (state.status == ChatStatus.typing)
+                const Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  child: LinearProgressIndicator(minHeight: 2),
+                ),
+              _ChatInput(
+                onSend: () => _handleSend(context),
+                controller: _controller,
+                enabled: state.status != ChatStatus.loading &&
+                    state.status != ChatStatus.typing,
+                hintText: l10n.chatInputHint,
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 
-  String? _resolveErrorMessage(ChatRoomState state, AppLocalizations l10n) {
-    switch (state.errorKey) {
-      case ChatErrorKey.localSaveFailed:
-        return l10n.chatErrorLocalSave;
-      case ChatErrorKey.upgradeFailed:
-        return l10n.chatErrorUpgrade;
-      case ChatErrorKey.renameFailed:
-        return l10n.chatErrorRename;
-      case null:
-        return state.errorMessage;
-    }
-  }
-
   Future<void> _openRenameDialog(
-    BuildContext context,
+    ChatBloc chatBloc,
     AppLocalizations l10n,
     ChatSession session,
   ) async {
     final result = await showDialog<String>(
       context: context,
       barrierDismissible: true,
-      builder: (_) =>
+      builder: (dialogCtx) =>
           _RenameChatDialog(l10n: l10n, initialTitle: session.title),
     );
 
     final newTitle = result?.trim();
     if (newTitle == null || newTitle.isEmpty) return;
 
-    context.read<ChatBloc>().add(
+    if (!context.mounted) return;
+
+    chatBloc.add(
       RenameSession(sessionId: session.id, newTitle: newTitle),
     );
   }
@@ -201,230 +153,117 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
     final auth = context.read<AuthBloc>().state;
     if (auth is! AuthAuthenticated) return;
 
+    final localeCode = context.read<LocaleCubit>().state.languageCode;
     context.read<ChatBloc>().add(
-      SendMessage(userId: auth.profile.firebaseUid, text: text),
-    );
-  }
-
-  void _handleUpgrade(BuildContext context) {
-    final auth = context.read<AuthBloc>().state;
-    if (auth is! AuthAuthenticated) return;
-
-    context.read<ChatBloc>().add(
-      UpgradeToPremium(userId: auth.profile.firebaseUid),
+      SendMessage(
+        userId: auth.profile.firebaseUid,
+        text: text,
+        localeCode: localeCode,
+      ),
     );
   }
 }
 
-class _ChatBubble extends StatelessWidget {
-  const _ChatBubble({required this.message, required this.isUser});
-
-  final String message;
-  final bool isUser;
+class _MessageList extends StatelessWidget {
+  const _MessageList({required this.messages, required this.isLoading});
+  final List<ChatMessage> messages;
+  final bool isLoading;
 
   @override
   Widget build(BuildContext context) {
-    final colors = Theme.of(context).colorScheme;
-    final align = isUser ? Alignment.centerRight : Alignment.centerLeft;
-    final bg = isUser ? colors.primary : colors.surfaceContainerHigh;
-    final fg = isUser ? colors.onPrimary : colors.onSurface;
+    if (isLoading && messages.isEmpty) {
+      return const Center(child: CircularProgressIndicator());
+    }
+    if (messages.isEmpty) {
+      return Center(
+        child: Icon(
+          Icons.chat_bubble_outline,
+          size: 48,
+          color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.2),
+        ),
+      );
+    }
+
+    return ListView.builder(
+      padding: const EdgeInsets.all(16),
+      itemCount: messages.length,
+      itemBuilder: (context, index) => _MessageBubble(message: messages[index]),
+    );
+  }
+}
+
+class _MessageBubble extends StatelessWidget {
+  const _MessageBubble({required this.message});
+  final ChatMessage message;
+
+  @override
+  Widget build(BuildContext context) {
+    final isMe = message.isUser;
+    final theme = Theme.of(context);
+    final colors = theme.colorScheme;
 
     return Align(
-      alignment: align,
+      alignment: isMe ? Alignment.centerRight : Alignment.centerLeft,
       child: Container(
-        margin: const EdgeInsets.symmetric(vertical: 6),
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-        constraints: const BoxConstraints(maxWidth: 320),
+        margin: const EdgeInsets.symmetric(vertical: 4),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+        constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.75),
         decoration: BoxDecoration(
-          color: bg,
-          borderRadius: BorderRadius.circular(18),
-          boxShadow: [
-            BoxShadow(
-              color: bg.withValues(alpha: 0.18),
-              blurRadius: 14,
-              offset: const Offset(0, 8),
-            ),
-          ],
-        ),
-        child: Text(
-          message,
-          style: Theme.of(
-            context,
-          ).textTheme.bodyMedium?.copyWith(color: fg, height: 1.4),
-        ),
-      ),
-    );
-  }
-}
-
-class _TypingBubble extends StatelessWidget {
-  const _TypingBubble({required this.label});
-
-  final String label;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = Theme.of(context).colorScheme;
-    return Align(
-      alignment: Alignment.centerLeft,
-      child: Container(
-        margin: const EdgeInsets.symmetric(vertical: 6),
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-        decoration: BoxDecoration(
-          color: colors.surfaceContainerHigh,
-          borderRadius: BorderRadius.circular(18),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const SizedBox(
-              width: 16,
-              height: 16,
-              child: CircularProgressIndicator(strokeWidth: 2),
-            ),
-            const SizedBox(width: 10),
-            Text(label, style: Theme.of(context).textTheme.bodySmall),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _ChatComposer extends StatelessWidget {
-  const _ChatComposer({
-    required this.controller,
-    required this.onSend,
-    required this.hint,
-    required this.isSending,
-  });
-
-  final TextEditingController controller;
-  final VoidCallback onSend;
-  final String hint;
-  final bool isSending;
-
-  @override
-  Widget build(BuildContext context) {
-    return SafeArea(
-      top: false,
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(16, 6, 16, 16),
-        child: Row(
-          children: [
-            Expanded(
-              child: TextField(
-                controller: controller,
-                minLines: 1,
-                maxLines: 4,
-                textInputAction: TextInputAction.send,
-                onSubmitted: (_) => isSending ? null : onSend(),
-                decoration: InputDecoration(
-                  hintText: hint,
-                  filled: true,
-                  fillColor: Theme.of(context).colorScheme.surfaceContainerLow,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(18),
-                    borderSide: BorderSide.none,
-                  ),
-                ),
-              ),
-            ),
-            const SizedBox(width: 10),
-            IconButton.filled(
-              onPressed: isSending ? null : onSend,
-              icon: const Icon(Icons.send_rounded),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _PremiumOverlay extends StatelessWidget {
-  const _PremiumOverlay({required this.onUpgrade});
-
-  final VoidCallback onUpgrade;
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
-    final colors = Theme.of(context).colorScheme;
-
-    return Positioned.fill(
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
-        child: Container(
-          color: Colors.black.withValues(alpha: 0.35),
-          alignment: Alignment.center,
-          child: Container(
-            margin: const EdgeInsets.symmetric(horizontal: 24),
-            padding: const EdgeInsets.all(20),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(24),
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [
-                  colors.surface.withValues(alpha: 0.9),
-                  colors.surfaceContainerHigh.withValues(alpha: 0.85),
-                ],
-              ),
-              border: Border.all(color: colors.primary.withValues(alpha: 0.22)),
-              boxShadow: [
-                BoxShadow(
-                  color: colors.primary.withValues(alpha: 0.2),
-                  blurRadius: 20,
-                  offset: const Offset(0, 12),
-                ),
-              ],
-            ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(
-                  Icons.workspace_premium_rounded,
-                  size: 44,
-                  color: colors.primary,
-                ),
-                const SizedBox(height: 12),
-                Text(
-                  l10n.chatLimitTitle,
-                  style: Theme.of(context).textTheme.titleLarge,
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  l10n.chatLimitBody,
-                  style: Theme.of(context).textTheme.bodyMedium,
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 16),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 10,
-                  ),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(16),
-                    color: colors.primary.withValues(alpha: 0.08),
-                  ),
-                  child: Text(
-                    l10n.chatUpgradeSubtitle,
-                    textAlign: TextAlign.center,
-                    style: Theme.of(context).textTheme.bodySmall,
-                  ),
-                ),
-                const SizedBox(height: 18),
-                FilledButton(
-                  onPressed: onUpgrade,
-                  child: Text(l10n.chatGoPremium),
-                ),
-              ],
-            ),
+          color: isMe ? colors.primary : colors.surfaceContainerHigh,
+          borderRadius: BorderRadius.circular(18).copyWith(
+            bottomRight: isMe ? const Radius.circular(2) : null,
+            bottomLeft: !isMe ? const Radius.circular(2) : null,
           ),
         ),
+        child: Text(
+          message.text,
+          style: TextStyle(color: isMe ? colors.onPrimary : colors.onSurface),
+        ),
+      ),
+    );
+  }
+}
+
+class _ChatInput extends StatelessWidget {
+  const _ChatInput({
+    required this.onSend,
+    required this.controller,
+    required this.enabled,
+    required this.hintText,
+  });
+
+  final VoidCallback onSend;
+  final TextEditingController controller;
+  final bool enabled;
+  final String hintText;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: EdgeInsets.fromLTRB(16, 8, 16, 16 + MediaQuery.viewInsetsOf(context).bottom),
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surface,
+        border: Border(top: BorderSide(color: Theme.of(context).dividerColor.withValues(alpha: 0.1))),
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: TextField(
+              controller: controller,
+              enabled: enabled,
+              decoration: InputDecoration(
+                hintText: hintText,
+                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+              ),
+              onSubmitted: (_) => onSend(),
+            ),
+          ),
+          const SizedBox(width: 8),
+          IconButton.filled(
+            onPressed: enabled ? onSend : null,
+            icon: const Icon(Icons.send_rounded),
+          ),
+        ],
       ),
     );
   }
@@ -432,7 +271,6 @@ class _PremiumOverlay extends StatelessWidget {
 
 class _RenameChatDialog extends StatefulWidget {
   const _RenameChatDialog({required this.l10n, required this.initialTitle});
-
   final AppLocalizations l10n;
   final String initialTitle;
 
@@ -441,108 +279,39 @@ class _RenameChatDialog extends StatefulWidget {
 }
 
 class _RenameChatDialogState extends State<_RenameChatDialog> {
-  late final TextEditingController _controller;
+  late final TextEditingController _ctrl;
 
   @override
   void initState() {
     super.initState();
-    _controller = TextEditingController(text: widget.initialTitle);
+    _ctrl = TextEditingController(text: widget.initialTitle);
   }
 
   @override
   void dispose() {
-    _controller.dispose();
+    _ctrl.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    final colors = Theme.of(context).colorScheme;
-    final text = Theme.of(context).textTheme;
-
-    return Dialog(
-      backgroundColor: Colors.transparent,
-      insetPadding: const EdgeInsets.symmetric(horizontal: 24),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(24),
-        child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 16, sigmaY: 16),
-          child: Container(
-            padding: const EdgeInsets.fromLTRB(20, 20, 20, 16),
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [
-                  colors.surface.withValues(alpha: 0.92),
-                  colors.surfaceContainerHigh.withValues(alpha: 0.88),
-                ],
-              ),
-              border: Border.all(color: colors.primary.withValues(alpha: 0.2)),
-              borderRadius: BorderRadius.circular(24),
-              boxShadow: [
-                BoxShadow(
-                  color: colors.primary.withValues(alpha: 0.2),
-                  blurRadius: 24,
-                  offset: const Offset(0, 12),
-                ),
-              ],
-            ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  widget.l10n.chatRenameTitle,
-                  style: text.titleLarge?.copyWith(fontWeight: FontWeight.w700),
-                ),
-                const SizedBox(height: 12),
-                TextField(
-                  controller: _controller,
-                  textInputAction: TextInputAction.done,
-                  decoration: InputDecoration(
-                    hintText: widget.l10n.chatRenameHint,
-                    filled: true,
-                    fillColor: colors.surfaceContainerLowest,
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(16),
-                      borderSide: BorderSide.none,
-                    ),
-                  ),
-                  onSubmitted: (_) => _onSave(context),
-                ),
-                const SizedBox(height: 16),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    TextButton(
-                      onPressed: () => Navigator.of(context).pop(),
-                      child: Text(widget.l10n.chatRenameCancel),
-                    ),
-                    const SizedBox(width: 8),
-                    ValueListenableBuilder<TextEditingValue>(
-                      valueListenable: _controller,
-                      builder: (_, value, __) {
-                        final enabled = value.text.trim().isNotEmpty;
-                        return FilledButton(
-                          onPressed: enabled ? () => _onSave(context) : null,
-                          child: Text(widget.l10n.chatRenameSave),
-                        );
-                      },
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-        ),
+    return AlertDialog(
+      title: Text(widget.l10n.chatRenameTitle),
+      content: TextField(
+        controller: _ctrl,
+        autofocus: true,
+        decoration: InputDecoration(hintText: widget.l10n.chatRenameHint),
       ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: Text(widget.l10n.chatRenameCancel),
+        ),
+        FilledButton(
+          onPressed: () => Navigator.pop(context, _ctrl.text),
+          child: Text(widget.l10n.chatRenameSave),
+        ),
+      ],
     );
-  }
-
-  void _onSave(BuildContext context) {
-    final title = _controller.text.trim();
-    if (title.isEmpty) return;
-    Navigator.of(context).pop(title);
   }
 }

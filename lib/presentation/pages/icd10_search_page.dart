@@ -21,25 +21,33 @@ import 'package:pharmai/presentation/widgets/icd10_result_card.dart';
 ///   transition completes.  This eliminates the dropped-first-keystroke bug
 ///   caused by [autofocus] racing with the IME initialisation on Android.
 class Icd10SearchPage extends StatefulWidget {
-  const Icd10SearchPage({super.key});
+  const Icd10SearchPage({super.key, this.initialQuery});
+
+  final String? initialQuery;
 
   @override
   State<Icd10SearchPage> createState() => _Icd10SearchPageState();
 }
 
 class _Icd10SearchPageState extends State<Icd10SearchPage> {
-  final _queryController = TextEditingController();
+  late final TextEditingController _queryController;
   final _scrollController = ScrollController();
   final _focusNode = FocusNode();
 
   @override
   void initState() {
     super.initState();
+    _queryController = TextEditingController(text: widget.initialQuery);
     _scrollController.addListener(_onScroll);
     // Delay focus request until after the first frame so the route animation
     // has settled and the OS IME is ready — prevents dropped first keystroke.
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) _focusNode.requestFocus();
+      if (mounted) {
+        if (widget.initialQuery != null && widget.initialQuery!.isNotEmpty) {
+          context.read<Icd10SearchCubit>().onQueryChanged(widget.initialQuery!);
+        }
+        _focusNode.requestFocus();
+      }
     });
   }
 

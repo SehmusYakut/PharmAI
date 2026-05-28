@@ -37,13 +37,18 @@ class RenameSession extends ChatEvent {
 }
 
 class SendMessage extends ChatEvent {
-  const SendMessage({required this.userId, required this.text});
+  const SendMessage({
+    required this.userId,
+    required this.text,
+    required this.localeCode,
+  });
 
   final String userId;
   final String text;
+  final String localeCode;
 
   @override
-  List<Object?> get props => [userId, text];
+  List<Object?> get props => [userId, text, localeCode];
 }
 
 class UpgradeToPremium extends ChatEvent {
@@ -53,4 +58,13 @@ class UpgradeToPremium extends ChatEvent {
 
   @override
   List<Object?> get props => [userId];
+}
+
+class _UpdateSessionTitle extends ChatEvent {
+  const _UpdateSessionTitle({required this.session, required this.sessions});
+  final ChatSession session;
+  final List<ChatSession> sessions;
+
+  @override
+  List<Object?> get props => [session, sessions];
 }

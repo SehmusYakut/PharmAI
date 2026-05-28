@@ -102,7 +102,7 @@ class _IvDripRateSectionState extends State<_IvDripRateSection> {
               const SizedBox(width: 12),
               Expanded(
                 child: DropdownButtonFormField<int>(
-                  value: _dropFactor,
+                  initialValue: _dropFactor,
                   isExpanded: true,
                   decoration: InputDecoration(
                     labelText: l.calcDropFactor,
@@ -111,15 +111,15 @@ class _IvDripRateSectionState extends State<_IvDripRateSection> {
                   ),
                   items: const [10, 15, 20, 60]
                       .map(
-                        (value) => DropdownMenuItem(
-                          value: value,
-                          child: Text(l.calcDropFactorOption(value)),
+                        (f) => DropdownMenuItem(
+                          value: f,
+                          child: Text(l.calcDropFactorOption(f)),
                         ),
                       )
                       .toList(),
-                  onChanged: (value) {
-                    if (value == null) return;
-                    setState(() => _dropFactor = value);
+                  onChanged: (val) {
+                    if (val == null) return;
+                    setState(() => _dropFactor = val);
                   },
                 ),
               ),
@@ -142,7 +142,7 @@ class _IvDripRateSectionState extends State<_IvDripRateSection> {
               const SizedBox(width: 12),
               Expanded(
                 child: DropdownButtonFormField<IvTimeUnit>(
-                  value: _timeUnit,
+                  initialValue: _timeUnit,
                   isExpanded: true,
                   decoration: InputDecoration(
                     labelText: l.calcTimeUnit,
@@ -159,9 +159,9 @@ class _IvDripRateSectionState extends State<_IvDripRateSection> {
                       child: Text(l.calcMinutes),
                     ),
                   ],
-                  onChanged: (value) {
-                    if (value == null) return;
-                    setState(() => _timeUnit = value);
+                  onChanged: (val) {
+                    if (val == null) return;
+                    setState(() => _timeUnit = val);
                   },
                 ),
               ),

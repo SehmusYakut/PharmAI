@@ -7,7 +7,7 @@ class UserProfile extends Equatable {
     this.customName,
     this.photoUrl,
     this.languageCode = 'tr',
-    this.isDarkMode = false,
+    this.themeMode = 'light',
   });
 
   final String firebaseUid;
@@ -15,13 +15,13 @@ class UserProfile extends Equatable {
   final String? customName;
   final String? photoUrl;
   final String languageCode;
-  final bool isDarkMode;
+  final String themeMode;
 
   UserProfile copyWith({
     String? customName,
     String? photoUrl,
     String? languageCode,
-    bool? isDarkMode,
+    String? themeMode,
   }) =>
       UserProfile(
         firebaseUid: firebaseUid,
@@ -29,10 +29,10 @@ class UserProfile extends Equatable {
         customName: customName ?? this.customName,
         photoUrl: photoUrl ?? this.photoUrl,
         languageCode: languageCode ?? this.languageCode,
-        isDarkMode: isDarkMode ?? this.isDarkMode,
+        themeMode: themeMode ?? this.themeMode,
       );
 
   @override
   List<Object?> get props =>
-      [firebaseUid, email, customName, photoUrl, languageCode, isDarkMode];
+      [firebaseUid, email, customName, photoUrl, languageCode, themeMode];
 }

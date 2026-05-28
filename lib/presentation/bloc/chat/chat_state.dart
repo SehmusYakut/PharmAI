@@ -1,46 +1,59 @@
 part of 'chat_bloc.dart';
 
+enum ChatStatus { initial, loading, success, failure, typing }
+
 enum ChatErrorKey { localSaveFailed, upgradeFailed, renameFailed }
 
 abstract class ChatState extends Equatable {
-  const ChatState();
+  const ChatState({
+    this.status = ChatStatus.initial,
+    this.sessions = const [],
+    this.messages = const [],
+  });
+
+  final ChatStatus status;
+  final List<ChatSession> sessions;
+  final List<ChatMessage> messages;
 
   @override
-  List<Object?> get props => [];
+  List<Object?> get props => [status, sessions, messages];
 }
 
 class ChatInitial extends ChatState {
-  const ChatInitial();
+  const ChatInitial() : super();
 }
 
 class ChatLoading extends ChatState {
-  const ChatLoading();
+  const ChatLoading({super.sessions, super.messages}) : super(status: ChatStatus.loading);
 }
 
 class ChatSessionsLoaded extends ChatState {
-  const ChatSessionsLoaded({required this.sessions, this.openSessionId});
+  const ChatSessionsLoaded({required super.sessions, this.openSessionId})
+      : super(status: ChatStatus.success);
 
-  final List<ChatSession> sessions;
   final int? openSessionId;
 
   @override
-  List<Object?> get props => [sessions, openSessionId];
+  List<Object?> get props => [status, sessions, messages, openSessionId];
 }
 
 class ChatRoomState extends ChatState {
   const ChatRoomState({
-    required this.sessions,
+    required super.sessions,
     required this.session,
-    required this.messages,
+    required super.messages,
     required this.isSending,
+    this.isStreaming = false,
+    this.streamingText = '',
     this.errorMessage,
     this.errorKey,
+    super.status = ChatStatus.success,
   });
 
-  final List<ChatSession> sessions;
   final ChatSession session;
-  final List<ChatMessage> messages;
   final bool isSending;
+  final bool isStreaming;
+  final String streamingText;
   final String? errorMessage;
   final ChatErrorKey? errorKey;
 
@@ -49,26 +62,36 @@ class ChatRoomState extends ChatState {
     ChatSession? session,
     List<ChatMessage>? messages,
     bool? isSending,
+    bool? isStreaming,
+    String? streamingText,
     String? errorMessage,
     ChatErrorKey? errorKey,
-  }) => ChatRoomState(
-    sessions: sessions ?? this.sessions,
-    session: session ?? this.session,
-    messages: messages ?? this.messages,
-    isSending: isSending ?? this.isSending,
-    errorMessage: errorMessage,
-    errorKey: errorKey,
-  );
+    ChatStatus? status,
+  }) =>
+      ChatRoomState(
+        sessions: sessions ?? this.sessions,
+        session: session ?? this.session,
+        messages: messages ?? this.messages,
+        isSending: isSending ?? this.isSending,
+        isStreaming: isStreaming ?? this.isStreaming,
+        streamingText: streamingText ?? this.streamingText,
+        errorMessage: errorMessage,
+        errorKey: errorKey,
+        status: status ?? this.status,
+      );
 
   @override
   List<Object?> get props => [
-    sessions,
-    session,
-    messages,
-    isSending,
-    errorMessage,
-    errorKey,
-  ];
+        status,
+        sessions,
+        session,
+        messages,
+        isSending,
+        isStreaming,
+        streamingText,
+        errorMessage,
+        errorKey,
+      ];
 }
 
 class PremiumLimitReachedState extends ChatRoomState {
@@ -77,20 +100,25 @@ class PremiumLimitReachedState extends ChatRoomState {
     required super.session,
     required super.messages,
     required super.isSending,
+    super.isStreaming = false,
+    super.streamingText = '',
     required this.queryCount,
     required this.limit,
-  });
+  }) : super(status: ChatStatus.success);
 
   final int queryCount;
   final int limit;
 
   @override
   List<Object?> get props => [
-    sessions,
-    session,
-    messages,
-    isSending,
-    queryCount,
-    limit,
-  ];
+        status,
+        sessions,
+        session,
+        messages,
+        isSending,
+        isStreaming,
+        streamingText,
+        queryCount,
+        limit,
+      ];
 }

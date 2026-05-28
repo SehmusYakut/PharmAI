@@ -97,7 +97,7 @@ class _PediatricWeightSectionState extends State<_PediatricWeightSection> {
           const SizedBox(width: 12),
           Expanded(
             child: DropdownButtonFormField<PediatricAgeUnit>(
-              value: _ageUnit,
+              initialValue: _ageUnit,
               isExpanded: true,
               decoration: InputDecoration(
                 labelText: l.calcAgeUnit,
@@ -114,9 +114,9 @@ class _PediatricWeightSectionState extends State<_PediatricWeightSection> {
                   child: Text(l.calcYears),
                 ),
               ],
-              onChanged: (value) {
-                if (value == null) return;
-                setState(() => _ageUnit = value);
+              onChanged: (val) {
+                if (val == null) return;
+                setState(() => _ageUnit = val);
               },
             ),
           ),

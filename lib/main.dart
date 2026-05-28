@@ -24,6 +24,7 @@ import 'data/datasources/local/seed_runner.dart';
 import 'firebase_options.dart';
 import 'injection_container.dart';
 import 'presentation/bloc/auth/auth_bloc.dart';
+import 'presentation/bloc/bookmark/bookmark_bloc.dart';
 import 'presentation/bloc/locale/locale_cubit.dart';
 import 'presentation/bloc/onboarding/onboarding_cubit.dart';
 import 'presentation/bloc/theme/theme_cubit.dart';
@@ -41,14 +42,16 @@ void main() async {
 
   // Only print and check GEMINI_API_KEY if dotenv is initialized
   if (dotenv.isInitialized) {
-    print('Loaded GEMINI_API_KEY: \'${dotenv.env['GEMINI_API_KEY']}\'');
+    debugPrint('Loaded GEMINI_API_KEY: \'${dotenv.env['GEMINI_API_KEY']}\'');
     AppConfig.ensureGeminiApiKeyLoaded();
   } else {
-    print('dotenv not initialized; skipping GEMINI_API_KEY check.');
+    debugPrint('dotenv not initialized; skipping GEMINI_API_KEY check.');
   }
 
   try {
-    await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
   } catch (e) {
     debugPrint('Firebase init error: $e');
   }
@@ -77,6 +80,7 @@ void main() async {
         BlocProvider(create: (_) => sl<ThemeCubit>()),
         BlocProvider(create: (_) => sl<LocaleCubit>()),
         BlocProvider(create: (_) => sl<AuthBloc>()..add(const AuthStarted())),
+        BlocProvider(create: (_) => sl<BookmarkBloc>()),
         BlocProvider(create: (_) => sl<OnboardingCubit>()..initialize()),
       ],
       child: BlocListener<LocaleCubit, Locale>(
@@ -132,11 +136,25 @@ Future<void> _runBackgroundSeedFlow() async {
 Future<void> _verifySeededData() async {
   final db = sl<LocalDatabaseService>();
   final icd10Count = await db.countIcd10();
+  final drugCount = await db.countDrugs();
+  if (icd10Count > 0 && drugCount > 0) return;
+
+  final token = ServicesBinding.rootIsolateToken;
+  if (token != null) {
+    final dir = await getApplicationDocumentsDirectory();
+    await seedLocalDatabaseInBackground(
+      SeedRequest(
+        dbDirectory: dir.path,
+        dbName: AppConfig.isarDbName,
+        rootIsolateToken: token,
+      ),
+    );
+    return;
+  }
+
   if (icd10Count == 0) {
     await _seedIcd10IfEmpty();
   }
-
-  final drugCount = await db.countDrugs();
   if (drugCount == 0) {
     await _seedDrugsIfEmpty();
   }
@@ -163,13 +181,13 @@ class PharmAIApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    ThemeMode themeMode = ThemeMode.system;
+    String themeState = 'light';
     Locale locale = const Locale('tr');
 
     try {
-      themeMode = context.watch<ThemeCubit>().state;
+      themeState = context.watch<ThemeCubit>().state;
     } catch (_) {
-      themeMode = ThemeMode.system;
+      themeState = 'light';
     }
 
     try {
@@ -178,12 +196,19 @@ class PharmAIApp extends StatelessWidget {
       locale = const Locale('tr');
     }
 
+    ThemeData themeData;
+    if (themeState == 'dark') {
+      themeData = AppTheme.dark;
+    } else if (themeState == 'midnight') {
+      themeData = AppTheme.midnight;
+    } else {
+      themeData = AppTheme.light;
+    }
+
     return MaterialApp.router(
       title: AppConfig.appName,
       debugShowCheckedModeBanner: false,
-      theme: AppTheme.light,
-      darkTheme: AppTheme.dark,
-      themeMode: themeMode,
+      theme: themeData,
       locale: locale,
       routerConfig: buildRouterConfig(),
       localizationsDelegates: const [
@@ -207,7 +232,7 @@ GoRouter buildRouterConfig() {
     routes: [
       GoRoute(
         path: AppConstants.routeHome,
-        builder: (_, __) =>
+        builder: (context, state) =>
             const Scaffold(body: Center(child: SizedBox.shrink())),
       ),
     ],

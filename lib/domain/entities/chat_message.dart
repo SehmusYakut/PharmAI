@@ -17,6 +17,9 @@ class ChatMessage extends Equatable {
   final String content;
   final DateTime timestamp;
 
+  bool get isUser => role == ChatRole.user;
+  String get text => content;
+
   @override
   List<Object> get props => [id, sessionId, role, content, timestamp];
 }

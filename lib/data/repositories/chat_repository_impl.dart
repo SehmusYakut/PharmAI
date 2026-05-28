@@ -112,12 +112,37 @@ class ChatRepositoryImpl implements ChatRepository {
   Future<Either<Failure, String>> generateReply({
     required List<ChatMessage> history,
     required String message,
+    required String localeCode,
   }) async {
     try {
-      final text = await _ai.generateReply(history: history, message: message);
+      final text = await _ai.generateReply(
+        history: history,
+        message: message,
+        localeCode: localeCode,
+      );
       return Right(text);
     } catch (e) {
       return Left(NetworkFailure(e.toString()));
+    }
+  }
+
+  @override
+  Stream<Either<Failure, String>> streamReply({
+    required List<ChatMessage> history,
+    required String message,
+    required String localeCode,
+  }) async* {
+    try {
+      await for (final chunk in _ai.streamReply(
+        history: history,
+        message: message,
+        localeCode: localeCode,
+      )) {
+        if (chunk.isEmpty) continue;
+        yield Right(chunk);
+      }
+    } catch (e) {
+      yield Left(NetworkFailure(e.toString()));
     }
   }
 

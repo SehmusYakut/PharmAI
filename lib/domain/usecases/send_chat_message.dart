@@ -8,9 +8,13 @@ class SendChatMessage {
 
   final ChatRepository _repository;
 
-  Future<Either<Failure, String>> call({
+  Stream<Either<Failure, String>> call({
     required List<ChatMessage> history,
     required String message,
-  }) =>
-      _repository.generateReply(history: history, message: message);
+    required String localeCode,
+  }) => _repository.streamReply(
+    history: history,
+    message: message,
+    localeCode: localeCode,
+  );
 }

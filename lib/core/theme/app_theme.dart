@@ -13,9 +13,16 @@ abstract class AppTheme {
   static const Color _slate800 = Color(0xFF1E293B);
   static const Color _slate900 = Color(0xFF0F172A);
 
+  // Midnight High-Contrast Constants
+  static const Color _midnightBg = Color(0xFF0A1128);
+  static const Color _neonTeal = Color(0xFF00F2FE);
+  static const Color _silverSlate = Color(0xFFE2E8F0);
+
   static ThemeData get light => _buildTheme(Brightness.light);
 
   static ThemeData get dark => _buildTheme(Brightness.dark);
+
+  static ThemeData get midnight => _buildMidnightTheme();
 
   static ThemeData _buildTheme(Brightness brightness) {
     final isDark = brightness == Brightness.dark;
@@ -48,10 +55,8 @@ abstract class AppTheme {
       onTertiaryContainer: isDark
           ? const Color(0xFFBFEFFF)
           : const Color(0xFF0B3652),
-      surface: isDark ? _slate900 : Colors.white,
+      surface: isDark ? _deepSeaBlueDark : _slate50,
       onSurface: isDark ? const Color(0xFFE2E8F0) : _slate800,
-      background: isDark ? _deepSeaBlueDark : _slate50,
-      onBackground: isDark ? const Color(0xFFE2E8F0) : _slate800,
       surfaceDim: isDark ? const Color(0xFF0B1220) : _slate100,
       surfaceBright: isDark ? const Color(0xFF182033) : const Color(0xFFFBFDFF),
       surfaceContainerLowest: isDark ? const Color(0xFF0B1220) : Colors.white,
@@ -138,7 +143,7 @@ abstract class AppTheme {
       brightness: brightness,
       colorScheme: scheme,
       fontFamily: 'Inter',
-      scaffoldBackgroundColor: scheme.background,
+      scaffoldBackgroundColor: scheme.surface,
       canvasColor: scheme.surface,
       textTheme: textTheme,
       appBarTheme: AppBarTheme(
@@ -250,6 +255,50 @@ abstract class AppTheme {
           TargetPlatform.macOS: FadeUpwardsPageTransitionsBuilder(),
           TargetPlatform.windows: FadeUpwardsPageTransitionsBuilder(),
         },
+      ),
+    );
+  }
+
+  static ThemeData _buildMidnightTheme() {
+    final scheme = ColorScheme.fromSeed(
+      seedColor: _neonTeal,
+      brightness: Brightness.dark,
+    ).copyWith(
+      primary: _neonTeal,
+      onPrimary: _midnightBg,
+      primaryContainer: const Color(0xFF003F4F),
+      onPrimaryContainer: _neonTeal,
+      secondary: const Color(0xFF38BDF8),
+      onSecondary: _midnightBg,
+      surface: _midnightBg,
+      onSurface: Colors.white,
+      surfaceContainerLowest: const Color(0xFF040914),
+      surfaceContainerHigh: const Color(0xFF1E293B),
+      onSurfaceVariant: _silverSlate,
+      outline: Colors.white24,
+    );
+
+    final baseTheme = _buildTheme(Brightness.dark);
+
+    return baseTheme.copyWith(
+      colorScheme: scheme,
+      scaffoldBackgroundColor: _midnightBg,
+      textTheme: baseTheme.textTheme.apply(
+        bodyColor: Colors.white,
+        displayColor: Colors.white,
+      ),
+      cardTheme: baseTheme.cardTheme.copyWith(
+        color: const Color(0xFF162033).withValues(alpha: 0.8),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(24),
+          side: const BorderSide(color: Colors.white24, width: 1),
+        ),
+      ),
+      appBarTheme: baseTheme.appBarTheme.copyWith(
+        titleTextStyle: baseTheme.textTheme.titleLarge?.copyWith(
+          color: Colors.white,
+          fontWeight: FontWeight.bold,
+        ),
       ),
     );
   }
