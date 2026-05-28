@@ -95,8 +95,10 @@ class AppLocalizations {
   const AppLocalizations(this.locale);
   final Locale locale;
 
-  static AppLocalizations of(BuildContext context) =>
-      Localizations.of<AppLocalizations>(context, AppLocalizations)!;
+  static AppLocalizations of(BuildContext context) {
+    return Localizations.of<AppLocalizations>(context, AppLocalizations) ??
+        AppLocalizations(const Locale('tr'));
+  }
 
   static const LocalizationsDelegate<AppLocalizations> delegate =
       _AppLocalizationsDelegate();
@@ -399,7 +401,8 @@ class _AppLocalizationsDelegate
   const _AppLocalizationsDelegate();
 
   @override
-  bool isSupported(Locale locale) => ['tr', 'en'].contains(locale.languageCode);
+  bool isSupported(Locale locale) =>
+      ['tr', 'en', 'de'].contains(locale.languageCode);
 
   @override
   Future<AppLocalizations> load(Locale locale) =>

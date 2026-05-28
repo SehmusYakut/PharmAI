@@ -35,39 +35,17 @@ bool _seedFlowStarted = false;
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  try {
-    await dotenv.load(fileName: '.env');
-  } catch (_) {
-    // .env is optional in debug; missing file should not crash startup.
-  }
+  // Run heavy initialization tasks in parallel to reduce cold start latency.
+  await Future.wait([
+    _loadEnv(),
+    Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform),
+    _initGoogleSignIn(),
+    initDependencies(),
+  ]).catchError((e) {
+    debugPrint('Parallel init error: $e');
+    return [];
+  });
 
-  // Only print and check GEMINI_API_KEY if dotenv is initialized
-  if (dotenv.isInitialized) {
-    debugPrint('Loaded GEMINI_API_KEY: \'${dotenv.env['GEMINI_API_KEY']}\'');
-    AppConfig.ensureGeminiApiKeyLoaded();
-  } else {
-    debugPrint('dotenv not initialized; skipping GEMINI_API_KEY check.');
-  }
-
-  try {
-    await Firebase.initializeApp(
-      options: DefaultFirebaseOptions.currentPlatform,
-    );
-  } catch (e) {
-    debugPrint('Firebase init error: $e');
-  }
-
-  try {
-    await GoogleSignIn.instance.initialize(
-      serverClientId:
-          '521840446802-9h88fdbbebbv4s1mjme987p4mm4esrlh.apps.googleusercontent.com',
-    );
-  } catch (e) {
-    debugPrint('GoogleSignIn init error: $e');
-  }
-
-  await initDependencies();
-  
   // Non-blocking RASP check.
   unawaited(_performRaspCheck());
 
@@ -104,6 +82,26 @@ void main() async {
       ),
     ),
   );
+}
+
+Future<void> _loadEnv() async {
+  try {
+    await dotenv.load(fileName: '.env');
+    if (dotenv.isInitialized) {
+      AppConfig.ensureGeminiApiKeyLoaded();
+    }
+  } catch (_) {}
+}
+
+Future<void> _initGoogleSignIn() async {
+  try {
+    await GoogleSignIn.instance.initialize(
+      serverClientId:
+          '521840446802-9h88fdbbebbv4s1mjme987p4mm4esrlh.apps.googleusercontent.com',
+    );
+  } catch (e) {
+    debugPrint('GoogleSignIn init error: $e');
+  }
 }
 
 Future<void> _performRaspCheck() async {

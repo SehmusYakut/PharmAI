@@ -21,7 +21,6 @@ import 'package:pharmai/data/models/local_profile_model.dart';
 ///     instance is shared across all repositories.
 ///   • Async CRUD: every write goes through an Isar write transaction to
 ///     guarantee ACID semantics with no thread contention.
-///   • Background Init: Open operations run in a separate isolate.
 class LocalDatabaseService {
   Isar? _db;
 
@@ -31,17 +30,12 @@ class LocalDatabaseService {
   Future<Isar> get db async => _db ??= await _open();
 
   Future<Isar> _open() async {
-    final dir = await getApplicationDocumentsDirectory();
-    final path = dir.path;
-    
-    // Perform Isar.open in a background isolate to keep main thread free.
-    return compute(_openIsarInIsolate, _IsarOpenArgs(
-      path: path,
-    ));
-  }
-
-  static Future<Isar> _openIsarInIsolate(_IsarOpenArgs args) async {
     await Isar.initializeIsarCore(download: true);
+    final dir = await getApplicationDocumentsDirectory();
+    
+    // Isar.open is already an asynchronous operation that handles its own
+    // background I/O. We avoid 'compute' or manual isolates because Isar 
+    // instances are not sendable between isolates.
     return Isar.open(
       [
         Icd10CodeModelSchema,
@@ -52,7 +46,7 @@ class LocalDatabaseService {
         ChatMessageModelSchema,
         ChatUsageModelSchema,
       ],
-      directory: args.path,
+      directory: dir.path,
       name: AppConfig.isarDbName,
       inspector: kDebugMode,
     );
@@ -238,9 +232,4 @@ class LocalDatabaseService {
     final isar = await db;
     return isar.drugModels.count();
   }
-}
-
-class _IsarOpenArgs {
-  _IsarOpenArgs({required this.path});
-  final String path;
 }
