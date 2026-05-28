@@ -1,5 +1,7 @@
+import 'dart:convert';
 import 'dart:isolate';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:isar/isar.dart';
 import 'package:pharmai/data/datasources/local/drug_json_parser.dart';
@@ -47,20 +49,41 @@ Future<void> seedLocalDatabaseInBackground(SeedRequest request) async {
       name: request.dbName,
     );
 
+    final bundle = _IsolateAssetBundle();
+
     final icd10Count = await isar.icd10CodeModels.count();
     if (icd10Count == 0) {
-      final raw = await rootBundle.loadString('assets/data/icd10_codes.csv');
+      final raw = await bundle.loadString('assets/data/icd10_codes.csv');
       final models = Icd10CsvParser.parseRaw(raw);
       await isar.writeTxn(() => isar.icd10CodeModels.putAll(models));
     }
 
     final drugCount = await isar.drugModels.count();
     if (drugCount == 0) {
-      final raw = await rootBundle.loadString('assets/data/drugs_data.json');
+      final raw = await bundle.loadString('assets/data/drugs_data.json');
       final models = DrugJsonParser.parseRaw(raw);
       await isar.writeTxn(() => isar.drugModels.putAll(models));
     }
 
     await isar.close();
   });
+}
+
+/// A specialized [AssetBundle] for use in background isolates.
+///
+/// Uses [BackgroundIsolateBinaryMessenger] to communicate with the root
+/// isolate for asset loading, avoiding [ServicesBinding] dependency.
+class _IsolateAssetBundle extends CachingAssetBundle {
+  @override
+  Future<ByteData> load(String key) async {
+    final ByteData? encoded = await BackgroundIsolateBinaryMessenger.instance
+        .send('flutter/assets', utf8.encoder.convert(key).buffer.asByteData());
+
+    if (encoded == null) {
+      throw FlutterError(
+        'Unable to load asset: $key. The asset might be missing or not listed in pubspec.yaml.',
+      );
+    }
+    return encoded;
+  }
 }
