@@ -45,6 +45,12 @@ dependencies:
   path_provider: ^2.1.1
   shared_preferences: ^2.3.3
 
+  # Security Hardening
+  flutter_secure_storage: ^9.2.2
+  safe_device: ^1.1.2
+  crypto: ^3.0.6
+  http: ^1.2.2
+
   # RFC 4180-compliant CSV parsing (handles embedded newlines in quoted fields)
   csv: ^6.0.0
   firebase_core: ^4.7.0

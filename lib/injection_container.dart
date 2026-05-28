@@ -2,6 +2,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:get_it/get_it.dart';
 import 'package:pharmai/core/auth/auth_state_notifier.dart';
 import 'package:pharmai/core/config/app_config.dart';
+import 'package:pharmai/core/network/secure_network_client.dart';
+import 'package:pharmai/core/security/security_service.dart';
 import 'package:pharmai/data/datasources/local/app_preferences_local_data_source.dart';
 import 'package:pharmai/data/datasources/local/local_database_service.dart';
 import 'package:pharmai/data/datasources/remote/gemini_chat_service.dart';
@@ -54,15 +56,19 @@ final GetIt sl = GetIt.instance;
 Future<void> initDependencies() async {
   // ── Core ──────────────────────────────────────────────────────────────────
   sl.registerLazySingleton<AuthStateNotifier>(() => AuthStateNotifier());
+  sl.registerLazySingleton<SecurityService>(() => SecurityService());
+  sl.registerLazySingleton<SecureNetworkClient>(() => SecureNetworkClient());
 
   // ── Infrastructure ────────────────────────────────────────────────────────
-  sl.registerLazySingleton<LocalDatabaseService>(() => LocalDatabaseService());
+  sl.registerLazySingleton<LocalDatabaseService>(
+    () => LocalDatabaseService(),
+  );
   sl.registerLazySingleton<AppPreferencesLocalDataSource>(
     () => AppPreferencesLocalDataSource(),
   );
   sl.registerLazySingleton<FirebaseAuth>(() => FirebaseAuth.instance);
   sl.registerLazySingleton(
-    () => GeminiChatService(apiKey: AppConfig.geminiApiKey),
+    () => GeminiChatService(apiKey: AppConfig.geminiApiKey, httpClient: sl<SecureNetworkClient>()),
   );
 
   // ── Repositories ──────────────────────────────────────────────────────────
@@ -81,7 +87,7 @@ Future<void> initDependencies() async {
   );
   sl.registerLazySingleton<DrugRepository>(() => DrugRepositoryImpl(sl()));
   sl.registerLazySingleton<ChatRepository>(
-    () => ChatRepositoryImpl(sl(), sl()),
+    () => ChatRepositoryImpl(sl(), sl(), sl()),
   );
 
   // ── Use-cases ─────────────────────────────────────────────────────────────

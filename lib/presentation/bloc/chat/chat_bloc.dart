@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:pharmai/core/config/app_config.dart';
 import 'package:pharmai/core/constants/app_constants.dart';
 import 'package:pharmai/domain/entities/chat_message.dart';
 import 'package:pharmai/domain/entities/chat_session.dart';
@@ -190,6 +191,17 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
           isSending: false,
           queryCount: usage.queryCount,
           limit: AppConstants.chatFreeQueryLimit,
+        ),
+      );
+      return;
+    }
+
+    if (AppConfig.isDeviceCompromised) {
+      emit(
+        current.copyWith(
+          errorMessage: 'Chat is disabled on compromised devices for security.',
+          isSending: false,
+          status: ChatStatus.failure,
         ),
       );
       return;

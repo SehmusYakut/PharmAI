@@ -1,14 +1,17 @@
 import 'package:google_generative_ai/google_generative_ai.dart';
+import 'package:http/http.dart' as http;
 import 'package:pharmai/domain/entities/chat_message.dart';
 
 class GeminiChatService {
-  GeminiChatService({required String apiKey})
-    : _model = apiKey.trim().isNotEmpty
-          ? GenerativeModel(
-              model: 'gemini-2.5-flash-lite',
-              apiKey: apiKey.trim(),
-            )
-          : null;
+  GeminiChatService({required String apiKey, http.Client? httpClient})
+    : _model =
+          apiKey.trim().isNotEmpty
+              ? GenerativeModel(
+                model: 'gemini-2.0-flash-exp',
+                apiKey: apiKey.trim(),
+                httpClient: httpClient,
+              )
+              : null;
 
   final GenerativeModel? _model;
 

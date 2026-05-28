@@ -13,6 +13,9 @@ class ChatUsageModel {
   int queryCount = 0;
   bool isPremium = false;
 
+  /// HMAC-SHA256 signature to prevent memory tampering of premium status.
+  String? signature;
+
   ChatUsage toDomain() => ChatUsage(
         userId: firebaseUid,
         queryCount: queryCount,

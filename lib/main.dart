@@ -23,6 +23,7 @@ import 'data/datasources/local/local_database_service.dart';
 import 'data/datasources/local/seed_runner.dart';
 import 'firebase_options.dart';
 import 'injection_container.dart';
+import 'core/security/security_service.dart';
 import 'presentation/bloc/auth/auth_bloc.dart';
 import 'presentation/bloc/bookmark/bookmark_bloc.dart';
 import 'presentation/bloc/locale/locale_cubit.dart';
@@ -66,6 +67,10 @@ void main() async {
   }
 
   await initDependencies();
+  
+  // Non-blocking RASP check.
+  unawaited(_performRaspCheck());
+
   // Non-blocking: locale code is a best-effort fire-and-forget at startup.
   FirebaseAuth.instance.setLanguageCode(sl<LocaleCubit>().state.languageCode);
 
@@ -99,6 +104,14 @@ void main() async {
       ),
     ),
   );
+}
+
+Future<void> _performRaspCheck() async {
+  final security = sl<SecurityService>();
+  final isCompromised = await security.isDeviceCompromised();
+  if (isCompromised) {
+    AppConfig.markDeviceAsCompromised();
+  }
 }
 
 Future<void> _runBackgroundSeedFlow() async {

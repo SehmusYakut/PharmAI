@@ -1,6 +1,7 @@
 import 'package:fpdart/fpdart.dart';
 import 'package:isar/isar.dart';
 import 'package:pharmai/core/error/failures.dart';
+import 'package:pharmai/core/security/security_service.dart';
 import 'package:pharmai/data/datasources/local/local_database_service.dart';
 import 'package:pharmai/data/datasources/remote/gemini_chat_service.dart';
 import 'package:pharmai/data/models/chat_message_model.dart';
@@ -12,10 +13,11 @@ import 'package:pharmai/domain/entities/chat_usage.dart';
 import 'package:pharmai/domain/repositories/chat_repository.dart';
 
 class ChatRepositoryImpl implements ChatRepository {
-  ChatRepositoryImpl(this._db, this._ai);
+  ChatRepositoryImpl(this._db, this._ai, this._security);
 
   final LocalDatabaseService _db;
   final GeminiChatService _ai;
+  final SecurityService _security;
 
   @override
   Future<Either<Failure, List<ChatSession>>> fetchSessions(
@@ -154,15 +156,26 @@ class ChatRepositoryImpl implements ChatRepository {
           .where()
           .firebaseUidEqualTo(userId)
           .findFirst();
-      final isNew = usage == null;
-      usage ??= ChatUsageModel.fromValues(
-        userId: userId,
-        queryCount: 0,
-        isPremium: false,
-      );
-      if (isNew) {
+      
+      if (usage == null) {
+        usage = ChatUsageModel.fromValues(
+          userId: userId,
+          queryCount: 0,
+          isPremium: false,
+        );
+        usage.signature = await _calculateSignature(usage);
         await isar.writeTxn(() => isar.chatUsageModels.put(usage!));
+      } else {
+        // Verify signature to prevent memory/disk tampering.
+        final currentSig = await _calculateSignature(usage);
+        if (usage.signature != currentSig) {
+          // If signature mismatch, we treat user as non-premium for safety.
+          usage.isPremium = false;
+          usage.signature = await _calculateSignature(usage);
+          await isar.writeTxn(() => isar.chatUsageModels.put(usage!));
+        }
       }
+
       return Right(usage.toDomain());
     } catch (e) {
       return Left(CacheFailure(e.toString()));
@@ -183,6 +196,7 @@ class ChatRepositoryImpl implements ChatRepository {
         isPremium: false,
       );
       usage.queryCount += 1;
+      usage.signature = await _calculateSignature(usage);
       await isar.writeTxn(() => isar.chatUsageModels.put(usage!));
       return const Right(unit);
     } catch (e) {
@@ -204,10 +218,16 @@ class ChatRepositoryImpl implements ChatRepository {
         isPremium: false,
       );
       usage.isPremium = value;
+      usage.signature = await _calculateSignature(usage);
       await isar.writeTxn(() => isar.chatUsageModels.put(usage!));
       return const Right(unit);
     } catch (e) {
       return Left(CacheFailure(e.toString()));
     }
+  }
+
+  Future<String> _calculateSignature(ChatUsageModel model) async {
+    final payload = '${model.firebaseUid}:${model.queryCount}:${model.isPremium}';
+    return _security.calculateSignature(payload);
   }
 }

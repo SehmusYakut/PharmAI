@@ -32,19 +32,19 @@ const LocalProfileModelSchema = CollectionSchema(
       name: r'firebaseUid',
       type: IsarType.string,
     ),
-    r'isDarkMode': PropertySchema(
-      id: 3,
-      name: r'isDarkMode',
-      type: IsarType.bool,
-    ),
     r'languageCode': PropertySchema(
-      id: 4,
+      id: 3,
       name: r'languageCode',
       type: IsarType.string,
     ),
     r'photoUrl': PropertySchema(
-      id: 5,
+      id: 4,
       name: r'photoUrl',
+      type: IsarType.string,
+    ),
+    r'themeMode': PropertySchema(
+      id: 5,
+      name: r'themeMode',
       type: IsarType.string,
     )
   },
@@ -97,6 +97,7 @@ int _localProfileModelEstimateSize(
       bytesCount += 3 + value.length * 3;
     }
   }
+  bytesCount += 3 + object.themeMode.length * 3;
   return bytesCount;
 }
 
@@ -109,9 +110,9 @@ void _localProfileModelSerialize(
   writer.writeString(offsets[0], object.customName);
   writer.writeString(offsets[1], object.email);
   writer.writeString(offsets[2], object.firebaseUid);
-  writer.writeBool(offsets[3], object.isDarkMode);
-  writer.writeString(offsets[4], object.languageCode);
-  writer.writeString(offsets[5], object.photoUrl);
+  writer.writeString(offsets[3], object.languageCode);
+  writer.writeString(offsets[4], object.photoUrl);
+  writer.writeString(offsets[5], object.themeMode);
 }
 
 LocalProfileModel _localProfileModelDeserialize(
@@ -125,9 +126,9 @@ LocalProfileModel _localProfileModelDeserialize(
   object.email = reader.readString(offsets[1]);
   object.firebaseUid = reader.readString(offsets[2]);
   object.id = id;
-  object.isDarkMode = reader.readBool(offsets[3]);
-  object.languageCode = reader.readString(offsets[4]);
-  object.photoUrl = reader.readStringOrNull(offsets[5]);
+  object.languageCode = reader.readString(offsets[3]);
+  object.photoUrl = reader.readStringOrNull(offsets[4]);
+  object.themeMode = reader.readString(offsets[5]);
   return object;
 }
 
@@ -145,11 +146,11 @@ P _localProfileModelDeserializeProp<P>(
     case 2:
       return (reader.readString(offset)) as P;
     case 3:
-      return (reader.readBool(offset)) as P;
-    case 4:
       return (reader.readString(offset)) as P;
-    case 5:
+    case 4:
       return (reader.readStringOrNull(offset)) as P;
+    case 5:
+      return (reader.readString(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
   }
@@ -836,16 +837,6 @@ extension LocalProfileModelQueryFilter
   }
 
   QueryBuilder<LocalProfileModel, LocalProfileModel, QAfterFilterCondition>
-      isDarkModeEqualTo(bool value) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addFilterCondition(FilterCondition.equalTo(
-        property: r'isDarkMode',
-        value: value,
-      ));
-    });
-  }
-
-  QueryBuilder<LocalProfileModel, LocalProfileModel, QAfterFilterCondition>
       languageCodeEqualTo(
     String value, {
     bool caseSensitive = true,
@@ -1134,6 +1125,142 @@ extension LocalProfileModelQueryFilter
       ));
     });
   }
+
+  QueryBuilder<LocalProfileModel, LocalProfileModel, QAfterFilterCondition>
+      themeModeEqualTo(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'themeMode',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<LocalProfileModel, LocalProfileModel, QAfterFilterCondition>
+      themeModeGreaterThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'themeMode',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<LocalProfileModel, LocalProfileModel, QAfterFilterCondition>
+      themeModeLessThan(
+    String value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'themeMode',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<LocalProfileModel, LocalProfileModel, QAfterFilterCondition>
+      themeModeBetween(
+    String lower,
+    String upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'themeMode',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<LocalProfileModel, LocalProfileModel, QAfterFilterCondition>
+      themeModeStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.startsWith(
+        property: r'themeMode',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<LocalProfileModel, LocalProfileModel, QAfterFilterCondition>
+      themeModeEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.endsWith(
+        property: r'themeMode',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<LocalProfileModel, LocalProfileModel, QAfterFilterCondition>
+      themeModeContains(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.contains(
+        property: r'themeMode',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<LocalProfileModel, LocalProfileModel, QAfterFilterCondition>
+      themeModeMatches(String pattern, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.matches(
+        property: r'themeMode',
+        wildcard: pattern,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<LocalProfileModel, LocalProfileModel, QAfterFilterCondition>
+      themeModeIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'themeMode',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<LocalProfileModel, LocalProfileModel, QAfterFilterCondition>
+      themeModeIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        property: r'themeMode',
+        value: '',
+      ));
+    });
+  }
 }
 
 extension LocalProfileModelQueryObject
@@ -1187,20 +1314,6 @@ extension LocalProfileModelQuerySortBy
   }
 
   QueryBuilder<LocalProfileModel, LocalProfileModel, QAfterSortBy>
-      sortByIsDarkMode() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'isDarkMode', Sort.asc);
-    });
-  }
-
-  QueryBuilder<LocalProfileModel, LocalProfileModel, QAfterSortBy>
-      sortByIsDarkModeDesc() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'isDarkMode', Sort.desc);
-    });
-  }
-
-  QueryBuilder<LocalProfileModel, LocalProfileModel, QAfterSortBy>
       sortByLanguageCode() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'languageCode', Sort.asc);
@@ -1225,6 +1338,20 @@ extension LocalProfileModelQuerySortBy
       sortByPhotoUrlDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'photoUrl', Sort.desc);
+    });
+  }
+
+  QueryBuilder<LocalProfileModel, LocalProfileModel, QAfterSortBy>
+      sortByThemeMode() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'themeMode', Sort.asc);
+    });
+  }
+
+  QueryBuilder<LocalProfileModel, LocalProfileModel, QAfterSortBy>
+      sortByThemeModeDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'themeMode', Sort.desc);
     });
   }
 }
@@ -1287,20 +1414,6 @@ extension LocalProfileModelQuerySortThenBy
   }
 
   QueryBuilder<LocalProfileModel, LocalProfileModel, QAfterSortBy>
-      thenByIsDarkMode() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'isDarkMode', Sort.asc);
-    });
-  }
-
-  QueryBuilder<LocalProfileModel, LocalProfileModel, QAfterSortBy>
-      thenByIsDarkModeDesc() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addSortBy(r'isDarkMode', Sort.desc);
-    });
-  }
-
-  QueryBuilder<LocalProfileModel, LocalProfileModel, QAfterSortBy>
       thenByLanguageCode() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'languageCode', Sort.asc);
@@ -1325,6 +1438,20 @@ extension LocalProfileModelQuerySortThenBy
       thenByPhotoUrlDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'photoUrl', Sort.desc);
+    });
+  }
+
+  QueryBuilder<LocalProfileModel, LocalProfileModel, QAfterSortBy>
+      thenByThemeMode() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'themeMode', Sort.asc);
+    });
+  }
+
+  QueryBuilder<LocalProfileModel, LocalProfileModel, QAfterSortBy>
+      thenByThemeModeDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'themeMode', Sort.desc);
     });
   }
 }
@@ -1353,13 +1480,6 @@ extension LocalProfileModelQueryWhereDistinct
   }
 
   QueryBuilder<LocalProfileModel, LocalProfileModel, QDistinct>
-      distinctByIsDarkMode() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addDistinctBy(r'isDarkMode');
-    });
-  }
-
-  QueryBuilder<LocalProfileModel, LocalProfileModel, QDistinct>
       distinctByLanguageCode({bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'languageCode', caseSensitive: caseSensitive);
@@ -1370,6 +1490,13 @@ extension LocalProfileModelQueryWhereDistinct
       distinctByPhotoUrl({bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'photoUrl', caseSensitive: caseSensitive);
+    });
+  }
+
+  QueryBuilder<LocalProfileModel, LocalProfileModel, QDistinct>
+      distinctByThemeMode({bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'themeMode', caseSensitive: caseSensitive);
     });
   }
 }
@@ -1402,12 +1529,6 @@ extension LocalProfileModelQueryProperty
     });
   }
 
-  QueryBuilder<LocalProfileModel, bool, QQueryOperations> isDarkModeProperty() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addPropertyName(r'isDarkMode');
-    });
-  }
-
   QueryBuilder<LocalProfileModel, String, QQueryOperations>
       languageCodeProperty() {
     return QueryBuilder.apply(this, (query) {
@@ -1419,6 +1540,13 @@ extension LocalProfileModelQueryProperty
       photoUrlProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'photoUrl');
+    });
+  }
+
+  QueryBuilder<LocalProfileModel, String, QQueryOperations>
+      themeModeProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'themeMode');
     });
   }
 }

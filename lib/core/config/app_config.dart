@@ -86,4 +86,17 @@ class AppConfig {
       'https://pharmai.example.com/privacy';
   static const String kvkkTextUrl =
       'https://pharmai.example.com/kvkk-aydinlatma-metni';
+
+  // ── RASP Status ─────────────────────────────────────────────────────────────
+
+  static bool _isDeviceCompromised = false;
+
+  /// Marks the device as compromised (Rooted/Jailbroken).
+  /// Triggers graceful degradation of sensitive features.
+  static void markDeviceAsCompromised() {
+    _isDeviceCompromised = true;
+  }
+
+  /// Returns true if the device environment is considered unsafe.
+  static bool get isDeviceCompromised => _isDeviceCompromised;
 }

@@ -57,6 +57,19 @@ const BookmarkModelSchema = CollectionSchema(
         )
       ],
     ),
+    r'category': IndexSchema(
+      id: -7560358558326323820,
+      name: r'category',
+      unique: false,
+      replace: false,
+      properties: [
+        IndexPropertySchema(
+          name: r'category',
+          type: IndexType.hash,
+          caseSensitive: true,
+        )
+      ],
+    ),
     r'code': IndexSchema(
       id: 329780482934683790,
       name: r'code',
@@ -270,6 +283,51 @@ extension BookmarkModelQueryWhere
               indexName: r'firebaseUid',
               lower: [],
               upper: [firebaseUid],
+              includeUpper: false,
+            ));
+      }
+    });
+  }
+
+  QueryBuilder<BookmarkModel, BookmarkModel, QAfterWhereClause> categoryEqualTo(
+      String category) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(IndexWhereClause.equalTo(
+        indexName: r'category',
+        value: [category],
+      ));
+    });
+  }
+
+  QueryBuilder<BookmarkModel, BookmarkModel, QAfterWhereClause>
+      categoryNotEqualTo(String category) {
+    return QueryBuilder.apply(this, (query) {
+      if (query.whereSort == Sort.asc) {
+        return query
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r'category',
+              lower: [],
+              upper: [category],
+              includeUpper: false,
+            ))
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r'category',
+              lower: [category],
+              includeLower: false,
+              upper: [],
+            ));
+      } else {
+        return query
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r'category',
+              lower: [category],
+              includeLower: false,
+              upper: [],
+            ))
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r'category',
+              lower: [],
+              upper: [category],
               includeUpper: false,
             ));
       }
