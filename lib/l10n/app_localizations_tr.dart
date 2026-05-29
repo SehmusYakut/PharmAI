@@ -249,4 +249,25 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get chatGoPremium => 'Premiuma Geç';
+
+  @override
+  String get chatWelcomeMessage => 'PharmAI bugün size nasıl yardımcı olabilir?';
+
+  @override
+  String get chatErrorLocalSave => 'Yerel kaydetme başarısız. Lütfen tekrar deneyin.';
+
+  @override
+  String get chatRenameAction => 'Sohbeti yeniden adlandır';
+
+  @override
+  String get chatRenameTitle => 'Sohbeti yeniden adlandır';
+
+  @override
+  String get chatRenameHint => 'Kısa, açıklayıcı başlık';
+
+  @override
+  String get chatRenameCancel => 'Vazgeç';
+
+  @override
+  String get chatRenameSave => 'Kaydet';
 }

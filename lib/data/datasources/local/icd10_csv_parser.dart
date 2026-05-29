@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:csv/csv.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
@@ -40,8 +41,8 @@ abstract class Icd10CsvParser {
   /// Call this once at first launch (or after a reset) and feed the result to
   /// [LocalDatabaseService.putAllIcd10] for bulk insert.
   static Future<List<Icd10CodeModel>> parseFromAssets() async {
-    final raw = await rootBundle.loadString(_assetPath);
-    return compute(_parseCsvData, raw);
+    final data = await rootBundle.load(_assetPath);
+    return compute(_parseByteData, data);
   }
 
   /// Parses raw CSV content already loaded in memory.
@@ -49,6 +50,13 @@ abstract class Icd10CsvParser {
   /// Use this inside background isolates where asset loading is handled
   /// externally and synchronous parsing is preferred.
   static List<Icd10CodeModel> parseRaw(String raw) => _parseCsvData(raw);
+
+  static List<Icd10CodeModel> _parseByteData(ByteData data) {
+    final raw = utf8.decode(
+      data.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes),
+    );
+    return _parseCsvData(raw);
+  }
 
   static List<Icd10CodeModel> _parseCsvData(String raw) {
     // CsvToListConverter handles RFC 4180 quoting, including fields that

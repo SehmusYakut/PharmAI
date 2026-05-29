@@ -128,6 +128,7 @@
   "chatNewSessionTitle": "Neuer Chat",
   "chatEmptyTitle": "Noch keine Gespräche",
   "chatEmptySubtitle": "Starten Sie einen neuen klinischen Chat, um Ihren Verlauf aufzubauen.",
+  "chatWelcomeMessage": "Wie kann PharmAI Ihnen heute helfen?",
   "chatInputHint": "Klinische Frage stellen...",
   "chatTyping": "Denkt nach...",
   "chatRenameAction": "Sitzung umbenennen",

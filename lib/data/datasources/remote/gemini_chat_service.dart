@@ -7,9 +7,10 @@ class GeminiChatService {
     : _model =
           apiKey.trim().isNotEmpty
               ? GenerativeModel(
-                model: 'gemini-2.0-flash-exp',
+                model: 'gemini-2.5-flash-lite',
                 apiKey: apiKey.trim(),
                 httpClient: httpClient,
+                systemInstruction: Content.system(_systemPromptBase),
               )
               : null;
 
@@ -42,7 +43,6 @@ class GeminiChatService {
     }
 
     final contents = <Content>[
-      Content('user', [TextPart(_buildSystemPrompt(localeCode))]),
       ...history.map(
         (m) => Content(m.role == ChatRole.user ? 'user' : 'model', [
           TextPart(m.content),
@@ -72,7 +72,6 @@ class GeminiChatService {
     }
 
     final contents = <Content>[
-      Content('user', [TextPart(_buildSystemPrompt(localeCode))]),
       ...history.map(
         (m) => Content(m.role == ChatRole.user ? 'user' : 'model', [
           TextPart(m.content),
@@ -108,10 +107,5 @@ class GeminiChatService {
       throw Exception('Empty title response from Gemini.');
     }
     return text;
-  }
-
-  static String _buildSystemPrompt(String localeCode) {
-    final locale = localeCode.trim().isEmpty ? 'tr' : localeCode.trim();
-    return '$_systemPromptBase\nLocale hint: $locale';
   }
 }

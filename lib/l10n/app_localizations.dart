@@ -574,6 +574,48 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Go Premium'**
   String get chatGoPremium;
+
+  /// No description provided for @chatWelcomeMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'How can PharmAI help you today?'**
+  String get chatWelcomeMessage;
+
+  /// No description provided for @chatErrorLocalSave.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not save locally. Please try again.'**
+  String get chatErrorLocalSave;
+
+  /// No description provided for @chatRenameAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Rename chat'**
+  String get chatRenameAction;
+
+  /// No description provided for @chatRenameTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Rename chat'**
+  String get chatRenameTitle;
+
+  /// No description provided for @chatRenameHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Short, descriptive title'**
+  String get chatRenameHint;
+
+  /// No description provided for @chatRenameCancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get chatRenameCancel;
+
+  /// No description provided for @chatRenameSave.
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get chatRenameSave;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

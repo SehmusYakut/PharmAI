@@ -241,6 +241,9 @@ class AppLocalizations {
           : 'Unlimited clinical chat, priority responses, and richer context.');
   String get chatGoPremium =>
       _isTr ? 'Premiuma Geç' : (_isDe ? 'Premium abschließen' : 'Go Premium');
+  String get chatWelcomeMessage => _isTr
+      ? 'PharmAI bugün size nasıl yardımcı olabilir?'
+      : (_isDe ? 'Wie kann PharmAI Ihnen heute helfen?' : 'How can PharmAI help you today?');
 
   // ── ICD-10 search page ─────────────────────────────────────────────────────
   String get icd10SearchTitle =>

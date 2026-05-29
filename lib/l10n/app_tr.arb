@@ -128,6 +128,7 @@
   "chatNewSessionTitle": "Yeni sohbet",
   "chatEmptyTitle": "Henüz sohbet yok",
   "chatEmptySubtitle": "Yeni bir klinik sohbet başlatarak geçmişinizi oluşturun.",
+  "chatWelcomeMessage": "PharmAI bugün size nasıl yardımcı olabilir?",
   "chatInputHint": "Klinik bir soru yazın...",
   "chatTyping": "Düşünüyor...",
   "chatRenameAction": "Sohbeti yeniden adlandır",

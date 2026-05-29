@@ -249,4 +249,25 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get chatGoPremium => 'Go Premium';
+
+  @override
+  String get chatWelcomeMessage => 'How can PharmAI help you today?';
+
+  @override
+  String get chatErrorLocalSave => 'Could not save locally. Please try again.';
+
+  @override
+  String get chatRenameAction => 'Rename chat';
+
+  @override
+  String get chatRenameTitle => 'Rename chat';
+
+  @override
+  String get chatRenameHint => 'Short, descriptive title';
+
+  @override
+  String get chatRenameCancel => 'Cancel';
+
+  @override
+  String get chatRenameSave => 'Save';
 }

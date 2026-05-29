@@ -44,8 +44,8 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
   void _scrollToBottom() {
     if (!_scrollController.hasClients) return;
     _scrollController.animateTo(
-      _scrollController.position.maxScrollExtent + 120,
-      duration: const Duration(milliseconds: 240),
+      _scrollController.position.maxScrollExtent,
+      duration: const Duration(milliseconds: 300),
       curve: Curves.easeOut,
     );
   }
@@ -53,10 +53,29 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
+    final theme = Theme.of(context);
 
     return BlocConsumer<ChatBloc, ChatState>(
+      listenWhen: (prev, curr) {
+        if (curr is ChatRoomState && prev is ChatRoomState) {
+          return curr.messages.length != prev.messages.length ||
+              curr.streamingText != prev.streamingText ||
+              curr.errorKey != prev.errorKey ||
+              curr.errorMessage != prev.errorMessage;
+        }
+        return prev.status != curr.status;
+      },
       listener: (context, state) {
-        if (state.sessions.any((s) => s.id == widget.sessionId)) {
+        if (state is ChatRoomState) {
+          if (state.errorKey != null || state.errorMessage != null) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(state.errorMessage ?? l10n.chatErrorLocalSave),
+                backgroundColor: theme.colorScheme.error,
+              ),
+            );
+          }
+          // Scroll on message count change or streaming text update
           WidgetsBinding.instance.addPostFrameCallback((_) => _scrollToBottom());
         }
       },
@@ -66,9 +85,17 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
               orElse: () => null,
             );
 
+        String? streamingText;
+        if (state is ChatRoomState && state.isStreaming) {
+          streamingText = state.streamingText;
+        }
+
+        final bool isTyping = state.status == ChatStatus.typing;
+
         return Scaffold(
           appBar: AppBar(
             title: Text(session?.title ?? l10n.chatNewSessionTitle),
+            centerTitle: true,
             actions: [
               if (session != null)
                 PopupMenuButton<String>(
@@ -100,11 +127,13 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
             children: [
               Expanded(
                 child: _MessageList(
+                  scrollController: _scrollController,
                   messages: state.messages,
                   isLoading: state.status == ChatStatus.loading,
+                  streamingText: streamingText,
                 ),
               ),
-              if (state.status == ChatStatus.typing)
+              if (isTyping && (streamingText == null || streamingText.isEmpty))
                 const Padding(
                   padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                   child: LinearProgressIndicator(minHeight: 2),
@@ -153,48 +182,88 @@ class _ChatRoomPageState extends State<ChatRoomPage> {
     final auth = context.read<AuthBloc>().state;
     if (auth is! AuthAuthenticated) return;
 
-    final localeCode = context.read<LocaleCubit>().state.languageCode;
     context.read<ChatBloc>().add(
       SendMessage(
         userId: auth.profile.firebaseUid,
         text: text,
-        localeCode: localeCode,
+        localeCode: context.read<LocaleCubit>().state.languageCode,
       ),
     );
   }
 }
 
 class _MessageList extends StatelessWidget {
-  const _MessageList({required this.messages, required this.isLoading});
+  const _MessageList({
+    required this.messages,
+    required this.isLoading,
+    required this.scrollController,
+    this.streamingText,
+  });
+
   final List<ChatMessage> messages;
   final bool isLoading;
+  final ScrollController scrollController;
+  final String? streamingText;
 
   @override
   Widget build(BuildContext context) {
     if (isLoading && messages.isEmpty) {
       return const Center(child: CircularProgressIndicator());
     }
-    if (messages.isEmpty) {
+    
+    final showStreaming = streamingText != null && streamingText!.isNotEmpty;
+    final totalCount = messages.length + (showStreaming ? 1 : 0);
+
+    if (totalCount == 0) {
       return Center(
-        child: Icon(
-          Icons.chat_bubble_outline,
-          size: 48,
-          color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.2),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              Icons.chat_bubble_outline,
+              size: 64,
+              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.1),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              AppLocalizations.of(context).chatWelcomeMessage,
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.4),
+              ),
+            ),
+          ],
         ),
       );
     }
 
     return ListView.builder(
-      padding: const EdgeInsets.all(16),
-      itemCount: messages.length,
-      itemBuilder: (context, index) => _MessageBubble(message: messages[index]),
+      controller: scrollController,
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
+      itemCount: totalCount,
+      itemBuilder: (context, index) {
+        if (index < messages.length) {
+          return _MessageBubble(message: messages[index]);
+        } else {
+          return _MessageBubble(
+            message: ChatMessage(
+              id: -1,
+              sessionId: -1,
+              role: ChatRole.model,
+              content: streamingText!,
+              timestamp: DateTime.now(),
+            ),
+            isStreaming: true,
+          );
+        }
+      },
     );
   }
 }
 
 class _MessageBubble extends StatelessWidget {
-  const _MessageBubble({required this.message});
+  const _MessageBubble({required this.message, this.isStreaming = false});
   final ChatMessage message;
+  final bool isStreaming;
 
   @override
   Widget build(BuildContext context) {
@@ -202,23 +271,69 @@ class _MessageBubble extends StatelessWidget {
     final theme = Theme.of(context);
     final colors = theme.colorScheme;
 
-    return Align(
-      alignment: isMe ? Alignment.centerRight : Alignment.centerLeft,
-      child: Container(
-        margin: const EdgeInsets.symmetric(vertical: 4),
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-        constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.75),
-        decoration: BoxDecoration(
-          color: isMe ? colors.primary : colors.surfaceContainerHigh,
-          borderRadius: BorderRadius.circular(18).copyWith(
-            bottomRight: isMe ? const Radius.circular(2) : null,
-            bottomLeft: !isMe ? const Radius.circular(2) : null,
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 6),
+      child: Column(
+        crossAxisAlignment:
+            isMe ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment:
+                isMe ? MainAxisAlignment.end : MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              if (!isMe)
+                Padding(
+                  padding: const EdgeInsets.only(right: 8, bottom: 4),
+                  child: CircleAvatar(
+                    radius: 14,
+                    backgroundColor: colors.primaryContainer,
+                    child: Icon(Icons.auto_awesome, size: 14, color: colors.onPrimaryContainer),
+                  ),
+                ),
+              Flexible(
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  decoration: BoxDecoration(
+                    color: isMe ? colors.primary : colors.surfaceContainerHigh,
+                    borderRadius: BorderRadius.only(
+                      topLeft: const Radius.circular(20),
+                      topRight: const Radius.circular(20),
+                      bottomLeft: Radius.circular(isMe ? 20 : 4),
+                      bottomRight: Radius.circular(isMe ? 4 : 20),
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.05),
+                        blurRadius: 4,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  child: Text(
+                    message.text,
+                    style: theme.textTheme.bodyLarge?.copyWith(
+                      color: isMe ? colors.onPrimary : colors.onSurface,
+                      height: 1.4,
+                    ),
+                  ),
+                ),
+              ),
+            ],
           ),
-        ),
-        child: Text(
-          message.text,
-          style: TextStyle(color: isMe ? colors.onPrimary : colors.onSurface),
-        ),
+          if (isStreaming)
+            Padding(
+              padding: const EdgeInsets.only(left: 40, top: 4),
+              child: SizedBox(
+                width: 12,
+                height: 12,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  valueColor: AlwaysStoppedAnimation<Color>(colors.primary.withValues(alpha: 0.5)),
+                ),
+              ),
+            ),
+        ],
       ),
     );
   }
@@ -239,29 +354,52 @@ class _ChatInput extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colors = theme.colorScheme;
+
     return Container(
       padding: EdgeInsets.fromLTRB(16, 8, 16, 16 + MediaQuery.viewInsetsOf(context).bottom),
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surface,
-        border: Border(top: BorderSide(color: Theme.of(context).dividerColor.withValues(alpha: 0.1))),
+        color: colors.surface,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.05),
+            offset: const Offset(0, -2),
+            blurRadius: 10,
+          ),
+        ],
       ),
       child: Row(
         children: [
           Expanded(
-            child: TextField(
-              controller: controller,
-              enabled: enabled,
-              decoration: InputDecoration(
-                hintText: hintText,
-                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+            child: Container(
+              decoration: BoxDecoration(
+                color: colors.surfaceContainerLowest,
+                borderRadius: BorderRadius.circular(28),
+                border: Border.all(color: colors.outlineVariant.withValues(alpha: 0.5)),
               ),
-              onSubmitted: (_) => onSend(),
+              child: TextField(
+                controller: controller,
+                enabled: enabled,
+                maxLines: 4,
+                minLines: 1,
+                textInputAction: TextInputAction.send,
+                onSubmitted: (_) => enabled ? onSend() : null,
+                decoration: InputDecoration(
+                  hintText: hintText,
+                  border: InputBorder.none,
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                ),
+              ),
             ),
           ),
           const SizedBox(width: 8),
           IconButton.filled(
             onPressed: enabled ? onSend : null,
             icon: const Icon(Icons.send_rounded),
+            style: IconButton.styleFrom(
+              minimumSize: const Size(52, 52),
+            ),
           ),
         ],
       ),

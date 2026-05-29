@@ -5,10 +5,8 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
-import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 import 'core/auth/auth_state_notifier.dart';
@@ -20,7 +18,6 @@ import 'core/theme/app_theme.dart';
 import 'data/datasources/local/drug_json_parser.dart';
 import 'data/datasources/local/icd10_csv_parser.dart';
 import 'data/datasources/local/local_database_service.dart';
-import 'data/datasources/local/seed_runner.dart';
 import 'firebase_options.dart';
 import 'injection_container.dart';
 import 'core/security/security_service.dart';
@@ -120,25 +117,13 @@ Future<void> _runBackgroundSeedFlow() async {
   await Future<void>.delayed(const Duration(seconds: 2));
 
   try {
-    final token = ServicesBinding.rootIsolateToken;
-    if (token == null) {
-      await _seedIcd10IfEmpty();
-      await Future<void>.delayed(const Duration(milliseconds: 300));
-      await _seedDrugsIfEmpty();
-      await _verifySeededData();
-      return;
-    }
-
-    final dir = await getApplicationDocumentsDirectory();
-    await seedLocalDatabaseInBackground(
-      SeedRequest(
-        dbDirectory: dir.path,
-        dbName: AppConfig.isarDbName,
-        rootIsolateToken: token,
-      ),
-    );
-  } catch (_) {
-    // Best-effort seed flow: parsing errors should not crash app startup.
+    // We use the direct seeding methods which leverage 'compute' for parsing.
+    // This avoids BackgroundIsolateBinaryMessenger issues in Isolate.run.
+    await _seedIcd10IfEmpty();
+    await Future<void>.delayed(const Duration(milliseconds: 300));
+    await _seedDrugsIfEmpty();
+  } catch (e) {
+    debugPrint('Background seed error: $e');
   } finally {
     await _verifySeededData();
   }
@@ -149,19 +134,6 @@ Future<void> _verifySeededData() async {
   final icd10Count = await db.countIcd10();
   final drugCount = await db.countDrugs();
   if (icd10Count > 0 && drugCount > 0) return;
-
-  final token = ServicesBinding.rootIsolateToken;
-  if (token != null) {
-    final dir = await getApplicationDocumentsDirectory();
-    await seedLocalDatabaseInBackground(
-      SeedRequest(
-        dbDirectory: dir.path,
-        dbName: AppConfig.isarDbName,
-        rootIsolateToken: token,
-      ),
-    );
-    return;
-  }
 
   if (icd10Count == 0) {
     await _seedIcd10IfEmpty();

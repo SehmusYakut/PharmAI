@@ -23,8 +23,8 @@ abstract class DrugJsonParser {
   /// Call once at first launch and feed the result to
   /// [LocalDatabaseService.putAllDrugs] for bulk insert.
   static Future<List<DrugModel>> parseFromAssets() async {
-    final raw = await rootBundle.loadString(_assetPath);
-    return compute(_parseJsonData, raw);
+    final data = await rootBundle.load(_assetPath);
+    return compute(_parseByteData, data);
   }
 
   /// Parses raw JSON content already loaded in memory.
@@ -32,6 +32,13 @@ abstract class DrugJsonParser {
   /// Use this in background isolates when asset loading is performed
   /// separately from parsing.
   static List<DrugModel> parseRaw(String raw) => _parseJsonData(raw);
+
+  static List<DrugModel> _parseByteData(ByteData data) {
+    final raw = utf8.decode(
+      data.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes),
+    );
+    return _parseJsonData(raw);
+  }
 
   // Top-level function required by compute().
   static List<DrugModel> _parseJsonData(String raw) {
