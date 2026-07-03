@@ -8,7 +8,7 @@
 PRODUCT_NAME = pharmai
 
 // The application's bundle identifier
-PRODUCT_BUNDLE_IDENTIFIER = com.sehmus.pharmai
+PRODUCT_BUNDLE_IDENTIFIER = com.kiraathanelabs.pharmai
 
 // The copyright displayed in application information
-PRODUCT_COPYRIGHT = Copyright © 2026 com.sehmus. All rights reserved.
+PRODUCT_COPYRIGHT = Copyright © 2026 com.kiraathanelabs. All rights reserved.
