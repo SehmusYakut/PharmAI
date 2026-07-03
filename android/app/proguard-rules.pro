@@ -4,7 +4,7 @@
 -keep class * extends io.isar.IsarCollection { *; }
 
 # Keep models and schemas for serialization
--keep class com.example.pharmai.data.models.** { *; }
+-keep class com.sehmus.pharmai.data.models.** { *; }
 
 # Flutter/Dart specific ProGuard rules are handled by the Flutter Gradle plugin,
 # but we add these for extra safety during extreme obfuscation.

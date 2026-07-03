@@ -9,11 +9,11 @@ subprojects {
                     try {
                         def hasNamespace = androidExt.hasProperty('namespace')
                         if (!hasNamespace || androidExt.namespace == null || androidExt.namespace.toString().trim() == '') {
-                            androidExt.namespace = 'com.example.pharmai'
+                            androidExt.namespace = 'com.sehmus.pharmai'
                         }
                     } catch (e) {
                         // ignore reflection/compat issues
-                        androidExt.namespace = 'com.example.pharmai'
+                        androidExt.namespace = 'com.sehmus.pharmai'
                     }
                 }
             }

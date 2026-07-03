@@ -64,7 +64,7 @@ class DefaultFirebaseOptions {
     messagingSenderId: '521840446802',
     projectId: 'pharmai-c7d09',
     storageBucket: 'pharmai-c7d09.firebasestorage.app',
-    iosBundleId: 'com.example.pharmai',
+    iosBundleId: 'com.sehmus.pharmai',
   );
 
   static const FirebaseOptions macos = FirebaseOptions(
@@ -73,7 +73,7 @@ class DefaultFirebaseOptions {
     messagingSenderId: '521840446802',
     projectId: 'pharmai-c7d09',
     storageBucket: 'pharmai-c7d09.firebasestorage.app',
-    iosBundleId: 'com.example.pharmai',
+    iosBundleId: 'com.sehmus.pharmai',
   );
 
   static const FirebaseOptions windows = FirebaseOptions(
