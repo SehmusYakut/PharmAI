@@ -6,6 +6,7 @@ import 'package:pharmai/domain/entities/user_profile.dart';
 import 'package:pharmai/domain/repositories/auth_repository.dart';
 import 'package:pharmai/domain/repositories/profile_repository.dart';
 import 'package:pharmai/domain/usecases/sign_in_with_google.dart';
+import 'package:pharmai/domain/usecases/sign_in_anonymously.dart';
 import 'package:pharmai/domain/usecases/sign_out.dart';
 
 part 'auth_event.dart';
@@ -16,16 +17,19 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     required AuthRepository authRepo,
     required ProfileRepository profileRepo,
     required SignInWithGoogle signInWithGoogle,
+    required SignInAnonymously signInAnonymously,
     required SignOut signOut,
     required AuthStateNotifier authNotifier,
   })  : _authRepo = authRepo,
         _profileRepo = profileRepo,
         _signInWithGoogle = signInWithGoogle,
+        _signInAnonymously = signInAnonymously,
         _signOut = signOut,
         _authNotifier = authNotifier,
         super(const AuthInitial()) {
     on<AuthStarted>(_onStarted);
     on<AuthGoogleSignInRequested>(_onGoogleSignIn);
+    on<AuthAnonymousSignInRequested>(_onAnonymousSignIn);
     on<AuthSignOutRequested>(_onSignOut);
     on<_AuthUserChanged>(_onUserChanged);
   }
@@ -33,6 +37,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   final AuthRepository _authRepo;
   final ProfileRepository _profileRepo;
   final SignInWithGoogle _signInWithGoogle;
+  final SignInAnonymously _signInAnonymously;
   final SignOut _signOut;
   final AuthStateNotifier _authNotifier;
   StreamSubscription<String?>? _authSub;
@@ -77,6 +82,21 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   ) async {
     emit(const AuthLoading());
     final result = await _signInWithGoogle();
+    result.fold(
+      (f) => emit(AuthError(f.message)),
+      (profile) {
+        _authNotifier.update(true);
+        emit(AuthAuthenticated(profile));
+      },
+    );
+  }
+
+  Future<void> _onAnonymousSignIn(
+    AuthAnonymousSignInRequested event,
+    Emitter<AuthState> emit,
+  ) async {
+    emit(const AuthLoading());
+    final result = await _signInAnonymously();
     result.fold(
       (f) => emit(AuthError(f.message)),
       (profile) {

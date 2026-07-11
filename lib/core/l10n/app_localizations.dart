@@ -380,6 +380,9 @@ class AppLocalizations {
   String get signInWithGoogle => _isTr
       ? 'Google ile Giriş Yap'
       : (_isDe ? 'Mit Google anmelden' : 'Sign in with Google');
+  String get continueAsGuest => _isTr
+      ? 'Misafir Olarak Devam Et'
+      : (_isDe ? 'Als Gast fortfahren' : 'Continue as Guest');
   String get signOut =>
       _isTr ? 'Çıkış Yap' : (_isDe ? 'Abmelden' : 'Sign Out');
   String get profile => _isTr ? 'Profil' : (_isDe ? 'Profil' : 'Profile');

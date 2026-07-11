@@ -9,10 +9,23 @@
       "client_info": {
         "mobilesdk_app_id": "1:521840446802:android:0c52ba01c0aacb9ca2fe8b",
         "android_client_info": {
-          "package_name": "com.kiraathanelabs.pharmai"
+          "package_name": "com.example.pharmai"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "521840446802-6eekf258qflhm7er2sj048iblcelkt1f.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.pharmai",
+            "certificate_hash": "0436fe80c1c5770b3b805b2d546a0799b4325906"
+          }
+        },
+        {
+          "client_id": "521840446802-9h88fdbbebbv4s1mjme987p4mm4esrlh.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyDi6EblmMkHkXCwPQEE2f21M5S_Psy5T94"
@@ -20,7 +33,55 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "521840446802-9h88fdbbebbv4s1mjme987p4mm4esrlh.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "521840446802-84o1hb2us3bborab5p15ppc5vd61onh3.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.pharmai"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:521840446802:android:fad5e82f09a7b394a2fe8b",
+        "android_client_info": {
+          "package_name": "com.kiraathanelabs.pharmai"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "521840446802-9h88fdbbebbv4s1mjme987p4mm4esrlh.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDi6EblmMkHkXCwPQEE2f21M5S_Psy5T94"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "521840446802-9h88fdbbebbv4s1mjme987p4mm4esrlh.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "521840446802-84o1hb2us3bborab5p15ppc5vd61onh3.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.pharmai"
+              }
+            }
+          ]
         }
       }
     }

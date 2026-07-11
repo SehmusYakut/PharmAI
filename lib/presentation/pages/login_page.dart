@@ -54,6 +54,19 @@ class LoginPage extends StatelessWidget {
                             icon: const Icon(Icons.login),
                             label: Text(l.signInWithGoogle),
                           ),
+                          const SizedBox(height: 12),
+                          TextButton(
+                            onPressed: () => context
+                                .read<AuthBloc>()
+                                .add(const AuthAnonymousSignInRequested()),
+                            child: Text(
+                              l.continueAsGuest,
+                              style: const TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ),
                           if (state is AuthError) ...[
                             const SizedBox(height: 16),
                             Text(

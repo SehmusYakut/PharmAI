@@ -12,6 +12,10 @@ class AuthGoogleSignInRequested extends AuthEvent {
   const AuthGoogleSignInRequested();
 }
 
+class AuthAnonymousSignInRequested extends AuthEvent {
+  const AuthAnonymousSignInRequested();
+}
+
 class AuthSignOutRequested extends AuthEvent {
   const AuthSignOutRequested();
 }

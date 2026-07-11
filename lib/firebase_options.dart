@@ -52,27 +52,29 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions android = FirebaseOptions(
     apiKey: 'AIzaSyDi6EblmMkHkXCwPQEE2f21M5S_Psy5T94',
-    appId: '1:521840446802:android:0c52ba01c0aacb9ca2fe8b',
+    appId: '1:521840446802:android:fad5e82f09a7b394a2fe8b',
     messagingSenderId: '521840446802',
     projectId: 'pharmai-c7d09',
     storageBucket: 'pharmai-c7d09.firebasestorage.app',
   );
-
   static const FirebaseOptions ios = FirebaseOptions(
     apiKey: 'AIzaSyD8pqJvU_iQTZ9PPUu6aApRrqVpdFWvTn0',
-    appId: '1:521840446802:ios:7d5715e2139ab7f9a2fe8b',
+    appId: '1:521840446802:ios:a599330ea43da9d7a2fe8b',
     messagingSenderId: '521840446802',
     projectId: 'pharmai-c7d09',
     storageBucket: 'pharmai-c7d09.firebasestorage.app',
+    androidClientId: '521840446802-6eekf258qflhm7er2sj048iblcelkt1f.apps.googleusercontent.com',
+    iosClientId: '521840446802-955eqqv1p0nqdjqmm2eqam449fct2132.apps.googleusercontent.com',
     iosBundleId: 'com.kiraathanelabs.pharmai',
   );
-
   static const FirebaseOptions macos = FirebaseOptions(
     apiKey: 'AIzaSyD8pqJvU_iQTZ9PPUu6aApRrqVpdFWvTn0',
-    appId: '1:521840446802:ios:7d5715e2139ab7f9a2fe8b',
+    appId: '1:521840446802:ios:a599330ea43da9d7a2fe8b',
     messagingSenderId: '521840446802',
     projectId: 'pharmai-c7d09',
     storageBucket: 'pharmai-c7d09.firebasestorage.app',
+    androidClientId: '521840446802-6eekf258qflhm7er2sj048iblcelkt1f.apps.googleusercontent.com',
+    iosClientId: '521840446802-955eqqv1p0nqdjqmm2eqam449fct2132.apps.googleusercontent.com',
     iosBundleId: 'com.kiraathanelabs.pharmai',
   );
 
