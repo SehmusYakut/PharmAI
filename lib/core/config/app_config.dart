@@ -16,7 +16,7 @@ class AppConfig {
 
   static const String appName = 'PharmAI';
   static const String appVersion = '1.0.0';
-  static const int buildNumber = 1;
+  static const int buildNumber = 2;
 
   // ── Privacy-by-Design: allowed PII fields ───────────────────────────────────
   // Only these three fields may ever be collected from the user (KVKK Art. 4 –
