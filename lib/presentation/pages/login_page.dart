@@ -11,6 +11,8 @@ class LoginPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
+    final isIOS = Theme.of(context).platform == TargetPlatform.iOS;
+
     return BlocListener<AuthBloc, AuthState>(
       listener: (context, state) {
         if (state is AuthAuthenticated) context.go(AppConstants.routeHome);
@@ -54,6 +56,27 @@ class LoginPage extends StatelessWidget {
                             icon: const Icon(Icons.login),
                             label: Text(l.signInWithGoogle),
                           ),
+                          if (isIOS) ...[
+                            const SizedBox(height: 12),
+                            SizedBox(
+                              height: 44,
+                              width: double.infinity,
+                              child: ElevatedButton.icon(
+                                onPressed: () => context
+                                    .read<AuthBloc>()
+                                    .add(const AuthAppleSignInRequested()),
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.black,
+                                  foregroundColor: Colors.white,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(22),
+                                  ),
+                                ),
+                                icon: const Icon(Icons.apple, size: 22),
+                                label: Text(l.signInWithApple),
+                              ),
+                            ),
+                          ],
                           const SizedBox(height: 12),
                           TextButton(
                             onPressed: () => context
@@ -89,3 +112,4 @@ class LoginPage extends StatelessWidget {
     );
   }
 }
+

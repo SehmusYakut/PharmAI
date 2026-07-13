@@ -35,6 +35,7 @@ import 'package:pharmai/domain/usecases/send_chat_message.dart';
 import 'package:pharmai/domain/usecases/search_drugs.dart';
 import 'package:pharmai/domain/usecases/search_icd10.dart';
 import 'package:pharmai/domain/usecases/sign_in_with_google.dart';
+import 'package:pharmai/domain/usecases/sign_in_with_apple.dart';
 import 'package:pharmai/domain/usecases/sign_in_anonymously.dart';
 import 'package:pharmai/domain/usecases/sign_out.dart';
 import 'package:pharmai/domain/usecases/start_chat_session.dart';
@@ -95,6 +96,7 @@ Future<void> initDependencies() async {
   sl.registerLazySingleton(() => SearchIcd10(sl()));
   sl.registerLazySingleton(() => SearchDrugs(sl()));
   sl.registerLazySingleton(() => SignInWithGoogle(sl()));
+  sl.registerLazySingleton(() => SignInWithApple(sl()));
   sl.registerLazySingleton(() => SignInAnonymously(sl()));
   sl.registerLazySingleton(() => SignOut(sl()));
   sl.registerLazySingleton(() => GetOrCreateProfile(sl()));
@@ -146,6 +148,7 @@ Future<void> initDependencies() async {
       authRepo: sl(),
       profileRepo: sl(),
       signInWithGoogle: sl(),
+      signInWithApple: sl(),
       signInAnonymously: sl(),
       signOut: sl(),
       authNotifier: sl(),

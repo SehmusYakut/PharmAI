@@ -1,5 +1,8 @@
 import 'dart:async';
+import 'dart:convert';
+import 'dart:math';
 
+import 'package:crypto/crypto.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:google_sign_in/google_sign_in.dart';
@@ -7,6 +10,7 @@ import 'package:pharmai/core/error/failures.dart';
 import 'package:pharmai/domain/entities/user_profile.dart';
 import 'package:pharmai/domain/repositories/auth_repository.dart';
 import 'package:pharmai/domain/repositories/profile_repository.dart';
+import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 
 class AuthRepositoryImpl implements AuthRepository {
   AuthRepositoryImpl(this._auth, this._profileRepo) {
@@ -25,6 +29,22 @@ class AuthRepositoryImpl implements AuthRepository {
 
   @override
   Stream<String?> get authStateChanges => _controller.stream;
+
+  /// Generates a cryptographically secure random nonce for Apple Sign-In.
+  String _generateNonce([int length = 32]) {
+    const chars =
+        '0123456789ABCDEFGHIJKLMNOPQRSTUVXYZabcdefghijklmnopqrstuvwxyz-._';
+    final random = Random.secure();
+    return List.generate(length, (_) => chars[random.nextInt(chars.length)])
+        .join();
+  }
+
+  /// Returns the SHA-256 hash of [input] as a hex string.
+  String _sha256ofString(String input) {
+    final bytes = utf8.encode(input);
+    final digest = sha256.convert(bytes);
+    return digest.toString();
+  }
 
   @override
   Future<Either<Failure, UserProfile>> signInWithGoogle() async {
@@ -46,6 +66,52 @@ class AuthRepositoryImpl implements AuthRepository {
       );
     } on GoogleSignInException catch (e) {
       if (e.code == GoogleSignInExceptionCode.canceled) {
+        return const Left(ValidationFailure('Sign-in cancelled'));
+      }
+      return Left(UnexpectedFailure(e.toString()));
+    } catch (e) {
+      return Left(UnexpectedFailure(e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<Failure, UserProfile>> signInWithApple() async {
+    try {
+      _mockUid = null;
+      final rawNonce = _generateNonce();
+      final nonce = _sha256ofString(rawNonce);
+
+      final appleCredential = await SignInWithApple.getAppleIDCredential(
+        scopes: [
+          AppleIDAuthorizationScopes.email,
+          AppleIDAuthorizationScopes.fullName,
+        ],
+        nonce: nonce,
+      );
+
+      final oauthCredential = OAuthProvider('apple.com').credential(
+        idToken: appleCredential.identityToken,
+        rawNonce: rawNonce,
+      );
+
+      final result = await _auth.signInWithCredential(oauthCredential);
+      final user = result.user!;
+
+      // Apple may only provide name on the first sign-in
+      final displayName = [
+        appleCredential.givenName ?? '',
+        appleCredential.familyName ?? '',
+      ].where((s) => s.isNotEmpty).join(' ');
+
+      return _profileRepo.getOrCreate(
+        uid: user.uid,
+        email: appleCredential.email ?? user.email ?? '',
+        displayName:
+            displayName.isNotEmpty ? displayName : user.displayName,
+        photoUrl: user.photoURL,
+      );
+    } on SignInWithAppleAuthorizationException catch (e) {
+      if (e.code == AuthorizationErrorCode.canceled) {
         return const Left(ValidationFailure('Sign-in cancelled'));
       }
       return Left(UnexpectedFailure(e.toString()));
@@ -95,3 +161,4 @@ class AuthRepositoryImpl implements AuthRepository {
     }
   }
 }
+

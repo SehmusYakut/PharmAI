@@ -168,6 +168,13 @@ class _HomePageState extends State<HomePage> {
                       },
                     ),
                   ),
+                  // ── Medical Disclaimer (Guideline 1.4.1) ─────────────────
+                  SliverToBoxAdapter(
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(20, 24, 20, 0),
+                      child: _MedicalDisclaimerCard(l10n: l10n),
+                    ),
+                  ),
                   const SliverToBoxAdapter(child: SizedBox(height: 96)),
                 ],
               ),
@@ -770,6 +777,72 @@ class _ActionButton extends StatelessWidget {
             child: Center(child: icon),
           ),
         ),
+      ),
+    );
+  }
+}
+
+// ── Medical Disclaimer Card ─────────────────────────────────────────────────
+
+class _MedicalDisclaimerCard extends StatelessWidget {
+  const _MedicalDisclaimerCard({required this.l10n});
+  final AppLocalizations l10n;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
+    final text = Theme.of(context).textTheme;
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: colors.surfaceContainerHighest.withValues(alpha: 0.4),
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(
+          color: colors.outlineVariant.withValues(alpha: 0.35),
+        ),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            width: 36,
+            height: 36,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: colors.tertiary.withValues(alpha: 0.12),
+            ),
+            child: Icon(
+              Icons.info_outline_rounded,
+              size: 20,
+              color: colors.tertiary,
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  l10n.medicalDisclaimerTitle,
+                  style: text.labelLarge?.copyWith(
+                    fontWeight: FontWeight.w700,
+                    color: colors.onSurface,
+                  ),
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  l10n.medicalDisclaimer,
+                  style: text.bodySmall?.copyWith(
+                    color: colors.onSurfaceVariant,
+                    height: 1.5,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }

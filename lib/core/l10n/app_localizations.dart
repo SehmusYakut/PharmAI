@@ -380,6 +380,9 @@ class AppLocalizations {
   String get signInWithGoogle => _isTr
       ? 'Google ile Giriş Yap'
       : (_isDe ? 'Mit Google anmelden' : 'Sign in with Google');
+  String get signInWithApple => _isTr
+      ? 'Apple ile Giriş Yap'
+      : (_isDe ? 'Mit Apple anmelden' : 'Sign in with Apple');
   String get continueAsGuest => _isTr
       ? 'Misafir Olarak Devam Et'
       : (_isDe ? 'Als Gast fortfahren' : 'Continue as Guest');
@@ -400,6 +403,37 @@ class AppLocalizations {
   String get languageEnglish => _isTr ? 'İngilizce' : (_isDe ? 'Englisch' : 'English');
   String get themeLabel => _isTr ? 'Tema' : (_isDe ? 'Design' : 'Theme');
   String get languageLabel => _isTr ? 'Dil' : (_isDe ? 'Sprache' : 'Language');
+
+  // ── Medical Citations & Disclaimer (Guideline 1.4.1) ───────────────────────
+  String get icd10Citation => _isTr
+      ? 'Kaynak: WHO Uluslararası Hastalık Sınıflandırması, 10. Revizyon (ICD-10), 2019 Baskısı'
+      : (_isDe
+          ? 'Quelle: WHO Internationale Klassifikation der Krankheiten, 10. Revision (ICD-10), Ausgabe 2019'
+          : 'Source: WHO International Classification of Diseases, 10th Revision (ICD-10), 2019 Edition');
+  String get icd10CitationShort => _isTr
+      ? 'WHO ICD-10, 2019'
+      : 'WHO ICD-10, 2019';
+  String get drugCitation => _isTr
+      ? 'Kaynak: TİTCK (Türkiye İlaç ve Tıbbi Cihaz Kurumu) Ruhsatlı İlaç Veritabanı'
+      : (_isDe
+          ? 'Quelle: TİTCK (Türkische Arzneimittelbehörde) Lizenzierte Arzneimitteldatenbank'
+          : 'Source: TİTCK (Turkish Medicines and Medical Devices Agency) Licensed Drug Database');
+  String get drugCitationShort => _isTr
+      ? 'TİTCK Ruhsatlı İlaç Veritabanı'
+      : (_isDe
+          ? 'TİTCK Arzneimitteldatenbank'
+          : 'TİTCK Licensed Drug Database');
+  String get medicalDisclaimer => _isTr
+      ? 'Bu uygulama yalnızca bilgilendirme amaçlıdır ve profesyonel tıbbi tavsiyenin yerine geçmez. Tüm tıbbi veriler WHO ICD-10 (2019), TİTCK Ruhsatlı İlaç Veritabanı ve hakemli klinik literatürden alınmıştır.'
+      : (_isDe
+          ? 'Diese App dient nur zu Informationszwecken und ersetzt keine professionelle medizinische Beratung. Alle medizinischen Daten stammen aus WHO ICD-10 (2019), TİTCK-Arzneimitteldatenbank und peer-reviewter klinischer Literatur.'
+          : 'This app is for informational purposes only and does not replace professional medical advice. All medical data is sourced from WHO ICD-10 (2019), TİTCK Licensed Drug Database, and peer-reviewed clinical literature.');
+  String get medicalDisclaimerTitle => _isTr
+      ? 'Tıbbi Sorumluluk Reddi'
+      : (_isDe ? 'Medizinischer Haftungsausschluss' : 'Medical Disclaimer');
+  String get sourceLabel => _isTr
+      ? 'Kaynak'
+      : (_isDe ? 'Quelle' : 'Source');
 }
 
 class _AppLocalizationsDelegate

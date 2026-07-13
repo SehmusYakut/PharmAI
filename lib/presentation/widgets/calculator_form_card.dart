@@ -230,6 +230,32 @@ class CalculatorFormCard extends StatelessWidget {
             ),
             // ── Result / error slot ──────────────────────────────────────────
             result,
+            // ── Always-visible source citation ──────────────────────────────
+            if (_hasEvidenceInfo)
+              Padding(
+                padding: const EdgeInsets.only(top: 12),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Icon(
+                      Icons.menu_book_rounded,
+                      size: 14,
+                      color: colors.outline,
+                    ),
+                    const SizedBox(width: 6),
+                    Expanded(
+                      child: Text(
+                        '${AppLocalizations.of(context).sourceLabel}: $reference',
+                        style: text.labelSmall?.copyWith(
+                          color: colors.outline,
+                          fontStyle: FontStyle.italic,
+                          height: 1.4,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
           ],
         ),
       ),

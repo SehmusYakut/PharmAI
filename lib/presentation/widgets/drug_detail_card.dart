@@ -292,6 +292,31 @@ class _DescriptionBody extends StatelessWidget {
               ),
             ),
           },
+        // ── Drug data source citation ─────────────────────────────────────
+        Padding(
+          padding: const EdgeInsets.only(top: 16),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Icon(
+                Icons.menu_book_rounded,
+                size: 14,
+                color: colors.outline,
+              ),
+              const SizedBox(width: 6),
+              Expanded(
+                child: Text(
+                  l10n.drugCitation,
+                  style: text.labelSmall?.copyWith(
+                    color: colors.outline,
+                    fontStyle: FontStyle.italic,
+                    height: 1.4,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
       ],
     );
   }
