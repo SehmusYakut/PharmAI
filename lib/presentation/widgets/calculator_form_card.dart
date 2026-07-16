@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:pharmai/core/l10n/app_localizations.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 /// Reusable scaffold for one calculator section.
 ///
@@ -15,6 +16,7 @@ class CalculatorFormCard extends StatelessWidget {
     required this.citation,
     this.formula,
     this.reference,
+    this.referenceUrl,
     required this.body,
     required this.onCalculate,
     required this.result,
@@ -31,6 +33,9 @@ class CalculatorFormCard extends StatelessWidget {
 
   /// Medical guideline/literature reference shown in the info sheet.
   final String? reference;
+
+  /// Optional URL link for details on reference
+  final String? referenceUrl;
 
   /// Input fields area — Row/Column of [CalculatorInputField] widgets.
   final Widget body;
@@ -240,18 +245,36 @@ class CalculatorFormCard extends StatelessWidget {
                     Icon(
                       Icons.menu_book_rounded,
                       size: 14,
-                      color: colors.outline,
+                      color: referenceUrl != null ? colors.primary : colors.outline,
                     ),
                     const SizedBox(width: 6),
                     Expanded(
-                      child: Text(
-                        '${AppLocalizations.of(context).sourceLabel}: $reference',
-                        style: text.labelSmall?.copyWith(
-                          color: colors.outline,
-                          fontStyle: FontStyle.italic,
-                          height: 1.4,
-                        ),
-                      ),
+                      child: referenceUrl != null
+                          ? InkWell(
+                              onTap: () async {
+                                final uri = Uri.tryParse(referenceUrl!);
+                                if (uri != null) {
+                                  await launchUrl(uri, mode: LaunchMode.externalApplication);
+                                }
+                              },
+                              child: Text(
+                                '${AppLocalizations.of(context).sourceLabel}: $reference',
+                                style: text.labelSmall?.copyWith(
+                                  color: colors.primary,
+                                  decoration: TextDecoration.underline,
+                                  fontStyle: FontStyle.italic,
+                                  height: 1.4,
+                                ),
+                              ),
+                            )
+                          : Text(
+                              '${AppLocalizations.of(context).sourceLabel}: $reference',
+                              style: text.labelSmall?.copyWith(
+                                color: colors.outline,
+                                fontStyle: FontStyle.italic,
+                                height: 1.4,
+                              ),
+                            ),
                     ),
                   ],
                 ),

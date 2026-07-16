@@ -89,6 +89,7 @@ class _GfrSectionState extends State<_GfrSection> {
       citation: l.calcGfrCitation,
       formula: l.calcGfrFormula,
       reference: l.calcGfrReference,
+      referenceUrl: 'https://pubmed.ncbi.nlm.nih.gov/34554658/',
       onCalculate: _calculate,
       body: Column(
         children: [

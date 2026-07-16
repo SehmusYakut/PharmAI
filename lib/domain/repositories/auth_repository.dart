@@ -7,5 +7,6 @@ abstract class AuthRepository {
   Future<Either<Failure, UserProfile>> signInWithApple();
   Future<Either<Failure, UserProfile>> signInAnonymously();
   Future<Either<Failure, Unit>> signOut();
+  Future<Either<Failure, Unit>> deleteAccount();
   Stream<String?> get authStateChanges;
 }

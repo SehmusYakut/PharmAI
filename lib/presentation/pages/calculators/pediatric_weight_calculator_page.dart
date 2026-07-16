@@ -80,6 +80,7 @@ class _PediatricWeightSectionState extends State<_PediatricWeightSection> {
       citation: l.calcPediatricWeightCitation,
       formula: l.calcPediatricWeightFormula,
       reference: l.calcPediatricWeightReference,
+      referenceUrl: 'https://www.alsg.org/',
       onCalculate: _calculate,
       body: Row(
         children: [

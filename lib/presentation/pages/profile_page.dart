@@ -50,6 +50,35 @@ class _ProfilePageState extends State<ProfilePage> {
     }
   }
 
+  Future<void> _confirmDeleteAccount() async {
+    final l = AppLocalizations.of(context);
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(l.deleteAccountConfirmTitle),
+        content: Text(l.deleteAccountConfirmMessage),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: Text(l.cancel),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(ctx).pop(true),
+            style: FilledButton.styleFrom(
+              backgroundColor: Theme.of(context).colorScheme.error,
+              foregroundColor: Theme.of(context).colorScheme.onError,
+            ),
+            child: Text(l.deleteAccountConfirmBtn),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true && mounted) {
+      context.read<AuthBloc>().add(const AuthDeleteAccountRequested());
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
@@ -65,16 +94,30 @@ class _ProfilePageState extends State<ProfilePage> {
           title: Text(l.profile),
           leading: BackButton(onPressed: () => context.pop()),
         ),
-        body: BlocBuilder<AuthBloc, AuthState>(
-          builder: (context, state) {
-            if (state is! AuthAuthenticated) {
-              return Center(
-                child: FilledButton(
-                  onPressed: () => context.go(AppConstants.routeLogin),
-                  child: Text(l.signInWithGoogle),
+        body: BlocListener<AuthBloc, AuthState>(
+          listener: (context, state) {
+            if (state is AuthError) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(state.message),
+                  backgroundColor: Theme.of(context).colorScheme.error,
                 ),
               );
             }
+          },
+          child: BlocBuilder<AuthBloc, AuthState>(
+            builder: (context, state) {
+              if (state is AuthLoading) {
+                return const Center(child: CircularProgressIndicator());
+              }
+              if (state is! AuthAuthenticated) {
+                return Center(
+                  child: FilledButton(
+                    onPressed: () => context.go(AppConstants.routeLogin),
+                    child: Text(l.signInWithGoogle),
+                  ),
+                );
+              }
             final profile = state.profile;
             return GestureDetector(
               onTap: () => FocusScope.of(context).unfocus(),
@@ -190,11 +233,22 @@ class _ProfilePageState extends State<ProfilePage> {
                     ),
                     child: Text(l.signOut),
                   ),
+                  const SizedBox(height: 12),
+                  OutlinedButton.icon(
+                    onPressed: _confirmDeleteAccount,
+                    icon: const Icon(Icons.delete_forever_rounded),
+                    label: Text(l.deleteAccount),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: Theme.of(context).colorScheme.error,
+                      side: BorderSide(color: Theme.of(context).colorScheme.error),
+                    ),
+                  ),
                 ],
               ),
             );
           },
         ),
+      ),
       ),
     );
   }

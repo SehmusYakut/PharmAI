@@ -86,6 +86,7 @@ class _IvDripRateSectionState extends State<_IvDripRateSection> {
       citation: l.calcIvDripRateCitation,
       formula: l.calcIvDripRateFormula,
       reference: l.calcIvDripRateReference,
+      referenceUrl: 'https://www.ins1.org/',
       onCalculate: _calculate,
       body: Column(
         children: [

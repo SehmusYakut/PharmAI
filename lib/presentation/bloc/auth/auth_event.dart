@@ -24,6 +24,10 @@ class AuthSignOutRequested extends AuthEvent {
   const AuthSignOutRequested();
 }
 
+class AuthDeleteAccountRequested extends AuthEvent {
+  const AuthDeleteAccountRequested();
+}
+
 class _AuthUserChanged extends AuthEvent {
   const _AuthUserChanged(this.uid);
   final String? uid;

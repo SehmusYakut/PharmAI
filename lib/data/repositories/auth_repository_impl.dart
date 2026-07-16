@@ -160,5 +160,35 @@ class AuthRepositoryImpl implements AuthRepository {
       return Left(UnexpectedFailure(e.toString()));
     }
   }
+
+  @override
+  Future<Either<Failure, Unit>> deleteAccount() async {
+    try {
+      final user = _auth.currentUser;
+      if (user != null) {
+        final uid = user.uid;
+        // Cascade delete database profile & related data first (while authenticated)
+        final profileDeleteResult = await _profileRepo.deleteProfile(uid);
+        if (profileDeleteResult.isLeft()) {
+          return const Left(UnexpectedFailure('Failed to delete local database data.'));
+        }
+        // Delete Firebase Auth user
+        await user.delete();
+      } else if (_mockUid != null) {
+        final uid = _mockUid!;
+        _mockUid = null;
+        await _profileRepo.deleteProfile(uid);
+        _controller.add(null);
+      }
+      return const Right(unit);
+    } on FirebaseAuthException catch (e) {
+      if (e.code == 'requires-recent-login') {
+        return const Left(ValidationFailure('Please sign in again to delete your account.'));
+      }
+      return Left(UnexpectedFailure(e.message ?? e.toString()));
+    } catch (e) {
+      return Left(UnexpectedFailure(e.toString()));
+    }
+  }
 }
 

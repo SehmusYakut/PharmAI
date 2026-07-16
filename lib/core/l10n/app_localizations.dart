@@ -388,6 +388,16 @@ class AppLocalizations {
       : (_isDe ? 'Als Gast fortfahren' : 'Continue as Guest');
   String get signOut =>
       _isTr ? 'Çıkış Yap' : (_isDe ? 'Abmelden' : 'Sign Out');
+  String get deleteAccount =>
+      _isTr ? 'Hesabımı Sil' : (_isDe ? 'Konto löschen' : 'Delete Account');
+  String get deleteAccountConfirmTitle =>
+      _isTr ? 'Hesabınızı Silmek İstediğinize Emin misiniz?' : (_isDe ? 'Konto löschen?' : 'Delete Your Account?');
+  String get deleteAccountConfirmMessage =>
+      _isTr ? 'Bu işlem kalıcıdır ve geri alınamaz. Kayıtlı tüm verileriniz (profil, sohbet geçmişi ve kaydedilenler) tamamen silinecektir.' : (_isDe ? 'Diese Aktion ist dauerhaft und kann nicht rückgängig gemacht werden. Alle Ihre Daten (Profil, Chatverlauf, Lesezeichen) werden gelöscht.' : 'This action is permanent and cannot be undone. All your saved data (profile, chat history, bookmarks) will be deleted.');
+  String get deleteAccountConfirmBtn =>
+      _isTr ? 'Evet, Hesabımı Sil' : (_isDe ? 'Konto endgültig löschen' : 'Yes, Delete My Account');
+  String get cancel =>
+      _isTr ? 'Vazgeç' : (_isDe ? 'Abbrechen' : 'Cancel');
   String get profile => _isTr ? 'Profil' : (_isDe ? 'Profil' : 'Profile');
   String get customName => _isTr ? 'Görünen Ad' : (_isDe ? 'Anzeigename' : 'Display Name');
   String get darkMode =>

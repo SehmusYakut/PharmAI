@@ -5,6 +5,7 @@ import 'package:pharmai/domain/entities/icd10_code.dart';
 import 'package:pharmai/presentation/bloc/auth/auth_bloc.dart';
 import 'package:pharmai/presentation/bloc/bookmark/bookmark_bloc.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 /// Expandable result card for a single ICD-10 code.
 ///
@@ -139,9 +140,20 @@ class Icd10ResultCard extends StatelessWidget {
                     _InfoRow(
                       icon: Icons.link_rounded,
                       label: l10n.icd10WhoLabel,
-                      child: SelectableText(
-                        code.url!,
-                        style: text.bodySmall?.copyWith(color: colors.primary),
+                      child: InkWell(
+                        onTap: () async {
+                          final uri = Uri.tryParse(code.url!);
+                          if (uri != null) {
+                            await launchUrl(uri, mode: LaunchMode.externalApplication);
+                          }
+                        },
+                        child: Text(
+                          code.url!,
+                          style: text.bodySmall?.copyWith(
+                            color: colors.primary,
+                            decoration: TextDecoration.underline,
+                          ),
+                        ),
                       ),
                     ),
                   ],

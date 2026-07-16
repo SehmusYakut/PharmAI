@@ -2,6 +2,10 @@ import 'package:fpdart/fpdart.dart';
 import 'package:isar/isar.dart';
 import 'package:pharmai/core/error/failures.dart';
 import 'package:pharmai/data/datasources/local/local_database_service.dart';
+import 'package:pharmai/data/models/bookmark_model.dart';
+import 'package:pharmai/data/models/chat_message_model.dart';
+import 'package:pharmai/data/models/chat_session_model.dart';
+import 'package:pharmai/data/models/chat_usage_model.dart';
 import 'package:pharmai/data/models/local_profile_model.dart';
 import 'package:pharmai/domain/entities/user_profile.dart';
 import 'package:pharmai/domain/repositories/profile_repository.dart';
@@ -74,6 +78,60 @@ class ProfileRepositoryImpl implements ProfileRepository {
         ..themeMode = updatedProfile.themeMode;
 
       await isar.writeTxn(() => isar.localProfileModels.put(updated));
+      return const Right(unit);
+    } catch (e) {
+      return Left(CacheFailure(e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<Failure, Unit>> deleteProfile(String uid) async {
+    try {
+      final isar = await _db.db;
+      await isar.writeTxn(() async {
+        // 1. Delete bookmarks
+        final bookmarks = await isar.bookmarkModels
+            .filter()
+            .firebaseUidEqualTo(uid)
+            .findAll();
+        for (final b in bookmarks) {
+          await isar.bookmarkModels.delete(b.id);
+        }
+
+        // 2. Delete chat messages and sessions
+        final sessions = await isar.chatSessionModels
+            .filter()
+            .firebaseUidEqualTo(uid)
+            .findAll();
+        for (final session in sessions) {
+          final messages = await isar.chatMessageModels
+              .filter()
+              .sessionIdEqualTo(session.id)
+              .findAll();
+          for (final message in messages) {
+            await isar.chatMessageModels.delete(message.id);
+          }
+          await isar.chatSessionModels.delete(session.id);
+        }
+
+        // 3. Delete chat usage
+        final usage = await isar.chatUsageModels
+            .filter()
+            .firebaseUidEqualTo(uid)
+            .findFirst();
+        if (usage != null) {
+          await isar.chatUsageModels.delete(usage.id);
+        }
+
+        // 4. Delete local profile itself
+        final profile = await isar.localProfileModels
+            .filter()
+            .firebaseUidEqualTo(uid)
+            .findFirst();
+        if (profile != null) {
+          await isar.localProfileModels.delete(profile.id);
+        }
+      });
       return const Right(unit);
     } catch (e) {
       return Left(CacheFailure(e.toString()));

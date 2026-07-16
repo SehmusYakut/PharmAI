@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:pharmai/core/l10n/app_localizations.dart';
 import 'package:pharmai/core/utils/drug_text_formatter.dart';
 import 'package:pharmai/domain/entities/drug.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 /// Expandable card showing full drug details.
 ///
@@ -301,16 +302,25 @@ class _DescriptionBody extends StatelessWidget {
               Icon(
                 Icons.menu_book_rounded,
                 size: 14,
-                color: colors.outline,
+                color: colors.primary,
               ),
               const SizedBox(width: 6),
               Expanded(
-                child: Text(
-                  l10n.drugCitation,
-                  style: text.labelSmall?.copyWith(
-                    color: colors.outline,
-                    fontStyle: FontStyle.italic,
-                    height: 1.4,
+                child: InkWell(
+                  onTap: () async {
+                    final uri = Uri.tryParse('https://www.titck.gov.tr/hizmetler/ilac-veritabani');
+                    if (uri != null) {
+                      await launchUrl(uri, mode: LaunchMode.externalApplication);
+                    }
+                  },
+                  child: Text(
+                    l10n.drugCitation,
+                    style: text.labelSmall?.copyWith(
+                      color: colors.primary,
+                      decoration: TextDecoration.underline,
+                      fontStyle: FontStyle.italic,
+                      height: 1.4,
+                    ),
                   ),
                 ),
               ),

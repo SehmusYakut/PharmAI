@@ -38,6 +38,7 @@ import 'package:pharmai/domain/usecases/sign_in_with_google.dart';
 import 'package:pharmai/domain/usecases/sign_in_with_apple.dart';
 import 'package:pharmai/domain/usecases/sign_in_anonymously.dart';
 import 'package:pharmai/domain/usecases/sign_out.dart';
+import 'package:pharmai/domain/usecases/delete_account.dart';
 import 'package:pharmai/domain/usecases/start_chat_session.dart';
 import 'package:pharmai/domain/usecases/toggle_bookmark.dart';
 import 'package:pharmai/domain/usecases/update_profile.dart';
@@ -99,6 +100,7 @@ Future<void> initDependencies() async {
   sl.registerLazySingleton(() => SignInWithApple(sl()));
   sl.registerLazySingleton(() => SignInAnonymously(sl()));
   sl.registerLazySingleton(() => SignOut(sl()));
+  sl.registerLazySingleton(() => DeleteAccount(sl()));
   sl.registerLazySingleton(() => GetOrCreateProfile(sl()));
   sl.registerLazySingleton(() => UpdateProfile(sl()));
   sl.registerLazySingleton(() => FetchChatSessions(sl()));
@@ -151,6 +153,7 @@ Future<void> initDependencies() async {
       signInWithApple: sl(),
       signInAnonymously: sl(),
       signOut: sl(),
+      deleteAccount: sl(),
       authNotifier: sl(),
     ),
   );

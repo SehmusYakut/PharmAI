@@ -10,6 +10,7 @@ import 'package:pharmai/presentation/bloc/onboarding/onboarding_cubit.dart';
 import 'package:pharmai/presentation/bloc/onboarding/onboarding_state.dart';
 import 'package:pharmai/presentation/bloc/theme/theme_cubit.dart';
 import 'package:pharmai/presentation/widgets/onboarding_tour_dialog.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -838,6 +839,39 @@ class _MedicalDisclaimerCard extends StatelessWidget {
                     color: colors.onSurfaceVariant,
                     height: 1.5,
                   ),
+                ),
+                const SizedBox(height: 12),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: [
+                    ActionChip(
+                      avatar: Icon(Icons.link_rounded, size: 14, color: colors.primary),
+                      label: const Text(
+                        'WHO ICD-10 Source',
+                        style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold),
+                      ),
+                      onPressed: () async {
+                        final uri = Uri.tryParse('https://icd.who.int/browse10/2019/en');
+                        if (uri != null) {
+                          await launchUrl(uri, mode: LaunchMode.externalApplication);
+                        }
+                      },
+                    ),
+                    ActionChip(
+                      avatar: Icon(Icons.link_rounded, size: 14, color: colors.primary),
+                      label: const Text(
+                        'TİTCK Drug Database Source',
+                        style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold),
+                      ),
+                      onPressed: () async {
+                        final uri = Uri.tryParse('https://www.titck.gov.tr/hizmetler/ilac-veritabani');
+                        if (uri != null) {
+                          await launchUrl(uri, mode: LaunchMode.externalApplication);
+                        }
+                      },
+                    ),
+                  ],
                 ),
               ],
             ),

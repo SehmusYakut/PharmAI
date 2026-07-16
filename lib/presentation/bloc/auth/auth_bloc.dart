@@ -9,6 +9,7 @@ import 'package:pharmai/domain/usecases/sign_in_with_google.dart';
 import 'package:pharmai/domain/usecases/sign_in_with_apple.dart';
 import 'package:pharmai/domain/usecases/sign_in_anonymously.dart';
 import 'package:pharmai/domain/usecases/sign_out.dart';
+import 'package:pharmai/domain/usecases/delete_account.dart';
 
 part 'auth_event.dart';
 part 'auth_state.dart';
@@ -21,6 +22,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     required SignInWithApple signInWithApple,
     required SignInAnonymously signInAnonymously,
     required SignOut signOut,
+    required DeleteAccount deleteAccount,
     required AuthStateNotifier authNotifier,
   })  : _authRepo = authRepo,
         _profileRepo = profileRepo,
@@ -28,6 +30,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         _signInWithApple = signInWithApple,
         _signInAnonymously = signInAnonymously,
         _signOut = signOut,
+        _deleteAccount = deleteAccount,
         _authNotifier = authNotifier,
         super(const AuthInitial()) {
     on<AuthStarted>(_onStarted);
@@ -35,6 +38,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     on<AuthAppleSignInRequested>(_onAppleSignIn);
     on<AuthAnonymousSignInRequested>(_onAnonymousSignIn);
     on<AuthSignOutRequested>(_onSignOut);
+    on<AuthDeleteAccountRequested>(_onDeleteAccount);
     on<_AuthUserChanged>(_onUserChanged);
   }
 
@@ -44,6 +48,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   final SignInWithApple _signInWithApple;
   final SignInAnonymously _signInAnonymously;
   final SignOut _signOut;
+  final DeleteAccount _deleteAccount;
   final AuthStateNotifier _authNotifier;
   StreamSubscription<String?>? _authSub;
 
@@ -133,6 +138,21 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     await _signOut();
     _authNotifier.update(false);
     emit(const AuthUnauthenticated());
+  }
+
+  Future<void> _onDeleteAccount(
+    AuthDeleteAccountRequested event,
+    Emitter<AuthState> emit,
+  ) async {
+    emit(const AuthLoading());
+    final result = await _deleteAccount();
+    result.fold(
+      (f) => emit(AuthError(f.message)),
+      (_) {
+        _authNotifier.update(false);
+        emit(const AuthUnauthenticated());
+      },
+    );
   }
 
   @override
