@@ -2,7 +2,7 @@ name: pharmai
 description: PharmAI – Medical Knowledge & Calculator App (ICD-10, Drug Info, Clinical Calculators).
 publish_to: 'none'
 
-version: 1.0.0+3
+version: 1.0.0+4
 
 environment:
   sdk: ^3.11.5
